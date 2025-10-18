@@ -8,7 +8,7 @@
 <body>
 <h2>Formularz Rejestracji</h2>
 <p>Załóż nowe konto, aby móc się zalogować.</p>
-
+<h2>Nie będziesz mógł zalogować się tym użytkownikiem nigdzie z wyjątkiem login_better.php (bezpieczniejsze)</h2>
 <form action="../src/register_handler.php" method="post">
     <div>
         <label for="username">Nazwa użytkownika:</label>

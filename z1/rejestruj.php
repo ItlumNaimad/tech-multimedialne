@@ -1,13 +1,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pl" lang="pl">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Damian Skonieczny - index3 (Sesja)</title>
+    <title>Damian Skonieczny - Rejestracja (kurs)</title>
 </head>
 <BODY>
-Formularz logowania (wersja 3, z sesją)
-<form method="post" action="weryfikuj3.php">
+Formularz rejestracji
+<form method="post" action="add.php">
     Login:<input type="text" name="user" maxlength="20" size="20"> <br>
     Hasło:<input type="password" name="pass" maxlength="20" size="20"><br>
+    Powtórz hasło:<input type="password" name="pass_repeat" maxlength="20" size="20"><br>
     <input type="submit" value="Send"/>
 </form>
 </BODY>

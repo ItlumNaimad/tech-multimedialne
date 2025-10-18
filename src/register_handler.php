@@ -1,7 +1,6 @@
 <?php
 
 // Dołączamy nasz plik z połączeniem do bazy danych
-global $pdo;
 require_once 'database.php';
 
 // Sprawdzamy, czy formularz został wysłany metodą POST
