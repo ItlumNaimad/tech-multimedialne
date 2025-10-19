@@ -1,4 +1,5 @@
 <?php
+
 // Wersja poprawiona, z częściowym wyeliminowaniem podatności
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pl" lang="pl">
@@ -10,11 +11,11 @@
 $user = htmlentities ($_POST['user'], ENT_QUOTES, "UTF-8"); // rozbrojenie potencjalnej bomby w zmiennej $user
 $pass = htmlentities ($_POST['pass'], ENT_QUOTES, "UTF-8"); // rozbrojenie potencjalnej bomby w zmiennej $pass
 
-// --- UZUPEŁNIJ SWOJE DANE DO LOKALNEJ BAZY ---
-$nazwa_hosta = 'localhost';
-$nazwa_usera = 'root';
+// --- DANE DO BAZY NA ZETOHOSTING ---
+$nazwa_hosta = '127.0.0.1';
+$nazwa_usera = '';
 $haslo_usera = '';
-$baza_usera = 'z1_damsko';
+$baza_usera = '';
 // ---------------------------------------------
 
 $link = mysqli_connect($nazwa_hosta, $nazwa_usera, $haslo_usera, $baza_usera);

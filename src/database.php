@@ -1,11 +1,11 @@
 <?php
 
-// Ustawienia połączenia z bazą danych
-$host = 'localhost';
-$db_name = 'z1_damsko';
-$username = 'root';
-$password = ''; // Domyślnie w XAMPP hasło jest puste
-$charset = 'utf8mb4';
+/// Ustawienia połączenia z bazą danych
+$host = '127.0.0.1';
+$db_name = '';
+$username = '';
+$password = '';
+$charset = '';
 
 // Opcje konfiguracyjne dla PDO
 $options = [

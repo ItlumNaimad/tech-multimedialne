@@ -13,11 +13,11 @@ if ($pass !== $pass_repeat) {
     die("Hasła nie są identyczne. Wróć.");
 }
 
-// --- UZUPEŁNIJ SWOJE DANE DO LOKALNEJ BAZY ---
-$nazwa_hosta = 'localhost';
-$nazwa_usera = 'root';
-$haslo_usera = '';
-$baza_usera = 'z1_damsko';
+// --- DANE DO BAZY NA ZETOHOSTING ---
+$nazwa_hosta = 'db1.zetohosting.pl';
+$nazwa_usera = 'damskopb_lab';
+$haslo_usera = 'FJpNEk46QWr8eSsX8z9j';
+$baza_usera = 'damskopb_lab';
 // ---------------------------------------------
 
 $link = mysqli_connect($nazwa_hosta, $nazwa_usera, $haslo_usera, $baza_usera);

@@ -11,11 +11,11 @@ session_start();
 $user=$_POST['user'];
 $pass=$_POST['pass'];
 
-// --- UZUPEŁNIJ SWOJE DANE DO LOKALNEJ BAZY ---
-$nazwa_hosta = 'localhost';
-$nazwa_usera = 'root';
+// --- DANE DO BAZY NA ZETOHOSTING ---
+$nazwa_hosta = '127.0.0.1';
+$nazwa_usera = '';
 $haslo_usera = '';
-$baza_usera = 'z1_damsko';
+$baza_usera = '';
 // ---------------------------------------------
 
 $link = mysqli_connect($nazwa_hosta, $nazwa_usera, $haslo_usera, $baza_usera);

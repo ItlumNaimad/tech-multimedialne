@@ -1,52 +1,66 @@
 <?php
-// Używamy sesji, więc musimy ją uruchomić na samej górze
 session_start();
-
-// 1. Dołączamy nasz bezpieczny plik bazy danych
 require_once 'database.php';
 
-// 2. Sprawdzamy, czy formularz został wysłany
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+// --- NOWA SEKCJA: Ustawienia Brute Force ---
+define('MAX_LOGIN_ATTEMPTS', 5); // Maksymalna liczba prób
+define('LOCKOUT_TIME_MINUTES', 15); // Czas blokady w minutach
+$ip_address = $_SERVER['REMOTE_ADDR']; // Pobierz IP użytkownika
 
-    $username = $_POST['username'];
-    $password_form = $_POST['password']; // Hasło z formularza
+try {
+    // --- NOWA SEKCJA: Sprawdzenie blokady ---
+    // 1. Policz, ile było nieudanych prób z tego IP w ciągu ostatnich 15 minut
+    $sql_check = "SELECT COUNT(*) FROM login_attempts 
+                    WHERE ip_address = :ip AND attempt_time > (NOW() - INTERVAL :minutes MINUTE)";
 
-    // 3. Bezpieczne zapytanie (Prepared Statement)
-    // Pobieramy użytkownika TYLKO po nazwie
-    $sql = "SELECT * FROM users WHERE username = :username";
+    $stmt_check = $pdo->prepare($sql_check);
+    $stmt_check->execute(['ip' => $ip_address, 'minutes' => LOCKOUT_TIME_MINUTES]);
+    $attempts_count = (int)$stmt_check->fetchColumn();
 
-    try {
+    // 2. Jeśli jest za dużo prób, zablokuj
+    if ($attempts_count >= MAX_LOGIN_ATTEMPTS) {
+        die("Wykryto zbyt wiele nieudanych prób logowania z Twojego adresu. Spróbuj ponownie za 15 minut.");
+    }
+
+    // 3. Kontynuuj logowanie, jeśli formularz został wysłany
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        $username = $_POST['username'];
+        $password_form = $_POST['password'];
+
+        $sql = "SELECT * FROM users WHERE username = :username";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':username', $username);
         $stmt->execute();
+        $user = $stmt->fetch();
 
-        $user = $stmt->fetch(); // Pobierz wiersz użytkownika
-
-        // 4. Weryfikacja
-        // Sprawdzamy, czy użytkownik istnieje ORAZ czy hasło się zgadza
         if ($user && password_verify($password_form, $user['password'])) {
+            // --- ZMIANA: Logowanie pomyślne ---
+            // 4. Wyczyść historię nieudanych prób dla tego IP
+            $sql_clear = "DELETE FROM login_attempts WHERE ip_address = :ip";
+            $stmt_clear = $pdo->prepare($sql_clear);
+            $stmt_clear->execute(['ip' => $ip_address]);
 
-            // Hasło jest poprawne!
-            // 5. Uruchamiamy sesję
-            session_regenerate_id(); // Ważne dla bezpieczeństwa
+            // Uruchom sesję (jak wcześniej)
+            session_regenerate_id();
             $_SESSION['loggedin'] = true;
             $_SESSION['username'] = $user['username'];
             $_SESSION['user_id'] = $user['id'];
 
-            // Przekierowujemy do "tajnego" panelu
             header("Location: ../z1/panel.php");
             exit();
 
         } else {
-            // Zły login lub hasło
+            // --- ZMIANA: Logowanie niepomyślne ---
+            // 5. Zarejestruj nieudaną próbę
+            $sql_log = "INSERT INTO login_attempts (ip_address) VALUES (:ip)";
+            $stmt_log = $pdo->prepare($sql_log);
+            $stmt_log->execute(['ip' => $ip_address]);
+
             die("Nieprawidłowa nazwa użytkownika lub hasło.");
         }
-
-    } catch (PDOException $e) {
-        die("Błąd logowania: " . $e->getMessage());
     }
-
-} else {
-    die("Nieautoryzowany dostęp.");
+    // Obsługa błędu 'try' (jak wcześniej)
+} catch (PDOException $e) {
+    die("Błąd logowania: ". $e->getMessage());
 }
 ?>

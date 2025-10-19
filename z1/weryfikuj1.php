@@ -1,4 +1,5 @@
 <?php
+
 // UWAGA: TEN SKRYPT JEST CELOWO PODATNY NA SQL INJECTION
 // Nigdy nie używaj go w prawdziwej aplikacji!
 ?>
@@ -12,11 +13,11 @@
 $user=$_POST['user']; // login z formularza
 $pass=$_POST['pass']; // hasło z formularza
 
-// --- UZUPEŁNIJ SWOJE DANE DO LOKALNEJ BAZY ---
-$nazwa_hosta = 'localhost';
-$nazwa_usera = 'root';
+// --- DANE DO BAZY NA ZETOHOSTING ---
+$nazwa_hosta = '127.0.0.1';
+$nazwa_usera = '';
 $haslo_usera = '';
-$baza_usera = 'z1_damsko';
+$baza_usera = '';
 // ---------------------------------------------
 
 $link = mysqli_connect($nazwa_hosta, $nazwa_usera, $haslo_usera, $baza_usera);
