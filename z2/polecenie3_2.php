@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);  /* Ta linia musi być pierwsza */ ?>
+<?php declare(strict_types=1);  /* Ta linia musi byc pierwsza */ ?>
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -23,11 +23,9 @@
 	<div id='myHeader'> </div>	
 	<main> 
 		<section class="sekcja1">	
-			<div class="container-fluid">
-				Strona powitalna. Zanim może się ona pojawić, powinno się zrealizować proces logowania, a na każdej stronie aplikacji powinno się sprawdzać sesję.
-			</div>	
+			Polecenie 3.2
 		</section>
 	</main>	
-	<?php require_once 'footer.php'; ?>	
+	<?php require_once 'footer.php'; ?>			
 </body>
 </html>

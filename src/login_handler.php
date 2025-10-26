@@ -3,8 +3,8 @@ session_start();
 require_once 'database.php';
 
 // --- NOWA SEKCJA: Ustawienia Brute Force ---
-define('MAX_LOGIN_ATTEMPTS', 5); // Maksymalna liczba prób
-define('LOCKOUT_TIME_MINUTES', 15); // Czas blokady w minutach
+define('MAX_LOGIN_ATTEMPTS', 4); // Maksymalna liczba prób
+define('LOCKOUT_TIME_MINUTES', 2); // Czas blokady w minutach
 $ip_address = $_SERVER['REMOTE_ADDR']; // Pobierz IP użytkownika
 
 try {

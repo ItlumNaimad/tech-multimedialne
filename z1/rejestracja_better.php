@@ -31,7 +31,7 @@
 </form>
 
 <br>
-<p>Masz już konto? <a href="logowanie.php">Zaloguj się tutaj</a>.</p>
+<p>Masz już konto? <a href="login_better.php">Zaloguj się tutaj</a>.</p>
 
 </body>
 </html>

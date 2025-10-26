@@ -16,7 +16,7 @@ if ($pass !== $pass_repeat) {
 // --- DANE DO BAZY NA ZETOHOSTING ---
 $nazwa_hosta = 'db1.zetohosting.pl';
 $nazwa_usera = 'damskopb_lab';
-$haslo_usera = 'FJpNEk46QWr8eSsX8z9j';
+$haslo_usera = 'XXXXX';
 $baza_usera = 'damskopb_lab';
 // ---------------------------------------------
 
