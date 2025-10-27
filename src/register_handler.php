@@ -1,63 +1,82 @@
 <?php
-
-// Dołączamy nasz plik z połączeniem do bazy danych
 require_once 'database.php';
 
-// Sprawdzamy, czy formularz został wysłany metodą POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    // Odbieramy dane z formularza
     $username = $_POST['username'];
     $password = $_POST['password'];
     $password_repeat = $_POST['password_repeat'];
 
-    // --- 1. Podstawowa Walidacja ---
-    // Sprawdzamy, czy hasła są identyczne (zgodnie z instrukcją [cite: 344])
+    $avatar_path_to_db = null; // Domyślnie brak awatara (NULL)
+
+    // --- Walidacja hasła i pól (bez zmian) ---
     if ($password !== $password_repeat) {
         die("Hasła nie są identyczne. Wróć i spróbuj ponownie.");
     }
-
-    // Sprawdzamy, czy pola nie są puste (chociaż `required` w HTML już to robi)
     if (empty($username) || empty($password)) {
         die("Nazwa użytkownika i hasło nie mogą być puste.");
     }
 
-    // --- 2. Haszowanie Hasła (Dobra Praktyka) ---
-    // NIGDY nie przechowujemy haseł jako czysty tekst! [zamiast: 54]
-    // Używamy bezpiecznej, wbudowanej funkcji PHP.
+    // --- NOWA SEKCJA: Obsługa Uploadu Awatara ---
+    // Sprawdzamy, czy plik został wysłany i czy nie ma błędu
+    if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] == UPLOAD_ERR_OK) {
+
+        $file = $_FILES['avatar'];
+        $max_filesize_mb = 2;
+        $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+        $upload_dir = '../uploads/'; // Względna do folderu 'src'
+
+        // 1. Sprawdzenie rozmiaru
+        if ($file['size'] > $max_filesize_mb * 1024 * 1024) {
+            die("Plik jest za duży. Maksymalny rozmiar to 2MB.");
+        }
+
+        // 2. Sprawdzenie typu pliku
+        if (!in_array($file['type'], $allowed_types)) {
+            die("Niedozwolony typ pliku. Dozwolone są tylko JPG, PNG i GIF.");
+        }
+
+        // 3. Stworzenie unikalnej nazwy pliku, aby uniknąć nadpisywania
+        $file_extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $unique_filename = uniqid('avatar_', true) . '.' . $file_extension;
+        $upload_path = $upload_dir . $unique_filename;
+
+        // 4. Przeniesienie pliku z folderu tymczasowego
+        if (move_uploaded_file($file['tmp_name'], $upload_path)) {
+            // Sukces! Ustaw ścieżkę do zapisu w bazie
+            // Zapisujemy ścieżkę względną do GŁÓWNEGO FOLDERU (public_html)
+            $avatar_path_to_db = 'uploads/' . $unique_filename;
+        } else {
+            die("Błąd podczas przenoszenia pliku. Spróbuj ponownie.");
+        }
+    }
+    // Jeśli plik nie został wysłany (jest opcjonalny), po prostu zostawiamy $avatar_path_to_db jako NULL
+
+
+    // --- Haszowanie Hasła (bez zmian) ---
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-    // --- 3. Zapis do Bazy Danych (Bezpiecznie z PDO) ---
-    // Zamiast niebezpiecznego INSERT z instrukcji[cite: 345]...
-    // Używamy PRZYGOTOWANYCH ZAPYTAŃ (Prepared Statements), aby chronić się przed SQL Injection
-
-    $sql = "INSERT INTO users (username, password) VALUES (:username, :password)";
+    // --- ZMODYFIKOWANY ZAPIS DO BAZY ---
+    // Dodaliśmy kolumnę `avatar_path` do zapytania
+    $sql = "INSERT INTO users (username, password, avatar_path) VALUES (:username, :password, :avatar_path)";
 
     try {
-        // Przygotuj zapytanie
         $stmt = $pdo->prepare($sql);
-
-        // "Wstrzyknij" zmienne do zapytania w bezpieczny sposób
         $stmt->bindParam(':username', $username);
         $stmt->bindParam(':password', $hashed_password);
-
-        // Wykonaj zapytanie
+        $stmt->bindParam(':avatar_path', $avatar_path_to_db); // Powiąż ścieżkę awatara
         $stmt->execute();
 
-        // Rejestracja pomyślna, przekieruj do strony logowania w z2
         header("Location: ../z2/index.php?page=logowanie");
-        // W przyszłości przekierujemy użytkownika do strony logowania
+        exit();
 
     } catch (PDOException $e) {
-        // Obsługa błędu - np. jeśli użytkownik już istnieje (dzięki `UNIQUE` w tabeli)
         if ($e->getCode() == 23000) {
             die("Ta nazwa użytkownika jest już zajęta. Wybierz inną.");
         } else {
-            // Inny błąd bazy danych
             die("Błąd podczas rejestracji: " . $e->getMessage());
         }
     }
 } else {
-    // Jeśli ktoś wszedł na ten plik bezpośrednio przez URL, a nie przez formularz
     echo "Nieautoryzowany dostęp.";
 }

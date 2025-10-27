@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);  /* Ta linia musi być pierwsza */ ?>
-	<footer class="page-footer mt-auto bg-light border-primary">   
-		<div class="container-fluid">
-			Zawartość Twojego footera
-		</div>
-	</footer>	
+<footer class="page-footer mt-auto bg-light border-top py-3">
+    <div class="container-fluid text-center">
+        <span class="text-muted">© <?php echo date("Y"); ?> DamSko PBS - Projekt Technologie Multimedialne</span>
+    </div>
+</footer>

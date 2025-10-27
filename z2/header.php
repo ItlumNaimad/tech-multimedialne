@@ -38,13 +38,38 @@
                         // Sprawdzamy, czy sesja istnieje i czy użytkownik jest zalogowany
                         if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true):
                             ?>
-                            <li class="nav-item">
-                                <a class="nav-link" href="index.php?page=panel">
-                                    Witaj, <?php echo htmlspecialchars($_SESSION['username']); ?>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown">
+                                    <?php
+                                        // Ustaw domyślny awatar
+                                        $default_avatar = 'media/menu_icons/info.svg'; // Domyślna ikona z szablonu [cite: 61-62]
+
+                                        // Sprawdź, czy użytkownik ma własny awatar i czy nie jest pusty
+                                        if (!empty($_SESSION['avatar_path'])) {
+                                            // Ścieżka z bazy jest względna do root (np. 'uploads/plik.jpg')
+                                            // A my jesteśmy w folderze 'z2', więc musimy dodać '../'
+                                            $avatar_src = '../' . htmlspecialchars($_SESSION['avatar_path']);
+                                        } else {
+                                            $avatar_src = $default_avatar;
+                                        }
+                                    ?>
+                                    <img src="<?php echo $avatar_src; ?>" alt="Avatar" class="rounded-circle" height="24" width="24" style="margin-right: 8px; object-fit: cover;">
+                                    <?php echo htmlspecialchars($_SESSION['username']); ?>
                                 </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="index.php?page=panel">Mój Panel</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" href="wyloguj.php">
+                                            <i class="bi bi-box-arrow-right me-2"></i>Wyloguj się
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="../z1/logout.php">Wyloguj się</a>
+                                <a class="nav-link" href="wyloguj.php">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Wyloguj się
+                                </a>
                             </li>
 
                         <?php else: ?>
