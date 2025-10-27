@@ -48,7 +48,8 @@ session_start(); // Uruchamiamy sesję OD RAZU, będziemy jej potrzebować
                     'p3_3' => 'polecenie3_3.php',
                     'logowanie' => 'pages/logowanie.php',
                     'rejestracja' => 'pages/rejestracja.php',
-                    'panel' => 'pages/panel.php'
+                    'panel' => 'pages/panel.php',
+                    'wyloguj' => 'wyloguj.php'
             ];
 
             // Sprawdzamy, czy żądana strona jest na naszej liście

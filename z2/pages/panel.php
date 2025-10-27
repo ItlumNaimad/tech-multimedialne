@@ -14,7 +14,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                 Jesteś poprawnie zalogowany w systemie opartym o Bootstrap.
                 Twoja sesja jest aktywna. Możesz teraz przejść do innych części serwisu lub się wylogować.
             </p>
-            <a href="../z1/logout.php" class="btn btn-primary btn-lg" role="button">Wyloguj się</a>
+            <a href="../z2/index.php?page=wyloguj" class="btn btn-primary btn-lg" role="button">Wyloguj się</a>
         </div>
     </div>
 </div>
