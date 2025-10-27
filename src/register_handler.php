@@ -44,9 +44,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Wykonaj zapytanie
         $stmt->execute();
 
-        echo "Rejestracja pomyślna! Możesz się teraz zalogować.";
+        // Rejestracja pomyślna, przekieruj do strony logowania w z2
+        header("Location: ../z2/index.php?page=logowanie");
         // W przyszłości przekierujemy użytkownika do strony logowania
-        // header("Location: ../z1/logowanie.php");
 
     } catch (PDOException $e) {
         // Obsługa błędu - np. jeśli użytkownik już istnieje (dzięki `UNIQUE` w tabeli)

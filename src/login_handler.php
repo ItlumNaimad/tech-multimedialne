@@ -46,7 +46,7 @@ try {
             $_SESSION['username'] = $user['username'];
             $_SESSION['user_id'] = $user['id'];
 
-            header("Location: ../z1/panel.php");
+            header("Location: ../z2/index.php?page=panel");
             exit();
 
         } else {
