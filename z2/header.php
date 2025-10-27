@@ -5,12 +5,10 @@
             <div class="container-fluid">
 
                 <div class="collapse navbar-collapse" id="main_nav">
-                    <ul class="navbar-nav">
-
+                    <ul class="navbar-nav me-auto">
                         <li class="nav-item">
                             <a class="nav-link" href="index.php?page=home">Strona Główna</a>
                         </li>
-
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Polecenia 1.x</a>
                             <ul class="dropdown-menu">
@@ -30,10 +28,33 @@
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="index.php?page=p3_1"> Polecenie 3.1 </a></li>
                                 <li><a class="dropdown-item" href="index.php?page=p3_2"> Polecenie 3.2 </a></li>
-
-                                <li><a class="dropdown-item" href="index.php?page=p3_3"> Polecenie 3.3 (Dodane) </a></li>
+                                <li><a class="dropdown-item" href="index.php?page=p3_3"> Polecenie 3.3 </a></li>
                             </ul>
                         </li>
+                    </ul>
+
+                    <ul class="navbar-nav ms-auto">
+                        <?php
+                        // Sprawdzamy, czy sesja istnieje i czy użytkownik jest zalogowany
+                        if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true):
+                            ?>
+                            <li class="nav-item">
+                                <a class="nav-link" href="index.php?page=panel">
+                                    Witaj, <?php echo htmlspecialchars($_SESSION['username']); ?>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="../z1/logout.php">Wyloguj się</a>
+                            </li>
+
+                        <?php else: ?>
+                            <li class="nav-item">
+                                <a class="nav-link" href="index.php?page=logowanie">Zaloguj się</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="index.php?page=rejestracja">Zarejestruj się</a>
+                            </li>
+                        <?php endif; ?>
                     </ul>
                 </div>
 

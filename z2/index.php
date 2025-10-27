@@ -31,37 +31,40 @@ session_start(); // Uruchamiamy sesję OD RAZU, będziemy jej potrzebować
     <section class="sekcja1">
         <div class="container-fluid">
             <?php
-            // --- Krok 2: Prosty router PHP ---
+            // --- Krok 2: Ulepszony router PHP ---
 
             // Sprawdzamy, czy w adresie URL jest parametr "page"
             $page = $_GET['page'] ?? 'home'; // Domyślnie ładuj 'home'
 
-            // Logika wczytywania odpowiedniej treści
-            switch ($page) {
-                case 'p1_1':
-                    echo '<h3>Polecenie 1.1</h3>';
-                    // Tutaj w przyszłości wstawimy treść tego zadania
-                    break;
-                case 'p1_2':
-                    echo '<h3>Polecenie 1.2</h3>';
-                    break;
-                case 'p2_1':
-                    echo '<h3>Polecenie 2.1</h3>';
-                    break;
-                case 'p2_2':
-                    echo '<h3>Polecenie 2.2</h3>';
-                    break;
-                case 'p3_1':
-                    echo '<h3>Polecenie 3.1</h3>';
-                    break;
-                case 'p3_2':
-                    echo '<h3>Polecenie 3.2</h3>';
-                    break;
-                case 'home':
-                default:
-                    echo '<h3>Strona główna</h3>';
-                    echo '<p>Witaj na stronie laboratorium 2. Wybierz polecenie z menu powyżej.</p>';
-                    break;
+            // Bezpieczniej jest zdefiniować, jakie pliki można wczytać
+            $allowed_pages = [
+                    'home' => 'strona_glowna.php', // Zrobimy ten plik za chwilę
+                    'p1_1' => 'polecenie1_1.php',
+                    'p1_2' => 'polecenie1_2.php',
+                    'p2_1' => 'polecenie2_1.php',
+                    'p2_2' => 'polecenie2_2.php',
+                    'p3_1' => 'polecenie3_1.php',
+                    'p3_2' => 'polecenie3_2.php',
+                    'p3_3' => 'polecenie3_3.php',
+                    'logowanie' => 'pages/logowanie.php',
+                    'rejestracja' => 'pages/rejestracja.php',
+                    'panel' => 'pages/panel.php'
+            ];
+
+            // Sprawdzamy, czy żądana strona jest na naszej liście
+            if (array_key_exists($page, $allowed_pages)) {
+                $file_to_include = $allowed_pages[$page];
+
+                // Sprawdzamy, czy ten plik fizycznie istnieje
+                if (file_exists($file_to_include)) {
+                    include $file_to_include;
+                } else {
+                    echo '<h3>Błąd 404</h3><p>Nie znaleziono pliku: ' . htmlspecialchars($file_to_include) . '</p>';
+                }
+            } else {
+                // Jeśli ktoś wpisze zły ?page=...
+                echo '<h3>Błąd 404</h3><p>Strona nie została znaleziona.</p>';
+                include 'strona_glowna.php';
             }
             ?>
         </div>
