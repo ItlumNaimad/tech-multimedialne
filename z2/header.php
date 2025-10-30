@@ -66,11 +66,6 @@
                                     </li>
                                 </ul>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="wyloguj.php">
-                                    <i class="bi bi-box-arrow-right me-2"></i>Wyloguj się
-                                </a>
-                            </li>
 
                         <?php else: ?>
                             <li class="nav-item">

@@ -1,8 +1,9 @@
-body {  background-color: #f8f9fa; } /* To jest standardowy kolor "light" z Bootstrapa */
+body {  background-color: #f8f9fa; }
+/* To jest standardowy kolor "light" z Bootstrapa */
 
 .navbar {
     min-height:40px; font-size:16px; font-weight: bold;
-} /* Lekko powiększmy i pogrubmy czcionkę */
+} /* Lekko powiększona i pogrubiona czcionka */
 
 .sekcja1
 {	  
