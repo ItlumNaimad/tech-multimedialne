@@ -5,7 +5,7 @@
 
 <h4>Zadanie 5: `phpinfo()`</h4>
 <p>Wyświetla pełną konfigurację PHP na serwerze. To zawsze działa.</p>
-<a href="phpinfo.php" target="_blank" class="btn btn-primary mb-3">Pokaż phpinfo() w nowej karcie</a>
+<a href="pages/phpinfo.php" target="_blank" class="btn btn-primary mb-3">Pokaż phpinfo() w nowej karcie</a>
 
 <hr>
 
