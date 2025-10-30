@@ -19,7 +19,7 @@ try {
 
     // 2. Jeśli jest za dużo prób, zablokuj
     if ($attempts_count >= MAX_LOGIN_ATTEMPTS) {
-        die("Wykryto zbyt wiele nieudanych prób logowania z Twojego adresu. Spróbuj ponownie za 15 minut.");
+        die("Wykryto zbyt wiele nieudanych prób logowania z Twojego adresu. Spróbuj ponownie za" . LOCKOUT_TIME_MINUTES ."minut.");
     }
 
     // 3. Kontynuuj logowanie, jeśli formularz został wysłany
@@ -42,6 +42,45 @@ try {
 
             // Uruchom sesję (jak wcześniej)
             session_regenerate_id();
+            // --- NOWA SEKCJA: Logowanie wizyty (Zad 14, 15, 16) ---
+            try {
+                // 1. Zbieramy dane z PHP [cite: 310-312]
+                $ip = $_SERVER['REMOTE_ADDR'];
+                $browser = $_SERVER['HTTP_USER_AGENT']; // Zad. 15
+
+                // 2. Zbieramy dane z JS (z ukrytych pól) [cite: 327]
+                $screen_res = $_POST['screen_res'] ?? null;
+                $window_res = $_POST['window_res'] ?? null;
+                $colors = $_POST['colors'] ?? null;
+                $cookies_enabled = $_POST['cookies_enabled'] ?? null;
+                $java_enabled = $_POST['java_enabled'] ?? null;
+                $language = $_POST['language'] ?? null;
+
+                // 3. Przygotuj zapytanie INSERT do tabeli goscieportalu
+                $sql_log = "INSERT INTO goscieportalu (ipaddress, browser, screen_res, window_res, colors, cookies_enabled, java_enabled, language) 
+                VALUES (:ip, :browser, :screen_res, :window_res, :colors, :cookies, :java, :lang)";
+
+                $stmt_log = $pdo->prepare($sql_log);
+
+                // 4. Powiąż wszystkie parametry
+                $stmt_log->bindParam(':ip', $ip);
+                $stmt_log->bindParam(':browser', $browser);
+                $stmt_log->bindParam(':screen_res', $screen_res);
+                $stmt_log->bindParam(':window_res', $window_res);
+                $stmt_log->bindParam(':colors', $colors);
+                $stmt_log->bindParam(':cookies', $cookies_enabled);
+                $stmt_log->bindParam(':java', $java_enabled);
+                $stmt_log->bindParam(':lang', $language);
+
+                // 5. Wykonaj zapytanie
+                $stmt_log->execute();
+
+            } catch (PDOException $e) {
+                // Cichy błąd - jeśli logowanie wizyty się nie uda, nie przerywaj logowania użytkownika
+                // W prawdziwej aplikacji zalogowalibyśmy ten błąd do pliku
+                error_log("Błąd logowania wizyty: " . $e->getMessage());
+            }
+// --- KONIEC NOWEJ SEKCJI ---
             $_SESSION['loggedin'] = true;
             $_SESSION['username'] = $user['username'];
             $_SESSION['user_id'] = $user['id'];

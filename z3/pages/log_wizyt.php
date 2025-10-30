@@ -1,36 +1,13 @@
-<h3>Zadanie 12-14: Logowanie i Wyświetlanie Wizyt Gości</h3>
-<p>Ta strona automatycznie zapisuje Twoją wizytę w bazie danych, a następnie wyświetla pełną listę wszystkich gości.</p>
+<h3>Zadanie 12-16: Logowanie i Wyświetlanie Wizyt Gości</h3>
+<p>Ta strona wyświetla pełną listę wszystkich gości. Nowe wizyty są teraz rejestrowane podczas pomyślnego logowania.</p>
 
 <?php
-// Dołączamy nasze połączenie PDO z folderu src (../src)
+// Usunęliśmy stąd kod INSERT - logowanie odbywa się teraz w login_handler.php
+
+// Dołączamy nasze połączenie PDO
 require_once '../src/database.php';
 
-// --- ZADANIE 12: ZAPISYWANIE WIZYTY ---
-
-// Pobieramy adres IP gościa
-if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-    $ipaddress = $_SERVER['HTTP_CLIENT_IP'];
-} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-    $ipaddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
-} else {
-    $ipaddress = $_SERVER['REMOTE_ADDR'];
-}
-
-try {
-    // Przygotuj zapytanie INSERT, aby dodać gościa do tabeli
-    $sql_insert = "INSERT INTO goscieportalu (ipaddress) VALUES (:ip)";
-    $stmt_insert = $pdo->prepare($sql_insert);
-    $stmt_insert->execute(['ip' => $ipaddress]);
-
-    // Wiadomość o sukcesie (opcjonalnie)
-    echo '<div class="alert alert-success">Twoja wizyta (IP: ' . htmlspecialchars($ipaddress) . ') została pomyślnie zarejestrowana.</div>';
-
-} catch (PDOException $e) {
-    echo '<div class="alert alert-danger">Błąd podczas zapisywania wizyty: ' . $e->getMessage() . '</div>';
-}
-
-// --- FUNKCJA Z ZADANIA 11 ---
-// Potrzebujemy jej ponownie, aby pobrać dane dla każdego IP z listy
+// Funkcja z Zadania 11
 function ip_details($ip) {
     $json = @file_get_contents("http://ipinfo.io/{$ip}/geo");
     if ($json === FALSE) {
@@ -38,63 +15,69 @@ function ip_details($ip) {
     }
     return json_decode($json);
 }
-
 ?>
 
 <hr>
 <h4>Zarejestrowane wizyty gości:</h4>
 <div class="table-responsive">
-    <table class="table table-striped table-hover">
+    <table class="table table-striped table-hover table-sm">
         <thead class="table-dark">
         <tr>
             <th>ID</th>
-            <th>Data i Godzina</th>
-            <th>Adres IP</th>
-            <th>Miasto</th>
-            <th>Region</th>
-            <th>Współrzędne</th>
-            <th>Mapa (Zad. 13)</th>
+            <th>Data</th>
+            <th>IP</th>
+            <th>Przeglądarka (Zad. 15)</th>
+            <th>Miasto/Region</th>
+            <th>Mapa</th>
+            <th>Ekran (Zad. 16)</th>
+            <th>Okno</th>
+            <th>Kolory</th>
+            <th>Ciasteczka</th>
+            <th>Java</th>
+            <th>Język</th>
         </tr>
         </thead>
         <tbody>
         <?php
-        // --- ZADANIE 12 i 13: WYŚWIETLANIE WIZYT ---
         try {
-            // 1. Pobierz wszystkie rekordy z tabeli goscieportalu
-            $sql_select = "SELECT id, ipaddress, datetime FROM goscieportalu ORDER BY datetime DESC";
+            // 1. Pobierz wszystkie rekordy (w tym nowe kolumny)
+            $sql_select = "SELECT * FROM goscieportalu ORDER BY datetime DESC";
             $stmt_select = $pdo->query($sql_select);
 
-            // 2. Przejdź przez każdy rekord (wiersz)
             while ($row = $stmt_select->fetch()) {
 
-                // 3. Pobierz dane geo dla danego IP
                 $details = ip_details($row['ipaddress']);
-
-                // Ustaw puste wartości, jeśli ipinfo.io zawiedzie
-                $city = $details->city ?? 'Brak danych';
-                $region = $details->region ?? 'Brak danych';
+                $city = $details->city ?? 'Brak';
+                $region = $details->region ?? 'danych';
                 $loc = $details->loc ?? '';
 
-                // 4. Wyświetl wiersz tabeli
                 echo '<tr>';
                 echo '<td>' . htmlspecialchars($row['id']) . '</td>';
                 echo '<td>' . htmlspecialchars($row['datetime']) . '</td>';
                 echo '<td>' . htmlspecialchars($row['ipaddress']) . '</td>';
-                echo '<td>' . htmlspecialchars($city) . '</td>';
-                echo '<td>' . htmlspecialchars($region) . '</td>';
-                echo '<td>' . htmlspecialchars($loc) . '</td>';
+                // Używamy substr, aby skrócić długi ciąg User-Agent
+                echo '<td title="' . htmlspecialchars($row['browser']) . '">' . htmlspecialchars(substr($row['browser'], 0, 30)) . '...</td>';
+                echo '<td>' . htmlspecialchars($city) . ' / ' . htmlspecialchars($region) . '</td>';
 
-                // 5. ZADANIE 13: Link do Google Maps [cite: 471-472]
                 if (!empty($loc)) {
                     echo '<td><a href="https://www.google.pl/maps/place/' . htmlspecialchars($loc) . '" target="_blank" class="btn btn-sm btn-info">LINK</a></td>';
                 } else {
                     echo '<td>-</td>';
                 }
-                echo '</tr>';
-            }
+
+                // Wyświetlamy nowe dane z Zadania 16
+                echo '<td>' . htmlspecialchars($row['screen_res']) . '</td>';
+                echo '<td>' . htmlspecialchars($row['window_res']) . '</td>';
+                echo '<td>' . htmlspecialchars($row['colors']) . '</td>';
+                    echo '<td>' . htmlspecialchars($row['cookies_enabled']) . '</td>';
+                    echo '<td>' . htmlspecialchars($row['java_enabled']) . '</td>';
+                    echo '<td>' . htmlspecialchars($row['language']) . '</td>';
+
+                    echo '</tr>';
+                }
 
         } catch (PDOException $e) {
-            echo '<tr><td colspan="7" class="text-danger">Błąd podczas pobierania wizyt: ' . $e->getMessage() . '</td></tr>';
+            echo '<tr><td colspan="12" class="text-danger">Błąd podczas pobierania wizyt: ' . $e->getMessage() . '</td></tr>';
         }
         ?>
         </tbody>
