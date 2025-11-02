@@ -14,7 +14,7 @@
                 <label for="password">Hasło</label>
             </div>
 
-            <<input type="hidden" id="screen_res" name="screen_res" value="">
+            <input type="hidden" id="screen_res" name="screen_res" value="">
             <input type="hidden" id="window_res" name="window_res" value="">
             <input type="hidden" id="colors" name="colors" value="">
             <input type="hidden" id="cookies_enabled" name="cookies_enabled" value="">
