@@ -42,20 +42,13 @@ $username = $_SESSION['username'];
             // --- Logika Pkt 8 (fsockopen) ---
             while ($row = $stmt_select->fetch()) {
 
-                // --- TYMCZASOWY TEST DEBUGOWANIA ---
-                // Komentujemy problematyczny kod
-                // $fp = @fsockopen($row['host'], $row['port'], $errno, $errstr, 3);
-                // if ($fp) { ... } else { ... }
-
                 // Na stałe ustawiamy status na "Test", aby sprawdzić, czy pętla w ogóle działa
                 $stan = '<span class="badge bg-warning">Test</span>';
                 // --- KONIEC TESTU DEBUGOWANIA ---
 
-                echo '<tr>';
-// ... reszta kodu pętli
-
-                echo '<tr>';
+                echo '<tr>'; // <-- Tylko JEDEN ten wpis ma tu być
                 echo '<td>' . $row['id'] . '</td>';
+
                 echo '<td>' . htmlspecialchars($row['host']) . '</td>';
                 echo '<td>' . htmlspecialchars((string)$row['port']) . '</td>';
                 echo '<td>' . $stan . '</td>';
