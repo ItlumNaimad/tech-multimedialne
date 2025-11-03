@@ -18,6 +18,11 @@
 
                     <ul class="navbar-nav ms-auto">
                         <?php if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true): ?>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" id="mute-button" title="Wycisz alarmy">
+                                    <i class="bi bi-volume-up-fill"></i>
+                                </a>
+                            </li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown">
                                     <?php
