@@ -42,15 +42,17 @@ $username = $_SESSION['username'];
             // --- Logika Pkt 8 (fsockopen) ---
             while ($row = $stmt_select->fetch()) {
 
-                // Sprawdzamy status portu
-                $fp = @fsockopen($row['host'], $row['port'], $errno, $errstr, 5); // Czas oczekiwania 5s
+                // --- TYMCZASOWY TEST DEBUGOWANIA ---
+                // Komentujemy problematyczny kod
+                // $fp = @fsockopen($row['host'], $row['port'], $errno, $errstr, 3);
+                // if ($fp) { ... } else { ... }
 
-                if ($fp) {
-                    $stan = '<span class="badge bg-success">OK</span>'; // Działa
-                    fclose($fp);
-                } else {
-                    $stan = '<span class="badge bg-danger" title="' . htmlspecialchars("$errno: $errstr") . '">Awaria</span>'; // Nie działa [cite: 112]
-                }
+                // Na stałe ustawiamy status na "Test", aby sprawdzić, czy pętla w ogóle działa
+                $stan = '<span class="badge bg-warning">Test</span>';
+                // --- KONIEC TESTU DEBUGOWANIA ---
+
+                echo '<tr>';
+// ... reszta kodu pętli
 
                 echo '<tr>';
                 echo '<td>' . $row['id'] . '</td>';
