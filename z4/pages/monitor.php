@@ -15,7 +15,12 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
         </a>
     </div>
 </div>
-
+<div>
+    <h3>
+        Odcisz alarm na prawej stronie navbaru, by alarm mógł działać
+        Będzie uruchamiane automatycznie po 3 sekundach przy odświeżaniu strony
+    </h3>
+</div>
 <div id="monitor-table-container">
     <p class="text-center">Ładowanie danych...</p>
 </div>
