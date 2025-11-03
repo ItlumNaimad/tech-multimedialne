@@ -24,7 +24,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 
 <script>
     // Globalna flaga do wyciszania
-    var isMuted = false;
+    var isMuted = true;
 
     // Pobieramy element audio
     var alarmSound = document.getElementById("alarm-sound");
@@ -80,6 +80,17 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                 // Zmień ikonę na włączoną
                 $(this).find('i').removeClass('bi-volume-mute-fill').addClass('bi-volume-up-fill');
                 $(this).attr('title', 'Wycisz alarmy');
+
+                // --- NOWA LOGIKA: Zdobądź pozwolenie ---
+                // Spróbuj odtworzyć i natychmiast zatrzymać dźwięk.
+                // To "rejestruje" interakcję użytkownika i odblokowuje dźwięk na przyszłość.
+                try {
+                    alarmSound.play();
+                    alarmSound.pause();
+                    alarmSound.currentTime = 0;
+                } catch (e) {
+                    console.warn("Próba odblokowania audio nie powiodła się (to może się zdarzyć): ", e);
+                }
             }
         });
     });
