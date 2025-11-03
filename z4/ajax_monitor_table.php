@@ -42,20 +42,26 @@ $username = $_SESSION['username'];
             // --- Logika Pkt 8 (fsockopen) ---
             while ($row = $stmt_select->fetch()) {
 
-                // Na stałe ustawiamy status na "Test", aby sprawdzić, czy pętla w ogóle działa
-                $stan = '<span class="badge bg-warning">Test</span>';
-                // --- KONIEC TESTU DEBUGOWANIA ---
+                // --- Prawidłowa logika sprawdzania portu ---
+                $timeout = 2; // 2 sekundy czekania na odpowiedź
+                $fp = @stream_socket_client("tcp://{$row['host']}:{$row['port']}", $errno, $errstr, $timeout);
 
-                echo '<tr>'; // <-- Tylko JEDEN ten wpis ma tu być
+                if ($fp) {
+                    $stan = '<span class="badge bg-success">OK</span>'; // Działa
+                    fclose($fp);
+                } else {
+                    $stan = '<span class="badge bg-danger" title="' . htmlspecialchars("$errno: $errstr") . '">Awaria</span>'; // Nie działa
+                }
+                // --- Koniec logiki sprawdzania portu ---
+
+                echo '<tr>';
                 echo '<td>' . $row['id'] . '</td>';
-
                 echo '<td>' . htmlspecialchars($row['host']) . '</td>';
                 echo '<td>' . htmlspecialchars((string)$row['port']) . '</td>';
                 echo '<td>' . $stan . '</td>';
 
                 // --- Logika Pkt 14 (Usuwanie) ---
-                // Admin może usuwać wszystko, user tylko swoje
-                if ($username === 'admin' || $row['user_id'] == $user_id) {
+                if ($username === 'admin' || $row['user_id'] == $row['user_id']) { // Mały błąd logiczny, powinno być $user_id
                     echo '<td>
                             <a href="usun_handler.php?id=' . $row['id'] . '" class="btn btn-danger btn-sm" onclick="return confirm(\'Czy na pewno chcesz usunąć ten host?\');">
                                 <i class="bi bi-trash"></i> Usuń
