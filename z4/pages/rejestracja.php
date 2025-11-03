@@ -25,7 +25,7 @@
                 <label for="password_repeat">Powtórz hasło</label>
             </div>
 
-            <input type="hidden" name="redirect_url" value="../z2/index.php?page=logowanie">
+            <input type="hidden" name="redirect_url" value="../z4/index.php?page=logowanie">
 
             <button class="w-100 btn btn-lg btn-primary" type="submit">Zarejestruj się</button>
 

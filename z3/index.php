@@ -1,7 +1,17 @@
 <?php
 declare(strict_types=1);
-// Uruchamiamy sesję, bo będziemy z niej korzystać
 session_start();
+
+// --- UPROSZCZONA LOGIKA PRZEKIEROWANIA DLA Z3 ---
+// Ta strona jest TYLKO dla zalogowanych. Jeśli nie ma sesji, przekieruj do logowania w z2.
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    // Używamy ścieżki absolutnej (zaczynającej się od /), aby na pewno trafić do z2
+    header('Location: /z2/index.php?page=logowanie');
+    exit(); // Zawsze kończ skrypt po przekierowaniu
+}
+
+// Jeśli doszliśmy tutaj, użytkownik JEST zalogowany.
+$page = $_GET['page'] ?? 'home';
 ?>
 <!DOCTYPE html>
 <html lang="pl">
@@ -15,7 +25,6 @@ session_start();
     <link rel="stylesheet" type="text/css" href="twoj_css.css">
 
 </head>
-
 <body>
 
 <?php require_once 'header.php'; ?>
@@ -24,26 +33,18 @@ session_start();
     <section class="sekcja1">
         <div class="container-fluid">
             <?php
-            // --- Nasz router PHP dla zadania 3 ---
-            $page = $_GET['page'] ?? 'home'; // Domyślnie ładuj 'home'
-
-            // Definiujemy pliki, które można wczytać
+            // Router dla z3 (już bez stron logowania/rejestracji)
             $allowed_pages = [
-                'home' => 'pages/home.php',
-                'testy_serwera' => 'pages/testy_serwera.php', // Zadania 4-9
-                'geolokalizacja_ip' => 'pages/geolokalizacja_ip.php', // Zadanie 11
-                'log_wizyt' => 'pages/log_wizyt.php' // Zadanie 12-16
+                    'home' => 'pages/home.php',
+                    'testy_serwera' => 'pages/testy_serwera.php',
+                    'geolokalizacja_ip' => 'pages/geolokalizacja_ip.php',
+                    'log_wizyt' => 'pages/log_wizyt.php'
             ];
 
-            if (array_key_exists($page, $allowed_pages)) {
-                $file_to_include = $allowed_pages[$page];
-                if (file_exists($file_to_include)) {
-                    include $file_to_include;
-                } else {
-                    echo '<h3>Błąd 404</h3><p>Nie znaleziono pliku: ' . htmlspecialchars($file_to_include) . '</p>';
-                }
+            if (array_key_exists($page, $allowed_pages) && file_exists($allowed_pages[$page])) {
+                include $allowed_pages[$page];
             } else {
-                echo '<h3>Błąd 404</h3><p>Strona nie została znaleziona.</p>';
+                // Domyślną stroną jest 'home' (czyli 'pages/home.php')
                 include 'pages/home.php';
             }
             ?>
@@ -54,6 +55,5 @@ session_start();
 <?php require_once 'footer.php'; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 </html>

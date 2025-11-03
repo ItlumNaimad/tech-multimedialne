@@ -84,7 +84,14 @@ try {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['avatar_path'] = $user['avatar_path'];
 
-            header("Location: ../z2/index.php?page=panel");
+            // Inteligentne przekierowanie
+            if (isset($_POST['redirect_url']) && !empty($_POST['redirect_url'])) {
+                // Jeśli formularz podał nam, dokąd wrócić, użyj tego
+                header("Location: " . $_POST['redirect_url']);
+            } else {
+                // Jeśli nie (dla bezpieczeństwa), użyj domyślnej lokalizacji z z2
+                header("Location: ../z2/index.php?page=panel");
+            }
             exit();
 
         } else {

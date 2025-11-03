@@ -1,6 +1,22 @@
 <?php
-declare(strict_types=1);  /* Ta linia musi być pierwsza */
-session_start(); // Uruchamiamy sesję OD RAZU, będziemy jej potrzebować
+declare(strict_types=1);
+session_start();
+
+// --- NOWA LOGIKA: PRZEKIEROWANIE NIEZALOGOWANYCH ---
+$page = $_GET['page'] ?? 'home';
+
+// Sprawdzamy, czy użytkownik jest niezalogowany
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+
+    // Jeśli jest niezalogowany ORAZ NIE próbuje wejść na 'logowanie' lub 'rejestracja'
+    if ($page !== 'logowanie' && $page !== 'rejestracja') {
+
+        // Wymuś przekierowanie do strony logowania w z4
+        header('Location: index.php?page=logowanie');
+        exit(); // Zawsze kończ skrypt po przekierowaniu
+    }
+}
+// --- KONIEC NOWEJ LOGIKI ---
 ?>
 <!DOCTYPE html>
 <html lang="pl">
@@ -22,12 +38,32 @@ session_start(); // Uruchamiamy sesję OD RAZU, będziemy jej potrzebować
     <script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap5.min.js"></script>
-
+    <?php if ($page === 'logowanie' || $page === 'rejestracja'): ?>
+        <style>
+            html, body {
+                height: 100%;
+            }
+            body {
+                display: flex;
+                align-items: center;
+                padding-top: 40px;
+                padding-bottom: 40px;
+                background-color: #f5f5f5;
+            }
+            .sekcja1 {
+                width: 100%;
+            }
+        </style>
+    <?php endif; ?>
 </head>
-
 <body>
-
-<?php require_once 'header.php'; ?>
+<?php
+// --- NOWA LOGIKA: POKAŻ HEADER TYLKO GDY TRZEBA ---
+// Nie pokazuj paska nawigacyjnego na stronie logowania i rejestracji
+if ($page !== 'logowanie' && $page !== 'rejestracja'):
+    ?>
+    <?php require_once 'header.php'; ?>
+<?php endif; ?>
 
 <main>
     <section class="sekcja1">
@@ -73,8 +109,13 @@ session_start(); // Uruchamiamy sesję OD RAZU, będziemy jej potrzebować
         </div>
     </section>
 </main>
+<?php
+// --- NOWA LOGIKA: POKAŻ FOOTER TYLKO GDY TRZEBA ---
+if ($page !== 'logowanie' && $page !== 'rejestracja'):
+    ?>
+    <?php require_once 'footer.php'; ?>
+<?php endif; ?>
 
-<?php require_once 'footer.php'; ?>
 
 </body>
 </html>

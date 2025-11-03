@@ -21,7 +21,7 @@
             <input type="hidden" id="java_enabled" name="java_enabled" value="">
             <input type="hidden" id="language" name="language" value="">
 
-            <input type="hidden" name="redirect_url" value="../z2/index.php?page=panel">
+            <input type="hidden" name="redirect_url" value="../z4/index.php?page=home">
 
             <button class="w-100 btn btn-lg btn-primary" type="submit">Zaloguj się</button>
 

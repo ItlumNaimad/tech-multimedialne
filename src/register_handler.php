@@ -67,7 +67,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bindParam(':avatar_path', $avatar_path_to_db); // Powiąż ścieżkę awatara
         $stmt->execute();
 
-        header("Location: ../z2/index.php?page=logowanie");
+        // Inteligentne przekierowanie
+        if (isset($_POST['redirect_url']) && !empty($_POST['redirect_url'])) {
+            // Jeśli formularz podał nam, dokąd wrócić, użyj tego
+            header("Location: " . $_POST['redirect_url']);
+        } else {
+            // Jeśli nie (dla bezpieczeństwa), użyj domyślnej lokalizacji z z2
+            header("Location: ../z2/index.php?page=panel");
+        }
         exit();
 
     } catch (PDOException $e) {
