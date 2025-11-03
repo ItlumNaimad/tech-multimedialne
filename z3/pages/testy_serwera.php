@@ -21,7 +21,7 @@
 
 <hr>
 
-<h4>Zadanie 7: `exec('top')` [cite: 110-112]</h4>
+<h4>Zadanie 7: `exec('top')` </h4>
 <p>Próba wyświetlenia listy procesów serwera (prawie na pewno zablokowane).</p>
 <pre class="bg-dark text-white p-2 rounded"><?php
     if (function_exists('exec')) {
