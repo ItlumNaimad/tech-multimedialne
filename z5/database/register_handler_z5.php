@@ -24,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $file = $_FILES['avatar'];
         $max_filesize_mb = 2;
         $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
-        $upload_dir = '../uploads/'; // Względna do folderu 'src'
+        $upload_dir = '../../uploads/'; // Poprawiona ścieżka: 2x w górę do głównego folderu
 
         // 1. Sprawdzenie rozmiaru
         if ($file['size'] > $max_filesize_mb * 1024 * 1024) {
@@ -73,7 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             // Tworzymy ścieżkę do nowego katalogu
             // Używamy ścieżki względnej od pliku register_handler.php
-            $user_directory = '../mycloud_files/' . $username;
+            $user_directory = '../../mycloud_files/' . $username;
 
             // Sprawdzamy, czy katalog jeszcze nie istnieje i go tworzymy
             if (!file_exists($user_directory) && !is_dir($user_directory)) {
