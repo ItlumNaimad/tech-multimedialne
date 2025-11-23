@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 require_once 'database_z5.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -73,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             // Tworzymy ścieżkę do nowego katalogu
             // Używamy ścieżki względnej od pliku register_handler.php
-            $user_directory = '../mycloud_files/' . $username;
+            $user_directory = '../../mycloud_files/' . $username;
 
             // Sprawdzamy, czy katalog jeszcze nie istnieje i go tworzymy
             if (!file_exists($user_directory) && !is_dir($user_directory)) {
