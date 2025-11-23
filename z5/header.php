@@ -8,10 +8,9 @@
                     <ul class="navbar-nav me-auto">
                         <?php if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true): ?>
                             <li class="nav-item">
-                                <a class="nav-link active" href="index.php?page=home">Monitoruj</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="index.php?page=dodaj">Dodaj Host</a>
+                                <a class="nav-link active" href="index.php?page=home">
+                                    <i class="bi bi-hdd-stack-fill"></i> Mój Dysk
+                                </a>
                             </li>
                         <?php endif; ?>
                     </ul>

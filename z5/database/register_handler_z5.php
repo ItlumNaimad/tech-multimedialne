@@ -67,6 +67,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bindParam(':avatar_path', $avatar_path_to_db); // Powiąż ścieżkę awatara
         $stmt->execute();
 
+    // --- NOWA SEKCJA: Tworzenie katalogu użytkownika (Zad 5) ---
+    // Sprawdzamy, czy login zawiera tylko bezpieczne znaki (wymóg instrukcji)
+        if (preg_match('/^[a-zA-Z0-9_-]+$/', $username)) {
+
+            // Tworzymy ścieżkę do nowego katalogu
+            // Używamy ścieżki względnej od pliku register_handler.php
+            $user_directory = '../mycloud_files/' . $username;
+
+            // Sprawdzamy, czy katalog jeszcze nie istnieje i go tworzymy
+            if (!file_exists($user_directory) && !is_dir($user_directory)) {
+                mkdir($user_directory, 0755, true);
+                // 0755 to standardowe uprawnienia, 'true' pozwala na rekursywne tworzenie
+            }
+        } else {
+            // Jeśli login ma dziwne znaki, nie tworzymy folderu i logujemy błąd
+            // (W pełnej aplikacji powinniśmy zablokować rejestrację wcześniej)
+            error_log("Nie można utworzyć folderu dla użytkownika: '$username'. Nazwa zawiera niedozwolone znaki.");
+        }
+        // --- KONIEC NOWEJ SEKCJI ---
+
+        header("Location: " . $_POST['redirect_url']); // Przekierowanie (bez zmian)
+        exit();
+
         // Inteligentne przekierowanie
         if (isset($_POST['redirect_url']) && !empty($_POST['redirect_url'])) {
             // Jeśli formularz podał nam, dokąd wrócić, użyj tego

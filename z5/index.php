@@ -63,20 +63,24 @@ if ($page !== 'logowanie' && $page !== 'rejestracja'):
         <div class="container-fluid">
             <?php
             // Router dla z4 (lekko uproszczony)
+            // Router dla z5
             $allowed_pages = [
-                    'home' => 'pages/monitor.php',
+                    'home' => 'pages/dysk.php', // Domyślnie pokazujemy dysk
                     'logowanie' => 'pages/logowanie.php',
-                    'rejestracja' => 'pages/rejestracja.php',
-                    'dodaj' => 'pages/dodaj.php'
+                    'rejestracja' => 'pages/rejestracja.php'
             ];
 
             // Sprawdzamy, czy strona jest dozwolona i czy plik istnieje
             if (array_key_exists($page, $allowed_pages) && file_exists($allowed_pages[$page])) {
                 include $allowed_pages[$page];
             } else {
-                // Domyślna strona (dla zalogowanych to monitor, dla reszty logowanie)
+                // Domyślne przekierowanie dla zalogowanych do dysku
                 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
-                    include 'pages/monitor.php';
+                    if (array_key_exists($page, $allowed_pages) && file_exists($allowed_pages[$page])) {
+                        include $allowed_pages[$page];
+                    } else {
+                        include 'pages/dysk.php'; // Domyślna strona dla zalogowanego
+                    }
                 } else {
                     include 'pages/logowanie.php';
                 }
