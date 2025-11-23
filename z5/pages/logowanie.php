@@ -1,6 +1,6 @@
 <div class="container" style="max-width: 400px;">
     <main class="form-signin w-100 m-auto text-center">
-        <form action="../src/login_handler.php" method="post">
+        <form action="../database/login_handler_z5.php" method="post">
             <img class="mb-4" src="https://getbootstrap.com/docs/5.3/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57">
 
             <h1 class="h3 mb-3 fw-normal">Zaloguj się (Bezpiecznie)</h1>

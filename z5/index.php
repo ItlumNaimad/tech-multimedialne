@@ -11,7 +11,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     // Jeśli jest niezalogowany ORAZ NIE próbuje wejść na 'logowanie' lub 'rejestracja'
     if ($page !== 'logowanie' && $page !== 'rejestracja') {
 
-        // Wymuś przekierowanie do strony logowania w z4
+        // Wymuś przekierowanie do strony logowania w
         header('Location: index.php?page=logowanie');
         exit(); // Zawsze kończ skrypt po przekierowaniu
     }
