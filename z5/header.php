@@ -3,7 +3,7 @@
     <div class="container">
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top mt-0 mb-0 ms-0 me-0 pt-0 pb-0 ps-0 pe-0">
             <div class="container-fluid">
-                <a class="navbar-brand" href="index.php?page=home">Z4 Monitor</a>
+                <a class="navbar-brand" href="index.php?page=home">Z5 MyCloud</a>
                 <div class="collapse navbar-collapse" id="main_nav">
                     <ul class="navbar-nav me-auto">
                         <?php if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true): ?>
