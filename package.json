@@ -1,0 +1,28 @@
+{
+  "name": "tech-multimedialne",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ItlumNaimad/tech-multimedialne.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ItlumNaimad/tech-multimedialne/issues"
+  },
+  "homepage": "https://github.com/ItlumNaimad/tech-multimedialne#readme",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.17",
+    "autoprefixer": "^10.4.22",
+    "daisyui": "^5.5.5",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.17"
+  }
+}
