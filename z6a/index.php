@@ -17,7 +17,7 @@ if ((!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) && !in_arr
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>mySpotify</title>
-    <link href="css/output.css" rel="stylesheet">
+    <link href="/z6a/css/output.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
 <body class="h-full text-white font-sans antialiased">
