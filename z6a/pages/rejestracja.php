@@ -2,7 +2,7 @@
     <main class="form-registration w-100 m-auto">
         <h1 class="h3 mb-3 fw-normal text-center">Zarejestruj się (Bezpiecznie)</h1>
 
-        <form action="database/register_handler_z5.php" method="post" enctype="multipart/form-data">
+        <form action="database/register_handler.php" method="post" enctype="multipart/form-data">
 
             <div class="form-floating mb-2">
                 <input type="text" class="form-control" id="username" name="username" placeholder="Nazwa użytkownika" required>
