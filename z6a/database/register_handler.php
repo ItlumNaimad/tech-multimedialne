@@ -1,4 +1,10 @@
 <?php
+// 1. Włączamy wyświetlanie błędów (ABY NIE BYŁO ERROR 500)
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// 2. Poprawna nazwa pliku bazy dla z6a
 require_once 'database_z6a.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -7,106 +13,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
     $password_repeat = $_POST['password_repeat'];
 
-    $avatar_path_to_db = null; // Domyślnie brak awatara (NULL)
+    // Walidacja
+    if ($password !== $password_repeat) die("Hasła nie są identyczne.");
+    if (empty($username) || empty($password)) die("Uzupełnij wszystkie pola.");
 
-    // --- Walidacja hasła i pól (bez zmian) ---
-    if ($password !== $password_repeat) {
-        die("Hasła nie są identyczne. Wróć i spróbuj ponownie.");
-    }
-    if (empty($username) || empty($password)) {
-        die("Nazwa użytkownika i hasło nie mogą być puste.");
-    }
-
-    // --- NOWA SEKCJA: Obsługa Uploadu Awatara ---
-    // Sprawdzamy, czy plik został wysłany i czy nie ma błędu
-    if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] == UPLOAD_ERR_OK) {
-
-        $file = $_FILES['avatar'];
-        $max_filesize_mb = 2;
-        $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
-        $upload_dir = '../../uploads/'; // Poprawiona ścieżka: 2x w górę do głównego folderu
-
-        // 1. Sprawdzenie rozmiaru
-        if ($file['size'] > $max_filesize_mb * 1024 * 1024) {
-            die("Plik jest za duży. Maksymalny rozmiar to 2MB.");
-        }
-
-        // 2. Sprawdzenie typu pliku
-        if (!in_array($file['type'], $allowed_types)) {
-            die("Niedozwolony typ pliku. Dozwolone są tylko JPG, PNG i GIF.");
-        }
-
-        // 3. Stworzenie unikalnej nazwy pliku, aby uniknąć nadpisywania
-        $file_extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $unique_filename = uniqid('avatar_', true) . 'z5' . $file_extension;
-        $upload_path = $upload_dir . $unique_filename;
-
-        // 4. Przeniesienie pliku z folderu tymczasowego
-        if (move_uploaded_file($file['tmp_name'], $upload_path)) {
-            // Sukces! Ustaw ścieżkę do zapisu w bazie
-            // Zapisujemy ścieżkę względną do GŁÓWNEGO FOLDERU (public_html)
-            $avatar_path_to_db = 'uploads/' . $unique_filename;
-        } else {
-            die("Błąd podczas przenoszenia pliku. Spróbuj ponownie.");
-        }
-    }
-    // Jeśli plik nie został wysłany (jest opcjonalny), po prostu zostawiamy $avatar_path_to_db jako NULL
-
-
-    // --- Haszowanie Hasła (bez zmian) ---
+    // Haszowanie
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-    // --- ZMODYFIKOWANY ZAPIS DO BAZY ---
-    // Dodaliśmy kolumnę `avatar_path` do zapytania
+    // (Opcjonalnie: Tutaj byłby kod od awatara, ale na razie go pomińmy dla testu)
+    $avatar_path = null;
+
+    // 3. Zapis do bazy
+    // Upewnij się, że tabela 'users' w bazie 'damskopb_myspotify' ma kolumnę 'avatar_path'
+    // Jeśli skopiowałeś tabelę z z1/z2, mogłeś nie mieć tej kolumny.
+    // Jeśli nie masz, usuń ", avatar_path" i ":avatar_path" z zapytania.
     $sql = "INSERT INTO users (username, password, avatar_path) VALUES (:username, :password, :avatar_path)";
 
     try {
         $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':username', $username);
-        $stmt->bindParam(':password', $hashed_password);
-        $stmt->bindParam(':avatar_path', $avatar_path_to_db); // Powiąż ścieżkę awatara
-        $stmt->execute();
+        $stmt->execute([
+            ':username' => $username,
+            ':password' => $hashed_password,
+            ':avatar_path' => $avatar_path
+        ]);
 
-    // --- NOWA SEKCJA: Tworzenie katalogu użytkownika (Zad 5) ---
-    // Sprawdzamy, czy login zawiera tylko bezpieczne znaki (wymóg instrukcji)
-        if (preg_match('/^[a-zA-Z0-9_-]+$/', $username)) {
-
-            // Tworzymy ścieżkę do nowego katalogu
-            // Używamy ścieżki względnej od pliku register_handler.php
-            $user_directory = '../../mycloud_files/' . $username;
-
-            // Sprawdzamy, czy katalog jeszcze nie istnieje i go tworzymy
-            if (!file_exists($user_directory) && !is_dir($user_directory)) {
-                mkdir($user_directory, 0755, true);
-                // 0755 to standardowe uprawnienia, 'true' pozwala na rekursywne tworzenie
-            }
-        } else {
-            // Jeśli login ma dziwne znaki, nie tworzymy folderu i logujemy błąd
-            // (W pełnej aplikacji powinniśmy zablokować rejestrację wcześniej)
-            error_log("Nie można utworzyć folderu dla użytkownika: '$username'. Nazwa zawiera niedozwolone znaki.");
-        }
-        // --- KONIEC NOWEJ SEKCJI ---
-
-        header("Location: " . $_POST['redirect_url']); // Przekierowanie (bez zmian)
-        exit();
-
-        // Inteligentne przekierowanie
-        if (isset($_POST['redirect_url']) && !empty($_POST['redirect_url'])) {
-            // Jeśli formularz podał nam, dokąd wrócić, użyj tego
-            header("Location: " . $_POST['redirect_url']);
-        } else {
-            // Jeśli nie (dla bezpieczeństwa), użyj domyślnej lokalizacji z z2
-            header("Location: ../z2/index.php?page=panel");
-        }
+        // Przekierowanie po sukcesie
+        header("Location: ../index.php?page=logowanie&msg=registered");
         exit();
 
     } catch (PDOException $e) {
-        if ($e->getCode() == 23000) {
-            die("Ta nazwa użytkownika jest już zajęta. Wybierz inną.");
-        } else {
-            die("Błąd podczas rejestracji: " . $e->getMessage());
-        }
+        die("Błąd SQL podczas rejestracji: " . $e->getMessage());
     }
-} else {
-    echo "Nieautoryzowany dostęp.";
 }
+?>

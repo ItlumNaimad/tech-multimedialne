@@ -21,6 +21,7 @@ try {
     $pdo = new PDO($dsn, $username, $password, $options);
 } catch (PDOException $e) {
     // W prawdziwej aplikacji błąd należałoby zalogować, a nie wyświetlać użytkownikowi
-    throw new PDOException($e->getMessage(), (int)$e->getCode());
+    //throw new PDOException($e->getMessage(), (int)$e->getCode());
+    die("<h3>Błąd połączenia z bazą danych:</h3> " . $e->getMessage());
 }
 ?>
