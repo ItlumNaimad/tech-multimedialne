@@ -18,7 +18,7 @@
             <span class="navbar-text me-3">
         Witaj, <?php echo htmlspecialchars($_SESSION['username'] ?? 'Gość'); ?>
       </span>
-            <a href="z6/wyloguj.php" class="btn btn-danger btn-sm">Wyloguj</a>
+            <a href="wyloguj.php" class="btn btn-danger btn-sm">Wyloguj</a>
         </div>
     </div>
 </nav>
