@@ -9,8 +9,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['music_file'])) {
     $idmt = $_POST['idmt'];
     $idu = $_SESSION['user_id'];
 
-    // Ścieżka do folderu z muzyką
-    $upload_dir = '../media/music/';
+    // --- STARA WERSJA (mogła mylić ścieżki) ---
+    // $upload_dir = '../media/music/';
+
+    // --- NOWA WERSJA (Ścieżka absolutna - niezawodna) ---
+    // __DIR__ to folder 'scripts'. Wychodzimy z niego (/../) do 'z6a', potem do 'media/music/'
+    $upload_dir = __DIR__ . '/../media/music/';
 
     // Unikalna nazwa pliku
     $file_name = time() . '_' . basename($_FILES['music_file']['name']);
