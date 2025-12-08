@@ -88,8 +88,8 @@ try {
             if (isset($_POST['redirect_url']) && !empty($_POST['redirect_url'])) {
                 header("Location: " . $_POST['redirect_url']);
             } else {
-                // Domyślnie idź do dysku
-                header("Location: ../z5/index.php?page=home");
+                // Domyślnie idź do home w z6a (kropki oznaczają wyjście z folderu database)
+                header("Location: ../index.php?page=home");
             }
             exit();
 
