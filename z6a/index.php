@@ -1,7 +1,7 @@
 <?php
 session_start();
-// Prosty router
 $page = $_GET['page'] ?? 'home';
+// Router
 $allowed = ['home', 'upload', 'logowanie', 'rejestracja'];
 if (!in_array($page, $allowed)) $page = 'home';
 
@@ -12,27 +12,29 @@ if ((!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) && !in_arr
 }
 ?>
 <!DOCTYPE html>
-<html lang="pl" class="h-full bg-gray-900">
+<html lang="pl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mySpotify</title>
-    <link href="/z6a/css/output.css" rel="stylesheet">
+    <title>mySpotify - Bootstrap</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/twoj_css.css">
 </head>
-<body class="h-full text-white font-sans antialiased">
+<body class="bg-dark text-light">
 
-<?php if (isset($_SESSION['loggedin'])): ?>
+<?php if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true): ?>
     <?php include 'header.php'; ?>
 <?php endif; ?>
 
-<main class="container mx-auto px-4 py-6">
+<div class="container mt-4">
     <?php
     $file = "pages/$page.php";
     if (file_exists($file)) include $file;
-    else echo "<h2 class='text-red-500'>Plik nie istnieje: $file</h2>";
+    else echo "<div class='alert alert-danger'>Plik nie istnieje: $file</div>";
     ?>
-</main>
+</div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'database_z6a.php'; // Łączymy się z bazą Z5
+require_once 'database.php'; // Łączymy się z bazą
 require_once 'utils.php';       // Funkcje pomocnicze (geo)
 
 // --- KONFIGURACJA BRUTE FORCE (Zgodnie z instrukcją z5) ---

@@ -1,19 +1,24 @@
-<nav class="bg-black border-b border-gray-800">
-    <div class="container mx-auto px-4">
-        <div class="flex items-center justify-between h-16">
-            <div class="flex items-center gap-8">
-                <a href="index.php?page=home" class="text-2xl font-bold text-green-500 flex items-center gap-2">
-                    <i class="bi bi-spotify"></i> mySpotify
-                </a>
-                <div class="hidden md:flex gap-4">
-                    <a href="index.php?page=home" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Biblioteka</a>
-                    <a href="index.php?page=upload" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Dodaj Utwór</a>
-                </div>
-            </div>
-            <div class="flex items-center gap-4">
-                <span class="text-sm text-gray-400">Witaj, <?= htmlspecialchars($_SESSION['username'] ?? 'Gość') ?></span>
-                <a href="../z2/wyloguj.php" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full text-sm font-bold transition">Wyloguj</a>
-            </div>
+<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="index.php?page=home">
+            <i class="bi bi-spotify"></i> mySpotify
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="index.php?page=home">Biblioteka</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="index.php?page=upload">Dodaj Utwór</a>
+                </li>
+            </ul>
+            <span class="navbar-text me-3">
+        Witaj, <?php echo htmlspecialchars($_SESSION['username'] ?? 'Gość'); ?>
+      </span>
+            <a href="../z2/wyloguj.php" class="btn btn-danger btn-sm">Wyloguj</a>
         </div>
     </div>
 </nav>
