@@ -1,6 +1,6 @@
 <div class="container" style="max-width: 400px;">
     <main class="form-signin w-100 m-auto text-center">
-        <form action="../database/login_handler.php" method="post">
+        <form action="database/login_handler.php" method="post">
             <img class="mb-4" src="https://getbootstrap.com/docs/5.3/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57">
 
             <h1 class="h3 mb-3 fw-normal">Zaloguj się</h1>
@@ -31,16 +31,11 @@
         </form>
     </main>
     <script>
-        // Ten skrypt uruchomi się automatycznie po załadowaniu strony
         (function() {
-            // Zbieramy dane o ekranie
             document.getElementById('screen_res').value = screen.width + 'x' + screen.height;
             document.getElementById('window_res').value = window.innerWidth + 'x' + window.innerHeight;
             document.getElementById('colors').value = screen.colorDepth;
-
-            // Zbieramy dane o przeglądarce
             document.getElementById('cookies_enabled').value = navigator.cookieEnabled ? 'Tak' : 'Nie';
-            // metoda .javaEnabled() została oznaczona przez IDE jako "deprecated"
             document.getElementById('java_enabled').value = navigator.javaEnabled() ? 'Tak' : 'Nie';
             document.getElementById('language').value = navigator.language || navigator.userLanguage;
         })();
