@@ -3,11 +3,17 @@
         <a class="navbar-brand fw-bold" href="index.php?page=home">
             <i class="bi bi-spotify"></i> mySpotify
         </a>
+        
+        <!-- Przycisk powrotu do listy zadań -->
+        <a href="../index.php" class="btn btn-outline-light btn-sm me-auto ms-2">
+            <i class="bi bi-arrow-left"></i> Powrót do listy zadań
+        </a>
+
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto">
+            <ul class="navbar-nav ms-auto me-3">
                 <li class="nav-item">
                     <a class="nav-link active" href="index.php?page=home">Biblioteka</a>
                 </li>
@@ -19,8 +25,8 @@
                 </li>
             </ul>
             <span class="navbar-text me-3">
-        Witaj, <?php echo htmlspecialchars($_SESSION['username'] ?? 'Gość'); ?>
-      </span>
+                Witaj, <?php echo htmlspecialchars($_SESSION['username'] ?? 'Gość'); ?>
+            </span>
             <a href="wyloguj.php" class="btn btn-danger btn-sm">Wyloguj</a>
         </div>
     </div>
