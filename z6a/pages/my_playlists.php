@@ -49,16 +49,21 @@ if (isset($_GET['idpl'])) {
 } else {
     // 2. Jeśli nie wybrano -> Pokaż listę playlist (własnych i publicznych)
     $idu = $_SESSION['user_id'];
-    
-    // Zapytanie, które pobiera playlisty zalogowanego użytkownika ORAZ wszystkie publiczne
+
+    // POPRAWIONE ZAPYTANIE:
+    // 1. Tabela 'users' zamiast 'user'
+    // 2. Łączymy p.idu z u.id (a nie u.idu)
     $sql = "SELECT p.*, u.username 
             FROM playlistname p
-            JOIN user u ON p.idu = u.idu
+            JOIN users u ON p.idu = u.id 
             WHERE p.idu = ? OR p.public = 1 
             ORDER BY p.datetime DESC";
+
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$idu]);
     $playlists = $stmt->fetchAll();
+
+    // ... reszta kodu wyświetlania (bez zmian) ...
 
     echo '<h2>Wszystkie Playlisty</h2>';
     echo '<a href="index.php?page=create_playlist" class="btn btn-success mb-3"><i class="bi bi-plus-circle"></i> Nowa Playlista</a>';
