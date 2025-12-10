@@ -23,10 +23,22 @@ if (isset($_GET['idpl'])) {
 
     echo '<div class="list-group">';
     foreach($songs as $song) {
-        echo '<div class="list-group-item bg-dark text-white border-secondary mb-2">';
-        echo '<h5>' . htmlspecialchars($song['title']) . ' - ' . htmlspecialchars($song['musician']) . '</h5>';
-        // PLAYER DLA PIOSENKI
-        echo '<audio controls class="w-100 mt-1"><source src="media/music/' . htmlspecialchars($song['filename']) . '" type="audio/mpeg"></audio>';
+        echo '<div class="list-group-item bg-dark text-white border-secondary mb-2 d-flex align-items-center">';
+        
+        // Nowy przycisk Play
+        echo '<button class="btn btn-outline-success rounded-circle play-btn p-3 me-3" 
+                      data-src="media/music/' . htmlspecialchars($song['filename']) . '"
+                      data-title="' . htmlspecialchars($song['title']) . '"
+                      data-artist="' . htmlspecialchars($song['musician']) . '">
+                  <i class="bi bi-play-fill fs-4"></i>
+              </button>';
+        
+        // Tytuł i wykonawca
+        echo '<div>';
+        echo '<h5>' . htmlspecialchars($song['title']) . '</h5>';
+        echo '<p class="mb-0 small">' . htmlspecialchars($song['musician']) . '</p>';
+        echo '</div>';
+
         echo '</div>';
     }
     if (count($songs) == 0) echo '<p>Pusta playlista.</p>';
