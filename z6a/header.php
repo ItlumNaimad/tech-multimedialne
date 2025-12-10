@@ -14,6 +14,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="index.php?page=upload">Dodaj Utwór</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="index.php?page=my_playlists">Playlisty</a>
+                </li>
             </ul>
             <span class="navbar-text me-3">
         Witaj, <?php echo htmlspecialchars($_SESSION['username'] ?? 'Gość'); ?>

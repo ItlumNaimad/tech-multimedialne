@@ -2,7 +2,16 @@
 session_start();
 $page = $_GET['page'] ?? 'home';
 // Router
-$allowed = ['home', 'upload', 'logowanie', 'rejestracja'];
+// Dodajemy nowe strony do listy dozwolonych
+$allowed = [
+        'home',
+        'upload',
+        'logowanie',
+        'rejestracja',
+        'my_playlists',     // <--- Nowe
+        'create_playlist',  // <--- Nowe
+        'add_to_playlist'   // <--- Nowe
+];
 if (!in_array($page, $allowed)) $page = 'home';
 
 // Przekierowanie niezalogowanych
