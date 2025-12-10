@@ -15,7 +15,14 @@ $songs = $stmt->fetchAll();
         <div class="col-md-4 mb-4">
             <div class="card bg-secondary text-white h-100">
                 <div class="card-body">
-                    <h5 class="card-title"><?= htmlspecialchars($song['title']) ?></h5>
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="card-title"><?= htmlspecialchars($song['title']) ?></h5>
+                        </div>
+                        <a href="index.php?page=add_to_playlist&song_id=<?= $song['ids'] ?>" class="btn btn-sm btn-outline-light" title="Dodaj do playlisty">
+                            <i class="bi bi-plus-lg"></i>
+                        </a>
+                    </div>
                     <p class="card-text text-light small">
                         <i class="bi bi-mic"></i> <?= htmlspecialchars($song['musician']) ?> <br>
                         <span class="badge bg-dark"><?= $song['genre'] ?></span>

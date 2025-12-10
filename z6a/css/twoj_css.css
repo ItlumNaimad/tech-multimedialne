@@ -19,3 +19,14 @@ body {  background-color: #f8f9fa; }
 	margin-left:1px; margin-right:1px; margin-bottom:1px;	
 }
 
+audio {
+    width: 100%;
+    min-width: 300px; /* Zapewnia minimalną szerokość */
+    height: 40px;     /* Ustawia stałą wysokość */
+    border-radius: 20px; /* Ładniejsze rogi */
+    outline: none;
+}
+/* Poprawka dla ciemnego motywu Chrome */
+audio::-webkit-media-controls-panel {
+    background-color: #f1f3f4;
+}
