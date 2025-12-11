@@ -33,8 +33,9 @@ if (isset($_GET['idpl'])) {
             echo '<div class="list-group">';
             foreach($songs as $song) {
                 echo '<div class="list-group-item bg-dark text-white border-secondary mb-2 d-flex align-items-center">';
+                // POPRAWIONA ŚCIEŻKA do media/music/
                 echo '<button class="btn btn-outline-success rounded-circle play-btn p-3 me-3" 
-                              data-src="media/films/' . htmlspecialchars($song['filename']) . '"
+                              data-src="media/music/' . htmlspecialchars($song['filename']) . '"
                               data-title="' . htmlspecialchars($song['title']) . '"
                               data-artist="' . htmlspecialchars($song['musician']) . '">
                           <i class="bi bi-play-fill fs-4"></i>
@@ -50,20 +51,14 @@ if (isset($_GET['idpl'])) {
     // 2. Jeśli nie wybrano -> Pokaż listę playlist (własnych i publicznych)
     $idu = $_SESSION['user_id'];
 
-    // POPRAWIONE ZAPYTANIE:
-    // 1. Tabela 'users' zamiast 'user'
-    // 2. Łączymy p.idu z u.id (a nie u.idu)
     $sql = "SELECT p.*, u.username 
             FROM playlistname p
-            JOIN users u ON p.idu = u.id 
+            JOIN user u ON p.idu = u.idu
             WHERE p.idu = ? OR p.public = 1 
             ORDER BY p.datetime DESC";
-
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$idu]);
     $playlists = $stmt->fetchAll();
-
-    // ... reszta kodu wyświetlania (bez zmian) ...
 
     echo '<h2>Wszystkie Playlisty</h2>';
     echo '<a href="index.php?page=create_playlist" class="btn btn-success mb-3"><i class="bi bi-plus-circle"></i> Nowa Playlista</a>';
@@ -74,11 +69,10 @@ if (isset($_GET['idpl'])) {
         echo '<div class="list-group">';
         foreach($playlists as $pl) {
             $is_owner = ($pl['idu'] == $idu);
-            
+
             echo '<a href="index.php?page=my_playlists&idpl=' . $pl['idpl'] . '" class="list-group-item list-group-item-action bg-dark text-white border-secondary d-flex justify-content-between align-items-center">';
             echo '<div><h5 class="mb-1">' . htmlspecialchars($pl['name']) . '</h5>';
-            
-            // Opis playlisty: Prywatna, Publiczna (autor)
+
             if ($is_owner) {
                 echo '<small>' . ($pl['public'] ? 'Publiczna 🌍' : 'Prywatna 🔒') . '</small>';
             } else {
