@@ -33,7 +33,6 @@ if (isset($_GET['idpl'])) {
             echo '<div class="list-group">';
             foreach($songs as $song) {
                 echo '<div class="list-group-item bg-dark text-white border-secondary mb-2 d-flex align-items-center">';
-                // POPRAWIONA ŚCIEŻKA do media/music/
                 echo '<button class="btn btn-outline-success rounded-circle play-btn p-3 me-3" 
                               data-src="media/music/' . htmlspecialchars($song['filename']) . '"
                               data-title="' . htmlspecialchars($song['title']) . '"
@@ -50,10 +49,12 @@ if (isset($_GET['idpl'])) {
 } else {
     // 2. Jeśli nie wybrano -> Pokaż listę playlist (własnych i publicznych)
     $idu = $_SESSION['user_id'];
-
+    
+    // POPRAWKA: JOIN users u ON p.idu = u.id (zamiast JOIN user)
+    // Zakładając, że klucz główny w tabeli 'users' to 'id'
     $sql = "SELECT p.*, u.username 
             FROM playlistname p
-            JOIN user u ON p.idu = u.idu
+            JOIN users u ON p.idu = u.id
             WHERE p.idu = ? OR p.public = 1 
             ORDER BY p.datetime DESC";
     $stmt = $pdo->prepare($sql);
@@ -69,10 +70,10 @@ if (isset($_GET['idpl'])) {
         echo '<div class="list-group">';
         foreach($playlists as $pl) {
             $is_owner = ($pl['idu'] == $idu);
-
+            
             echo '<a href="index.php?page=my_playlists&idpl=' . $pl['idpl'] . '" class="list-group-item list-group-item-action bg-dark text-white border-secondary d-flex justify-content-between align-items-center">';
             echo '<div><h5 class="mb-1">' . htmlspecialchars($pl['name']) . '</h5>';
-
+            
             if ($is_owner) {
                 echo '<small>' . ($pl['public'] ? 'Publiczna 🌍' : 'Prywatna 🔒') . '</small>';
             } else {
