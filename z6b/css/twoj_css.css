@@ -1,32 +1,57 @@
-body {  background-color: #f8f9fa; }
-/* To jest standardowy kolor "light" z Bootstrapa */
-
-.navbar {
-    min-height:40px; font-size:16px; font-weight: bold;
-} /* Lekko powiększona i pogrubiona czcionka */
-
-.sekcja1
-{	  
-	height:auto; width:auto; text-align:left;
-	border-color:blue; border-width:1px;
-	margin-top:45px; margin-left:5px; margin-right:1px;	margin-bottom:5px;	
+/* GŁÓWNY MOTYW VOD */
+body {
+    background-color: #141414 !important; /* Netflix Black */
+    color: #e5e5e5;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-.page-footer
-{
-	height:21px; width:auto; font-size:11px; color:blue;
-	border:solid; border-width:1px; border-color:blue;
-	margin-left:1px; margin-right:1px; margin-bottom:1px;	
+/* KARTY FILMÓW */
+.card {
+    background-color: #181818;
+    border: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-audio {
-    width: 100%;
-    min-width: 300px; /* Zapewnia minimalną szerokość */
-    height: 40px;     /* Ustawia stałą wysokość */
-    border-radius: 20px; /* Ładniejsze rogi */
-    outline: none;
+.card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    z-index: 10;
 }
-/* Poprawka dla ciemnego motywu Chrome */
-audio::-webkit-media-controls-panel {
-    background-color: #f1f3f4;
+
+/* TYTUŁY */
+h2, h3, h5.card-title {
+    color: #fff;
+    font-weight: 700;
+}
+
+/* BADGE GATUNKU */
+.badge.bg-dark {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    font-weight: normal;
+}
+
+/* PRZYCISKI */
+.btn-outline-light:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-color: white;
+}
+
+/* NAWIGACJA */
+.nav-link {
+    color: #b3b3b3 !important;
+    transition: color 0.2s;
+}
+.nav-link:hover, .nav-link.active {
+    color: #fff !important;
+}
+
+/* PLAYLISTY */
+.list-group-item {
+    background-color: #181818;
+    border-color: #333;
+    color: #fff;
+}
+.list-group-item:hover {
+    background-color: #2a2a2a;
 }

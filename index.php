@@ -1,5 +1,20 @@
 <?php
+session_start();
+// Czyścimy wszystkie zmienne sesyjne
+$_SESSION = array();
+
+// Jeśli sesja korzysta z ciasteczek, usuń także ciasteczko sesyjne
+if (ini_get("session.use_cookies")) {
+    $params = session_get_cookie_params();
+    setcookie(session_name(), '', time() - 42000,
+            $params["path"], $params["domain"],
+            $params["secure"], $params["httponly"]
+    );
+}
+// Ostatecznie niszczymy sesję
+session_destroy();
 ?>
+<!DOCTYPE html>
 <!DOCTYPE html>
 <html lang="pl">
 <head>

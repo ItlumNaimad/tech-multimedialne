@@ -1,5 +1,13 @@
 <?php
 session_start();
+// --- OCHRONA SESJI (Izolacja od mySpotify) ---
+if (isset($_SESSION['loggedin']) && ($_SESSION['app_id'] ?? '') !== 'mynetflix') {
+    session_unset();
+    session_destroy();
+    session_start();
+}
+$page = $_GET['page'] ?? 'home';
+
 // Prosty router
 $page = $_GET['page'] ?? 'home';
 $allowed = ['home', 'upload', 'logowanie', 'rejestracja', 'my_playlists', 'create_playlist', 'add_to_playlist'];
@@ -16,43 +24,12 @@ if ((!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) && !in_arr
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mySpotify</title>
-    <link rel="stylesheet" href="css/twoj_css.css">
-    <!-- Bootstrap 5 CSS -->
+    <title>myNetflix</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <!-- Custom dark theme -->
-    <style>
-        body {
-            background-color: #121212;
-            color: #fff;
-        }
-        .card {
-            background-color: #282828;
-        }
-        .list-group-item {
-            background-color: #282828;
-            border-color: #404040;
-        }
-        .form-control {
-            background-color: #333;
-            border-color: #555;
-            color: #fff;
-        }
-        .form-control:focus {
-            background-color: #333;
-            border-color: #1db954;
-            color: #fff;
-            box-shadow: none;
-        }
-        .form-range::-webkit-slider-thumb {
-            background-color: #1db954;
-        }
-        .form-range::-moz-range-thumb {
-            background-color: #1db954;
-        }
-    </style>
+
+    <link rel="stylesheet" href="css/twoj_css.css">
 </head>
 <body class="d-flex flex-column h-100">
 
@@ -68,7 +45,6 @@ if ((!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) && !in_arr
     ?>
 </main>
 
-<!-- Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

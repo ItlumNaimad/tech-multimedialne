@@ -1,5 +1,16 @@
 <?php
 session_start();
+
+// --- OCHRONA SESJI (Izolacja od myNetflix) ---
+// Jeśli użytkownik jest zalogowany, ALE to sesja z innej apki (np. Netflix), wyloguj go.
+if (isset($_SESSION['loggedin']) && ($_SESSION['app_id'] ?? '') !== 'myspotify') {
+    session_unset();
+    session_destroy();
+    session_start(); // Startujemy nową, czystą sesję
+    // Użytkownik zostanie przekierowany do logowania przez dalszą część skryptu
+}
+$page = $_GET['page'] ?? 'home';
+
 // Prosty router
 $page = $_GET['page'] ?? 'home';
 $allowed = ['home', 'upload', 'logowanie', 'rejestracja', 'my_playlists', 'create_playlist', 'add_to_playlist'];

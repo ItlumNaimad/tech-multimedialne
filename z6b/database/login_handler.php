@@ -77,6 +77,7 @@ try {
 
             // D. Ustawiamy zmienne sesyjne
             $_SESSION['loggedin'] = true;
+            $_SESSION['app_id'] = 'mynetflix'; // Znacznik, że to sesja Netflix
             $_SESSION['username'] = $user['username'];
             $_SESSION['user_id'] = $user['id'];
 
