@@ -1,5 +1,6 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-black mb-4 border-bottom border-danger" style="border-width: 2px !important;">
+<nav class="navbar navbar-expand-lg navbar-dark bg-black mb-4 border-bottom border-danger" style="border-bottom-width: 2px !important;">
     <div class="container-fluid px-4">
+
         <a class="navbar-brand fw-bold text-danger fs-3" href="index.php?page=home" style="letter-spacing: 1px;">
             <i class="bi bi-film"></i> myNetflix
         </a>
@@ -11,6 +12,7 @@
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto me-3 align-items-center">
                 <li class="nav-item">
