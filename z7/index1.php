@@ -19,6 +19,7 @@
                 url: 'my_file.json', // Adres pliku
                 dataType: 'json',    // Oczekiwany format
                 type: 'get',
+                cache: false,
                 success: function(data) {
                     // Gdy sukces: wpisz imię do spana
                     status.text(data.imie);
