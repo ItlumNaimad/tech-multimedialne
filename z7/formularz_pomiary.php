@@ -17,15 +17,15 @@
     </div>
     <div class="input-group mb-2">
         <span class="input-group-text">X3</span>
-        <input type="number" step="0.1" name="x3" class="form-control" value="30">
+        <input type="number" step="0.1" name="x3" class="form-control" value="1">
     </div>
     <div class="input-group mb-2">
         <span class="input-group-text">X4</span>
-        <input type="number" step="0.1" name="x4" class="form-control" value="40">
+        <input type="number" step="0.1" name="x4" class="form-control" value="7">
     </div>
     <div class="input-group mb-2">
         <span class="input-group-text">X5</span>
-        <input type="number" step="0.1" name="x5" class="form-control" value="50">
+        <input type="number" step="0.1" name="x5" class="form-control" value="5.5">
     </div>
     <button type="submit" class="btn btn-primary w-100">Wyślij Pomiar</button>
 </form>
