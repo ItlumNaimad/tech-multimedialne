@@ -17,6 +17,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if (isset($_FILES['file']) && $_FILES['file']['error'] == 0) {
         $target_dir = "upload/";
+        // Ensure directory exists
+        if (!file_exists($target_dir)) {
+            mkdir($target_dir, 0777, true);
+        }
+
         $file_name = time() . "_" . basename($_FILES["file"]["name"]);
         $target_file = $target_dir . $file_name;
         $file_extension = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
@@ -31,6 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $file_type = 'video';
             } elseif ($file_extension == 'mp3') {
                 $file_type = 'audio';
+            } elseif ($file_extension == 'pdf') {
+                $file_type = 'pdf';
             } else {
                 $file_type = 'file';
             }
@@ -43,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (mysqli_query($conn, $sql)) {
         echo json_encode(['status' => 'success']);
     } else {
+        http_response_code(500);
         echo json_encode(['status' => 'error', 'message' => mysqli_error($conn)]);
     }
 }
