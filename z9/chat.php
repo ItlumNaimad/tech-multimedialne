@@ -82,48 +82,58 @@ const recipientUser = '<?php echo $recipient; ?>';
 const chatBox = document.getElementById('chat-box');
 const sendForm = document.getElementById('send-form');
 
+let lastMessageId = 0;
+
 async function fetchMessages() {
     try {
         const response = await fetch(`api_fetch.php?recipient=${encodeURIComponent(recipientUser)}`);
         const messages = await response.json();
         
+        if (messages.length === 0) return;
+
         const isScrolledToBottom = chatBox.scrollHeight - chatBox.clientHeight <= chatBox.scrollTop + 50;
-
-        chatBox.innerHTML = '';
-        messages.forEach(msg => {
-            const isSentByMe = msg.user === currentUser;
-            const msgClass = isSentByMe ? 'message-sent' : 'message-received';
-            
-            let mediaHtml = '';
-            if (msg.file_path) {
-                if (msg.file_type === 'image') {
-                    mediaHtml = `<div class="media-content"><a href="${msg.file_path}" target="_blank"><img src="${msg.file_path}" class="img-fluid rounded mt-2" style="max-height: 200px;"></a></div>`;
-                } else if (msg.file_type === 'video') {
-                    mediaHtml = `<div class="media-content mt-2"><video src="${msg.file_path}" autoplay muted loop controls style="max-width: 100%; border-radius: 8px;"></video></div>`;
-                } else if (msg.file_type === 'audio') {
-                    mediaHtml = `<div class="media-content mt-2"><audio src="${msg.file_path}" controls style="width: 100%;"></audio></div>`;
-                } else if (msg.file_type === 'pdf') {
-                    mediaHtml = `<div class="media-content mt-2"><iframe src="${msg.file_path}" style="width: 100%; height: 300px; border: none; border-radius: 8px;"></iframe><br><a href="${msg.file_path}" class="btn btn-sm btn-outline-info mt-1" target="_blank">Otwórz PDF w nowym oknie</a></div>`;
-                } else {
-                    mediaHtml = `<div class="media-content mt-2"><a href="${msg.file_path}" class="btn btn-sm btn-outline-secondary" download>Pobierz plik (${msg.file_path.split('.').pop()})</a></div>`;
+        
+        // Filtrujemy tylko wiadomości, których jeszcze nie mamy
+        const newMessages = messages.filter(msg => parseInt(msg.id) > lastMessageId);
+        
+        if (newMessages.length > 0) {
+            newMessages.forEach(msg => {
+                const isSentByMe = msg.user === currentUser;
+                const msgClass = isSentByMe ? 'message-sent' : 'message-received';
+                
+                let mediaHtml = '';
+                if (msg.file_path) {
+                    if (msg.file_type === 'image') {
+                        mediaHtml = `<div class="media-content"><a href="${msg.file_path}" target="_blank"><img src="${msg.file_path}" class="img-fluid rounded mt-2" style="max-height: 200px;"></a></div>`;
+                    } else if (msg.file_type === 'video') {
+                        mediaHtml = `<div class="media-content mt-2"><video src="${msg.file_path}" autoplay muted loop controls style="max-width: 100%; border-radius: 8px;"></video></div>`;
+                    } else if (msg.file_type === 'audio') {
+                        mediaHtml = `<div class="media-content mt-2"><audio src="${msg.file_path}" controls style="width: 100%;"></audio></div>`;
+                    } else if (msg.file_type === 'pdf') {
+                        mediaHtml = `<div class="media-content mt-2"><iframe src="${msg.file_path}" style="width: 100%; height: 300px; border: none; border-radius: 8px;"></iframe><br><a href="${msg.file_path}" class="btn btn-sm btn-outline-info mt-1" target="_blank">Otwórz PDF w nowym oknie</a></div>`;
+                    } else {
+                        mediaHtml = `<div class="media-content mt-2"><a href="${msg.file_path}" class="btn btn-sm btn-outline-secondary" download>Pobierz plik (${msg.file_path.split('.').pop()})</a></div>`;
+                    }
                 }
-            }
 
-            const html = `
-                <div class="message ${msgClass}">
+                const div = document.createElement('div');
+                div.className = `message ${msgClass}`;
+                div.innerHTML = `
                     <div class="bubble shadow-sm">
                         <div class="small fw-bold opacity-75">${msg.user}</div>
                         <div class="text-break">${msg.message}</div>
                         ${mediaHtml}
                     </div>
                     <div class="message-info text-muted small mt-1">${msg.datetime}</div>
-                </div>
-            `;
-            chatBox.innerHTML += html;
-        });
+                `;
+                chatBox.appendChild(div);
+                
+                lastMessageId = Math.max(lastMessageId, parseInt(msg.id));
+            });
 
-        if (isScrolledToBottom) {
-            chatBox.scrollTop = chatBox.scrollHeight;
+            if (isScrolledToBottom) {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
         }
     } catch (error) {
         console.error('Błąd podczas pobierania wiadomości:', error);
