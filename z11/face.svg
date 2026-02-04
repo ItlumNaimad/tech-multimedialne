@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css" href="face.css" ?>
+<svg width="45" height="65" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g id="whole_head" class="whole_head">
+        <ellipse id="head" class="head" cx="21" cy="26" fill="yellow" rx="20" ry="24" stroke="red" stroke-width="2"/>
+        <line x1="12" y1="35" x2="30" y2="35" style="stroke:black;stroke-width:2"/>
+        <g id="eye_left" class="eye_left">
+            <ellipse cx="12" cy="20" rx="4" ry="4"/>
+        </g>
+        <g id="eye_right" class="eye_right">
+            <ellipse cx="30" cy="20" rx="4" ry="4"/>
+        </g>
+    </g>
+</svg>

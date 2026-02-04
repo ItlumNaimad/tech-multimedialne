@@ -1,0 +1,24 @@
+body { background-image: url(face.svg); background-repeat: no-repeat; }
+
+.whole_head {
+    animation-timing-function: ease-in-out;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    animation-name: head_down;
+}
+
+@keyframes head_down {
+    50% { transform: translateY(12px); }
+}
+
+.eye_left, .eye_right {
+    animation-timing-function: ease-in-out;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    animation-name: blinking;
+}
+
+@keyframes blinking {
+    10% { opacity: 0; }
+    12% { opacity: 1; }
+}
