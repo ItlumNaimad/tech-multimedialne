@@ -1,4 +1,13 @@
 <?php
+/**
+ * Plik: api_sensors.php
+ * Cel: Dwukierunkowy interfejs API dla danych z czujników (system vmeter).
+ * Funkcjonalność: Obsługuje zapis nowych pomiarów (v0-v5) oraz odczyt historii dla wykresów.
+ * Wykorzystane biblioteki: Brak (MySQLi).
+ * Sposób działania: 
+ *   - Tryb zapisu: Wyzwalany obecnością parametrów v0, v1... Zapisuje dane typu float do tabeli 'vmeter'.
+ *   - Tryb odczytu: Wyzwalany brakiem parametrów. Pobiera 20 ostatnich rekordów i zwraca je jako tablicę JSON posortowaną chronologicznie.
+ */
 header('Content-Type: application/json');
 require_once 'db_connect.php';
 

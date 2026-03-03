@@ -1,4 +1,11 @@
 <?php
+/**
+ * Plik: api_tracker.php
+ * Cel: Endpoint API dla modułu analitycznego tracker.js.
+ * Funkcjonalność: Rejestruje dane o wizycie użytkownika, w tym geolokalizację i parametry techniczne.
+ * Wykorzystane biblioteki: Brak (MySQLi).
+ * Sposób działania: Odbiera dane w formacie JSON z body żądania, dekoduje je i zapisuje (szerokość/długość geograficzną, info o przeglądarce i rozdzielczość) w tabeli 'visitor_logs'.
+ */
 header('Content-Type: application/json');
 require_once 'db_connect.php';
 

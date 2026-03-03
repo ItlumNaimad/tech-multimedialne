@@ -1,3 +1,10 @@
+<!--
+  Plik: header.php
+  Cel: Wspólny pasek nawigacyjny aplikacji Laboratorium 12.
+  Funkcjonalność: Zapewnia menu, informację o zalogowanym użytkowniku i przycisk wylogowania.
+  Wykorzystane biblioteki: Bootstrap Icons (bi-*).
+  Sposób działania: Wyświetla logo, linki nawigacyjne oraz nazwę użytkownika pobraną z $_SESSION['username'].
+-->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
     <div class="container">
         <a class="navbar-brand fw-bold" href="index.php?page=home">

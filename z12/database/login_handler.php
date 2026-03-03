@@ -1,4 +1,15 @@
 <?php
+/**
+ * Plik: database/login_handler.php
+ * Cel: Logika autoryzacji użytkownika i zabezpieczenia systemowe.
+ * Funkcjonalność: Weryfikacja poświadczeń, ochrona przed brute-force, geoblokada.
+ * Wykorzystane biblioteki: PDO, ipinfo.io (przez utils.php).
+ * Sposób działania: 
+ *   1. Sprawdza kraj pochodzenia IP (dozwolona tylko Polska).
+ *   2. Sprawdza licznik nieudanych prób logowania w tabeli 'break_ins' (blokada czasowa).
+ *   3. Weryfikuje hasło (password_verify).
+ *   4. Po sukcesie regeneruje ID sesji, loguje zdarzenie i przekierowuje do panelu.
+ */
 session_start();
 require_once 'database.php'; // Łączymy się z bazą
 require_once 'utils.php';       // Funkcje pomocnicze (geo)

@@ -1,4 +1,11 @@
 <?php
+/**
+ * Plik: database/register_handler.php
+ * Cel: Obsługa procesu zakładania nowego konta użytkownika.
+ * Funkcjonalność: Walidacja danych formularza i zapis w bazie.
+ * Wykorzystane biblioteki: PDO.
+ * Sposób działania: Porównuje hasła, sprawdza kompletność danych, haszuje hasło algorytmem domyślnym PHP (BCRYPT/Argon2) i wykonuje INSERT do tabeli 'users'.
+ */
 require_once 'database.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {

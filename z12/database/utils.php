@@ -1,4 +1,11 @@
 <?php
+/**
+ * Plik: database/utils.php
+ * Cel: Funkcje pomocnicze dla aplikacji.
+ * Funkcjonalność: Dostarcza narzędzia do geolokalizacji na podstawie adresu IP.
+ * Wykorzystane biblioteki: ipinfo.io (zewnętrzne API).
+ * Sposób działania: Funkcja ip_details($ip) wysyła zapytanie do serwisu ipinfo.io i zwraca obiekt z danymi o lokalizacji (kraj, miasto, współrzędne).
+ */
 declare(strict_types=1);
 
 function ip_details($ip) {

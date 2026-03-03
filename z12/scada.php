@@ -1,4 +1,14 @@
 <?php
+/**
+ * Plik: scada.php
+ * Cel: Interaktywny panel wizualizacji procesów SCADA.
+ * Funkcjonalność: Monitorowanie parametrów w czasie rzeczywistym, symulacja wejść, wizualizacja na planie.
+ * Wykorzystane biblioteki: Google Charts (Gauges), Chart.js (Line Chart), Bootstrap Icons.
+ * Sposób działania: 
+ *   - Skrypt JS cyklicznie (co 2s) odpytuje api_sensors.php o najnowsze dane.
+ *   - Aktualizuje kolory pomieszczeń na planie SVG zgodnie z logiką temperatur z PDF.
+ *   - Aktualizuje wskazówki zegarów Google i punkty na wykresie Chart.js.
+ */
 session_start();
 
 // Ochrona sesji - przekierowanie jeśli niezalogowany

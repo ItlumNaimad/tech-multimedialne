@@ -1,4 +1,11 @@
 <?php
+/**
+ * Plik: db_connect.php
+ * Cel: Konfiguracja połączenia z bazą danych przy użyciu MySQLi.
+ * Funkcjonalność: Tworzy obiekt $conn dla skryptów API i statystyk.
+ * Wykorzystane biblioteki: MySQLi.
+ * Sposób działania: Inicjalizuje połączenie proceduralne/obiektowe MySQLi, ustawia kodowanie utf8mb4 i obsługuje błędy połączenia zwracając JSON w przypadku awarii.
+ */
 // Konfiguracja połączenia
 $host = '127.0.0.1';
 $db_name = 'damskopb_z12';

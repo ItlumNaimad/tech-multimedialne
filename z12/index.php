@@ -1,4 +1,14 @@
 <?php
+/**
+ * Plik: index.php
+ * Cel: Główny kontroler (router) aplikacji Laboratorium 12.
+ * Funkcjonalność: Zarządza strukturą strony, sesją i dostępem do podstron.
+ * Wykorzystane biblioteki: Bootstrap 5 (CSS/JS).
+ * Sposób działania: 
+ *   - Izoluje sesję lab12 od innych zadań.
+ *   - Obsługuje parametr 'page' w adresie URL, ładując odpowiednie pliki z katalogu pages/.
+ *   - Wymusza logowanie dla zastrzeżonych sekcji aplikacji.
+ */
 session_start();
 
 // --- OCHRONA SESJI (Izolacja od z6a/z6b) ---
@@ -11,7 +21,7 @@ $page = $_GET['page'] ?? 'home';
 
 // Prosty router
 $page = $_GET['page'] ?? 'home';
-$allowed = ['home', 'logowanie', 'rejestracja'];
+$allowed = ['home', 'logowanie', 'rejestracja', 'scada', 'stats'];
 if (!in_array($page, $allowed)) $page = 'home';
 
 // Przekierowanie niezalogowanych
@@ -30,6 +40,12 @@ if ((!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) && !in_arr
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    
+    <?php if ($page === 'scada'): ?>
+        <!-- Biblioteki Wykresów dla SCADA -->
+        <script src="https://www.gstatic.com/charts/loader.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <?php endif; ?>
 </head>
 <body class="d-flex flex-column h-100">
 
@@ -50,10 +66,11 @@ if ((!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) && !in_arr
 
 <footer class="footer mt-auto py-3 bg-light border-top">
     <div class="container text-center">
-        <span class="text-muted">Laboratorium 12 &copy; 2026</span>
+        <span class="text-muted">Laboratorium 12 Technologie Multimedialne</span>
     </div>
 </footer>
 
+<script src="tracker.js"></script>
 <!-- Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>

@@ -1,4 +1,11 @@
 <?php
+/**
+ * Plik: api_hello.php
+ * Cel: Endpoint API do testowania komunikacji z zewnętrznymi urządzeniami (np. Arduino).
+ * Funkcjonalność: Odbiera proste wiadomości tekstowe i zapisuje je w bazie danych.
+ * Wykorzystane biblioteki: Brak (standardowe PHP + MySQLi przez db_connect.php).
+ * Sposób działania: Odbiera parametr 'message' metodą GET lub POST, używa Prepared Statement do bezpiecznego zapisu w tabeli 'hello_arduino' i zwraca status w formacie JSON.
+ */
 header('Content-Type: application/json');
 require_once 'db_connect.php';
 

@@ -1,4 +1,11 @@
 <?php
+/**
+ * Plik: stats.php
+ * Cel: Moduł prezentacji danych analitycznych.
+ * Funkcjonalność: Wyświetla historię odwiedzin zarejestrowaną przez tracker.js.
+ * Wykorzystane biblioteki: Bootstrap Icons.
+ * Sposób działania: Pobiera 50 ostatnich wpisów z tabeli 'visitor_logs' i renderuje je w formie tabeli z ikonami przeglądarek oraz linkami do map Google (jeśli dostępne są współrzędne GPS).
+ */
 session_start();
 require_once 'db_connect.php';
 

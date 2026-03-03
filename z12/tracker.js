@@ -2,6 +2,16 @@
  * Tracker.js - Moduł analityczny dla portalu SCADA
  * Pobiera dane o przeglądarce, rozdzielczości i geolokalizacji.
  */
+/**
+ * Plik: tracker.js
+ * Cel: Skrypt analityczny po stronie klienta.
+ * Funkcjonalność: Zbieranie informacji o sesji użytkownika i przesyłanie ich do bazy.
+ * Wykorzystane biblioteki: Geolocation API (natywne przeglądarki).
+ * Sposób działania: 
+ *   - Pobiera User Agent, rozdzielczość ekranu.
+ *   - Wysyła prośbę o dostęp do lokalizacji GPS.
+ *   - Przesyła zebrane dane metodą POST do api_tracker.php przy użyciu Fetch API.
+ */
 (function() {
     function sendTrackingData(lat = null, lon = null) {
         const payload = {
