@@ -25,9 +25,9 @@ $cookies_enabled = isset($data['cookies_enabled']) ? (int)$data['cookies_enabled
 // Dane pobierane po stronie serwera (PHP)
 $ip_address = $_SERVER['REMOTE_ADDR'];
 
-// Zapisujemy do tabeli visitor_logs (zgodnie z nowym schematem SQL)
-$sql = "INSERT INTO visitor_logs (ip_address, latitude, longitude, browser_info, resolution, cookies_enabled) 
-        VALUES (?, ?, ?, ?, ?, ?)";
+// Zapisujemy do tabeli visitor_logs (używamy nazwy kolumny 'recorded')
+$sql = "INSERT INTO visitor_logs (ip_address, latitude, longitude, browser_info, resolution, cookies_enabled, recorded) 
+        VALUES (?, ?, ?, ?, ?, ?, NOW())";
 
 try {
     $stmt = $conn->prepare($sql);

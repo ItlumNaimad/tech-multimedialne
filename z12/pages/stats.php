@@ -13,7 +13,7 @@ if (!isset($_SESSION['loggedin']) || ($_SESSION['app_id'] ?? '') !== 'lab12') {
 }
 
 // Pobieranie logów - limitujemy do 50 najnowszych
-$sql = "SELECT * FROM visitor_logs ORDER BY datetime DESC LIMIT 50";
+$sql = "SELECT * FROM visitor_logs ORDER BY recorded DESC LIMIT 50";
 $result = $conn->query($sql);
 ?>
 <div class="card shadow-sm">
@@ -38,7 +38,7 @@ $result = $conn->query($sql);
                     <?php if ($result && $result->num_rows > 0): ?>
                         <?php while($row = $result->fetch_assoc()): ?>
                             <tr>
-                                <td class="small text-nowrap"><?php echo $row['datetime']; ?></td>
+                                <td class="small text-nowrap"><?php echo $row['recorded']; ?></td>
                                 <td class="fw-bold"><?php echo htmlspecialchars($row['ip_address'] ?? 'Ukryty'); ?></td>
                                 <td>
                                     <?php if ($row['latitude']): ?>
