@@ -21,7 +21,7 @@ $page = $_GET['page'] ?? 'home';
 
 // Prosty router
 $page = $_GET['page'] ?? 'home';
-$allowed = ['home', 'logowanie', 'rejestracja', 'scada', 'stats'];
+$allowed = ['home', 'logowanie', 'rejestracja', 'scada', 'stats', 'formularz'];
 if (!in_array($page, $allowed)) $page = 'home';
 
 // Przekierowanie niezalogowanych
@@ -41,6 +41,12 @@ if ((!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) && !in_arr
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     
+    <!-- FontAwesome 6 (Ikony i Animacje) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Skrypt analityczny Tracker.js -->
+    <script src="tracker.js"></script>
+
     <?php if ($page === 'scada'): ?>
         <!-- Biblioteki Wykresów dla SCADA -->
         <script src="https://www.gstatic.com/charts/loader.js"></script>
@@ -70,7 +76,6 @@ if ((!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) && !in_arr
     </div>
 </footer>
 
-<script src="tracker.js"></script>
 <!-- Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>

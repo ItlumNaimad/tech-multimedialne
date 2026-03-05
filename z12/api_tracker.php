@@ -1,15 +1,12 @@
 <?php
 /**
- * Plik: api_tracker.php
- * Cel: Endpoint API dla modułu analitycznego tracker.js.
- * Funkcjonalność: Rejestruje dane o wizycie użytkownika, w tym geolokalizację i parametry techniczne.
- * Wykorzystane biblioteki: Brak (MySQLi).
- * Sposób działania: Odbiera dane w formacie JSON z body żądania, dekoduje je i zapisuje (szerokość/długość geograficzną, info o przeglądarce i rozdzielczość) w tabeli 'visitor_logs'.
+ * Plik: z12/api_tracker.php
+ * Cel: Rejestrowanie danych analitycznych (geolokalizacja, parametry ekranu).
  */
 header('Content-Type: application/json');
 require_once 'db_connect.php';
 
-// Odbieramy dane JSON z body żądania
+// Odbieramy dane JSON z body żądania (wysyłane przez tracker.js)
 $json = file_get_contents('php://input');
 $data = json_decode($json, true);
 
@@ -18,20 +15,28 @@ if (!$data) {
     exit();
 }
 
+// Dane pobierane z żądania (JS)
 $lat = $data['latitude'] ?? null;
 $lon = $data['longitude'] ?? null;
-$browser_info = $data['browser_info'] ?? 'Nieznana';
+$browser_info = $data['browser_info'] ?? $_SERVER['HTTP_USER_AGENT'];
 $resolution = $data['resolution'] ?? 'Nieznana';
+$cookies_enabled = isset($data['cookies_enabled']) ? (int)$data['cookies_enabled'] : 0;
 
-// Zapisujemy do tabeli visitor_logs
+// Dane pobierane po stronie serwera (PHP)
+$ip_address = $_SERVER['REMOTE_ADDR'];
+
+// Zapisujemy do tabeli visitor_logs (zgodnie z nowym schematem SQL)
+$sql = "INSERT INTO visitor_logs (ip_address, latitude, longitude, browser_info, resolution, cookies_enabled) 
+        VALUES (?, ?, ?, ?, ?, ?)";
+
 try {
-    $stmt = $conn->prepare("INSERT INTO visitor_logs (latitude, longitude, browser_info, resolution, recorded) VALUES (?, ?, ?, ?, NOW())");
-    $stmt->bind_param("ddss", $lat, $lon, $browser_info, $resolution);
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sddssi", $ip_address, $lat, $lon, $browser_info, $resolution, $cookies_enabled);
 
     if ($stmt->execute()) {
-        echo json_encode(["status" => "success", "message" => "Odwiedziny odnotowane"]);
+        echo json_encode(["status" => "success", "message" => "Ślad wizyty zapisany"]);
     } else {
-        echo json_encode(["status" => "error", "message" => "Błąd zapisu w bazie"]);
+        echo json_encode(["status" => "error", "message" => "Błąd zapisu w bazie danych"]);
     }
     $stmt->close();
 } catch (Exception $e) {

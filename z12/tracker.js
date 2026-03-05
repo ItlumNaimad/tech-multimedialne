@@ -1,48 +1,42 @@
 /**
- * Tracker.js - Moduł analityczny dla portalu SCADA
- * Pobiera dane o przeglądarce, rozdzielczości i geolokalizacji.
- */
-/**
- * Plik: tracker.js
- * Cel: Skrypt analityczny po stronie klienta.
- * Funkcjonalność: Zbieranie informacji o sesji użytkownika i przesyłanie ich do bazy.
- * Wykorzystane biblioteki: Geolocation API (natywne przeglądarki).
- * Sposób działania: 
- *   - Pobiera User Agent, rozdzielczość ekranu.
- *   - Wysyła prośbę o dostęp do lokalizacji GPS.
- *   - Przesyła zebrane dane metodą POST do api_tracker.php przy użyciu Fetch API.
+ * Plik: z12/tracker.js
+ * Cel: Zbieranie danych analitycznych o gościu (geolokalizacja, ekran, cookies).
  */
 (function() {
-    function sendTrackingData(lat = null, lon = null) {
-        const payload = {
-            latitude: lat,
-            longitude: lon,
-            browser_info: navigator.userAgent,
-            resolution: `${screen.width}x${screen.height}`
-        };
+    const trackerData = {
+        browser_info: navigator.userAgent,
+        resolution: window.screen.width + "x" + window.screen.height,
+        cookies_enabled: navigator.cookieEnabled ? 1 : 0,
+        latitude: null,
+        longitude: null
+    };
 
+    const sendData = (data) => {
         fetch('api_tracker.php', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            headers: { 'Content-Type: application/json' },
+            body: JSON.stringify(data)
         })
         .then(response => response.json())
-        .then(data => console.log('Analytics saved:', data))
-        .catch(err => console.error('Analytics error:', err));
-    }
+        .then(res => console.log("Tracker status:", res.message))
+        .catch(err => console.error("Tracker error:", err));
+    };
 
     // Próba pobrania geolokalizacji
     if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
             (position) => {
-                sendTrackingData(position.coords.latitude, position.coords.longitude);
+                trackerData.latitude = position.coords.latitude;
+                trackerData.longitude = position.coords.longitude;
+                sendData(trackerData);
             },
             (error) => {
-                console.warn("Geolocation denied, sending data without coordinates.");
-                sendTrackingData(); // Wyślij bez GPS jeśli użytkownik odmówił
-            }
+                console.warn("Geolocation denied or error:", error.message);
+                sendData(trackerData); // Wysyłamy bez GPS
+            },
+            { timeout: 5000 }
         );
     } else {
-        sendTrackingData(); // Brak wsparcia dla geolokalizacji
+        sendData(trackerData);
     }
 })();
