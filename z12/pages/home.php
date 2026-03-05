@@ -105,16 +105,16 @@
 </style>
 
 <script>
-    // Prosty skrypt wyświetlający status cookies na dashboardzie
+    // Sprawdzanie faktycznego statusu zgody na cookies
     document.addEventListener('DOMContentLoaded', function() {
         const stateEl = document.getElementById('cookie-state');
         const badgeEl = document.getElementById('cookie-status-badge');
         
-        if (navigator.cookieEnabled) {
-            stateEl.innerText = 'Włączone';
+        if (document.cookie.includes("tm_cookies_accepted=true")) {
+            stateEl.innerText = 'Włączone (Zaakceptowano)';
             badgeEl.classList.replace('bg-info', 'bg-success');
         } else {
-            stateEl.innerText = 'Wyłączone';
+            stateEl.innerText = 'Nieaktywne (Brak zgody)';
             badgeEl.classList.replace('bg-info', 'bg-danger');
         }
     });

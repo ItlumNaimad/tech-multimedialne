@@ -44,9 +44,26 @@ if ((!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) && !in_arr
     <!-- FontAwesome 6 (Ikony i Animacje) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
+    <!-- Banner Cookies -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055;">
+      <div id="cookieToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+        <div class="toast-header bg-primary text-white">
+          <i class="bi bi-cookie me-2"></i>
+          <strong class="me-auto">Polityka Cookies</strong>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body bg-white">
+          Ta aplikacja wykorzystuje pliki cookies do celów analitycznych (tracker.js). Czy wyrażasz zgodę?
+          <div class="mt-2 pt-2 border-top">
+            <button type="button" class="btn btn-primary btn-sm" id="acceptCookies">Akceptuję</button>
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="toast">Odrzucam</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Skrypt analityczny Tracker.js -->
     <script src="tracker.js"></script>
-
     <?php if ($page === 'scada'): ?>
         <!-- Biblioteki Wykresów dla SCADA -->
         <script src="https://www.gstatic.com/charts/loader.js"></script>
