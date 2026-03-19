@@ -1,17 +1,12 @@
 <?php
 /**
  * Plik: api_sensors.php
- * Cel: Dwukierunkowy interfejs API dla danych z czujników (system vmeter).
- * Funkcjonalność: Obsługuje zapis nowych pomiarów (v0-v5) oraz odczyt historii dla wykresów.
- * Wykorzystane biblioteki: Brak (MySQLi).
- * Sposób działania: 
- *   - Tryb zapisu: Wyzwalany obecnością parametrów v0, v1... Zapisuje dane typu float do tabeli 'vmeter'.
- *   - Tryb odczytu: Wyzwalany brakiem parametrów. Pobiera 20 ostatnich rekordów i zwraca je jako tablicę JSON posortowaną chronologicznie.
+ * Cel: Dwukierunkowy interfejs API dla Arduino (system vmeter).
  */
 header('Content-Type: application/json');
 require_once 'db_connect.php';
 
-// Odbieramy parametry czujników (v0..v5) - GET lub POST
+// Odbieramy parametry czujników (v0..v5)
 $v0 = $_REQUEST['v0'] ?? null;
 $v1 = $_REQUEST['v1'] ?? null;
 $v2 = $_REQUEST['v2'] ?? null;
@@ -19,35 +14,36 @@ $v3 = $_REQUEST['v3'] ?? null;
 $v4 = $_REQUEST['v4'] ?? null;
 $v5 = $_REQUEST['v5'] ?? null;
 
-// --- TRYB ZAPISU (jeśli przesłano parametry) ---
+// Odbieramy alarmy (opcjonalnie)
+$vent = $_REQUEST['ventilation'] ?? 0;
+$fire = $_REQUEST['fire_alarm']  ?? 0;
+$flood= $_REQUEST['flood']       ?? 0;
+$gas  = $_REQUEST['gas']         ?? 0;
+$co2  = $_REQUEST['co2']         ?? 0;
+
+// --- TRYB ZAPISU (Dla Arduino) ---
 if ($v0 !== null && $v1 !== null) {
-    // Walidacja danych (konwersja na float)
     $v0 = (float)$v0; $v1 = (float)$v1; $v2 = (float)$v2;
     $v3 = (float)$v3; $v4 = (float)$v4; $v5 = (float)$v5;
+    $vent = (int)$vent; $fire = (int)$fire; $flood = (int)$flood; 
+    $gas = (int)$gas; $co2 = (int)$co2;
 
-    // Prepared Statement do zapisu
-    $sql = "INSERT INTO vmeter (v0, v1, v2, v3, v4, v5) VALUES (?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO vmeter (v0, v1, v2, v3, v4, v5, ventilation, fire_alarm, flood, gas, co2) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("dddddd", $v0, $v1, $v2, $v3, $v4, $v5);
+    $stmt->bind_param("ddddddiiiii", $v0, $v1, $v2, $v3, $v4, $v5, $vent, $fire, $flood, $gas, $co2);
 
     if ($stmt->execute()) {
-        echo json_encode(["status" => "success", "message" => "Dane zapisane pomyślnie"]);
+        echo json_encode(["status" => "success", "message" => "Arduino data saved"]);
     } else {
-        echo json_encode(["status" => "error", "message" => "Błąd zapisu danych"]);
+        echo json_encode(["status" => "error", "message" => "DB error: " . $stmt->error]);
     }
     $stmt->close();
 
-// --- TRYB ODCZYTU (jeśli brak parametrów - zwracamy JSON dla wykresu) ---
+// --- TRYB ODCZYTU (JSON dla wykresu) ---
 } else {
-    // Pobieramy 20 ostatnich rekordów, sortujemy chronologicznie
-    $sql = "SELECT * FROM (
-                SELECT id, recorded, v0, v1, v2, v3, v4, v5 
-                FROM vmeter 
-                ORDER BY recorded DESC 
-                LIMIT 20
-            ) sub 
-            ORDER BY recorded ASC";
-    
+    $sql = "SELECT id, recorded, v0, v1, v2, v3, v4, v5 FROM vmeter ORDER BY id DESC LIMIT 20";
     $result = $conn->query($sql);
     $data = [];
 
@@ -56,8 +52,7 @@ if ($v0 !== null && $v1 !== null) {
             $data[] = $row;
         }
     }
-
-    echo json_encode($data);
+    echo json_encode(array_reverse($data));
 }
 
 $conn->close();
