@@ -37,6 +37,21 @@ CREATE TABLE `logowanie` (
 -- --------------------------------------------------------
 
 --
+-- Struktura tabeli dla tabeli `monit`
+--
+
+CREATE TABLE `monit` (
+  `idm` int(11) NOT NULL,
+  `idp_to` int(11) NOT NULL,
+  `idpz` int(11) NOT NULL,
+  `message` varchar(255) NOT NULL,
+  `is_read` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_polish_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Struktura tabeli dla tabeli `podzadanie`
 --
 
@@ -94,6 +109,14 @@ ALTER TABLE `logowanie`
   ADD PRIMARY KEY (`idl`);
 
 --
+-- Indeksy dla tabeli `monit`
+--
+ALTER TABLE `monit`
+  ADD PRIMARY KEY (`idm`),
+  ADD KEY `idp_to` (`idp_to`),
+  ADD KEY `idpz` (`idpz`);
+
+--
 -- Indeksy dla tabeli `podzadanie`
 --
 ALTER TABLE `podzadanie`
@@ -126,6 +149,12 @@ ALTER TABLE `logowanie`
   MODIFY `idl` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT dla tabeli `monit`
+--
+ALTER TABLE `monit`
+  MODIFY `idm` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT dla tabeli `podzadanie`
 --
 ALTER TABLE `podzadanie`
@@ -146,6 +175,13 @@ ALTER TABLE `zadanie`
 --
 -- Ograniczenia dla zrzutów tabel
 --
+
+--
+-- Ograniczenia dla tabeli `monit`
+--
+ALTER TABLE `monit`
+  ADD CONSTRAINT `monit_ibfk_1` FOREIGN KEY (`idp_to`) REFERENCES `pracownik` (`idp`) ON DELETE CASCADE,
+  ADD CONSTRAINT `monit_ibfk_2` FOREIGN KEY (`idpz`) REFERENCES `podzadanie` (`idpz`) ON DELETE CASCADE;
 
 --
 -- Ograniczenia dla tabeli `podzadanie`

@@ -35,5 +35,8 @@ session_destroy();
 <a href ="z10">Zadanie 10</a><br />
 <a href ="z11">Zadanie 11</a><br />
 <a href ="z12">Zadanie 12</a><br />
+<a href ="z13">Zadanie 13</a><br />
+<a href ="z14">Zadanie 14</a><br />
+<a href ="z15">Zadanie 15</a><br />
 <a href ="projekt">Projekt</a><br />
 </body>

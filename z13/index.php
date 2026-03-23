@@ -64,13 +64,23 @@ try {
     $stmt_monits->execute(['idp' => $user_id]);
     $my_monits = $stmt_monits->fetchAll();
 
-    // 1. Twoje podzadania (Wykonawca)
-    $stmt_my_subtasks = $pdo->prepare("SELECT pz.*, z.nazwa_zadania, pm.login AS pm_login 
-                                        FROM podzadanie pz 
-                                        JOIN zadanie z ON pz.idz = z.idz 
-                                        JOIN pracownik pm ON z.idp = pm.idp 
-                                        WHERE pz.idp = :idp");
-    $stmt_my_subtasks->execute(['idp' => $user_id]);
+    // 1. Obsługa przełączania/filtrowania zadań dla pracownika (nowa funkcjonalność)
+    $stmt_assigned_tasks = $pdo->prepare("SELECT DISTINCT z.idz, z.nazwa_zadania FROM zadanie z JOIN podzadanie pz ON z.idz = pz.idz WHERE pz.idp = :idp");
+    $stmt_assigned_tasks->execute(['idp' => $user_id]);
+    $assigned_tasks = $stmt_assigned_tasks->fetchAll();
+
+    $idz_filter = $_GET['idz_filter'] ?? null;
+    $sql_my_subtasks = "SELECT pz.*, z.nazwa_zadania, pm.login AS pm_login 
+                        FROM podzadanie pz 
+                        JOIN zadanie z ON pz.idz = z.idz 
+                        JOIN pracownik pm ON z.idp = pm.idp 
+                        WHERE pz.idp = :idp";
+    if ($idz_filter) $sql_my_subtasks .= " AND z.idz = :idz";
+    
+    $stmt_my_subtasks = $pdo->prepare($sql_my_subtasks);
+    $params = ['idp' => $user_id];
+    if ($idz_filter) $params['idz'] = $idz_filter;
+    $stmt_my_subtasks->execute($params);
     $my_subtasks = $stmt_my_subtasks->fetchAll();
 
     // 2. Twoje zadania (Project Manager)
@@ -152,9 +162,20 @@ try {
     <?php endforeach; ?>
 
     <!-- SEKCOJA: TWOJE PODZADANIA (Wykonawca) -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-white">
+    <div class="card mb-4 shadow-sm border-primary">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
             <h4 class="mb-0">Twoje podzadania <small class="text-muted">(Jesteś wykonawcą)</small></h4>
+            <div class="d-flex align-items-center">
+                <label class="me-2 small fw-bold">Pokaż projekt:</label>
+                <select class="form-select form-select-sm" style="width: 200px;" onchange="location.href='index.php?idz_filter='+this.value">
+                    <option value="">-- Wszystkie --</option>
+                    <?php foreach ($assigned_tasks as $at): ?>
+                        <option value="<?= $at['idz'] ?>" <?= $idz_filter == $at['idz'] ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($at['nazwa_zadania']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -163,7 +184,8 @@ try {
                         <tr>
                             <th>Zadanie (Manager)</th>
                             <th>Nazwa Podzadania</th>
-                            <th>Stan realizacji</th>
+                            <th style="width: 200px;">Postęp prac</th>
+                            <th style="width: 60px;">Stan</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -175,9 +197,20 @@ try {
                         <tr class="<?= $stan_class ?>">
                             <td><?= htmlspecialchars($sub['nazwa_zadania']) ?> (<?= htmlspecialchars($sub['pm_login']) ?>)</td>
                             <td><?= htmlspecialchars($sub['nazwa_podzadania']) ?></td>
-                            <td class="fw-bold"><?= $sub['stan'] ?>%</td>
+                            <td>
+                                <input type="range" class="form-range update-stan" 
+                                       data-idpz="<?= $sub['idpz'] ?>" 
+                                       min="0" max="100" 
+                                       value="<?= $sub['stan'] ?>">
+                            </td>
+                            <td>
+                                <span id="stan-val-<?= $sub['idpz'] ?>" class="fw-bold"><?= $sub['stan'] ?>%</span>
+                            </td>
                         </tr>
                         <?php endforeach; ?>
+                        <?php if (empty($my_subtasks)): ?>
+                            <tr><td colspan="4" class="text-center text-muted">Brak przypisanych podzadań.</td></tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
