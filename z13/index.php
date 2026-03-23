@@ -230,9 +230,9 @@ try {
             ?>
                 <div class="mb-4 p-3 border rounded bg-white shadow-sm">
                     <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-                        <h5 class="fw-bold mb-0 <?= $avg_class ?>">
+                        <h5 id="task-title-<?= $task['idz'] ?>" class="fw-bold mb-0 <?= $avg_class ?>">
                             <?= htmlspecialchars($task['nazwa_zadania']) ?> 
-                            <span class="badge bg-secondary ms-2"><?= $task['avg_progress'] ?>%</span>
+                            <span id="task-avg-<?= $task['idz'] ?>" class="badge bg-secondary ms-2"><?= $task['avg_progress'] ?>%</span>
                         </h5>
                         <form method="POST" onsubmit="return confirm('Czy na pewno chcesz usunąć całe zadanie?')">
                             <input type="hidden" name="action" value="delete_task">
@@ -260,6 +260,7 @@ try {
                                     <td>
                                         <input type="range" class="form-range update-stan" 
                                                data-idpz="<?= $sub['idpz'] ?>" 
+                                               data-idz="<?= $task['idz'] ?>"
                                                min="0" max="100" 
                                                value="<?= $sub['stan'] ?>">
                                     </td>
@@ -336,8 +337,31 @@ try {
 document.querySelectorAll('.update-stan').forEach(slider => {
     slider.addEventListener('change', function() {
         const idpz = this.getAttribute('data-idpz');
+        const idz = this.getAttribute('data-idz'); // Pobierz ID zadania nadrzędnego
         const newVal = this.value;
+        
         document.getElementById('stan-val-' + idpz).innerText = newVal + '%';
+
+        // Logika przeliczania średniej dla zadania głównego (tylko w panelu PM)
+        if (idz) {
+            const allSliders = document.querySelectorAll(`.update-stan[data-idz="${idz}"]`);
+            let sum = 0;
+            allSliders.forEach(s => sum += parseInt(s.value));
+            const avg = Math.round(sum / allSliders.length);
+            
+            const avgBadge = document.getElementById('task-avg-' + idz);
+            const taskTitle = document.getElementById('task-title-' + idz);
+            
+            if (avgBadge) {
+                avgBadge.innerText = avg + '%';
+                
+                // Aktualizacja kolorystyki (opcjonalnie)
+                taskTitle.classList.remove('stan-0', 'stan-1-99', 'stan-100');
+                if (avg == 0) taskTitle.classList.add('stan-0');
+                else if (avg == 100) taskTitle.classList.add('stan-100');
+                else taskTitle.classList.add('stan-1-99');
+            }
+        }
 
         fetch('api_update_stan.php', {
             method: 'POST',
