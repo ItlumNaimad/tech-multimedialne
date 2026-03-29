@@ -200,11 +200,12 @@ try {
                             <td>
                                 <input type="range" class="form-range update-stan" 
                                        data-idpz="<?= $sub['idpz'] ?>" 
+                                       data-idz="<?= $sub['idz'] ?>"
                                        min="0" max="100" 
                                        value="<?= $sub['stan'] ?>">
                             </td>
                             <td>
-                                <span id="stan-val-<?= $sub['idpz'] ?>" class="fw-bold"><?= $sub['stan'] ?>%</span>
+                                <span class="fw-bold stan-val-label" data-idpz="<?= $sub['idpz'] ?>"><?= $sub['stan'] ?>%</span>
                             </td>
                         </tr>
                         <?php endforeach; ?>

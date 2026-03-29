@@ -39,6 +39,10 @@ if (isset($_SESSION['loggedin'])) {
                 </div>
                 <button type="submit" class="btn btn-primary w-100 py-2 mt-2">Zaloguj się</button>
             </form>
+            <div class="mt-3 text-center">
+                <p class="mb-0">Nie masz konta?</p>
+                <a href="rejestracja.php" class="btn btn-outline-secondary btn-sm w-100 mt-2">Zarejestruj się</a>
+            </div>
         </div>
         <div class="card-footer text-center bg-white border-0 pb-4">
             <small class="text-muted">Dostęp tylko dla pracowników firmy.</small>

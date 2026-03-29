@@ -51,6 +51,13 @@ $max_time_sec = $test['max_time'] * 60; // Zakładamy, że w bazie są minuty
             <div class="card question-card shadow-sm">
                 <div class="card-body">
                     <h5><?php echo ($index + 1) . ". " . htmlspecialchars($q['tresc_pytania']); ?></h5>
+                    
+                    <?php if (!empty($q['plik_multimedialny'])): ?>
+                        <div class="text-center my-3">
+                            <img src="../media/<?php echo $test['nazwa']; ?>/<?php echo $q['plik_multimedialny']; ?>" class="img-fluid rounded border" alt="Media do pytania">
+                        </div>
+                    <?php endif; ?>
+
                     <hr>
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" name="ans[<?php echo $q['idpyt']; ?>][]" value="a" id="q<?php echo $q['idpyt']; ?>a">

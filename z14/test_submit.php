@@ -65,25 +65,59 @@ $stmt_log->execute([$idp, "Ukończono test ID: $idt, wynik: $total_points"]);
 // 2. Generowanie PDF
 $pdf = new FPDF();
 $pdf->AddPage();
+// Polskie znaki w FPDF wymagają specyficznego kodowania lub czcionek, tu używamy standardowego Arial i iconv
 $pdf->SetFont('Arial', 'B', 16);
-$pdf->Cell(0, 10, iconv('UTF-8', 'ISO-8859-2', 'Raport z testu'), 0, 1, 'C');
-$pdf->SetFont('Arial', '', 12);
-$pdf->Cell(0, 10, iconv('UTF-8', 'ISO-8859-2', "Uzytkownik: " . $_SESSION['username']), 0, 1);
-$pdf->Cell(0, 10, iconv('UTF-8', 'ISO-8859-2', "Wynik: $total_points / " . count($questions)), 0, 1);
+$pdf->Cell(0, 10, iconv('UTF-8', 'ISO-8859-2', 'Raport z wynikami testu'), 0, 1, 'C');
+$pdf->SetFont('Arial', '', 10);
+$pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Uzytkownik: " . $_SESSION['username']), 0, 1);
+$pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Data: " . date("Y-m-d H:i:s")), 0, 1);
+$pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Wynik koncowy: $total_points / " . count($questions)), 0, 1);
 $pdf->Ln(5);
 
 foreach ($report_data as $idx => $data) {
+    $pdf->SetFont('Arial', 'B', 11);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->MultiCell(0, 7, iconv('UTF-8', 'ISO-8859-2', ($idx+1) . ". " . $data['q']));
     
-    if ($data['status']) {
-        $pdf->SetTextColor(0, 128, 0); // Zielony
-        $pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Poprawnie! Odpowiedz: " . $data['user']), 0, 1);
-    } else {
-        $pdf->SetTextColor(255, 0, 0); // Czerwony
-        $pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Blednie. Twoja: " . ($data['user'] ?: "-") . " | Poprawna: " . $data['correct']), 0, 1);
+    $pdf->SetFont('Arial', '', 10);
+    
+    // Pobierz dane pytania z bazy dla szczegółów opcji
+    $stmt_q_detail = $pdo->prepare("SELECT * FROM pytania WHERE tresc_pytania = ?");
+    $stmt_q_detail->execute([$data['q']]);
+    $q_det = $stmt_q_detail->fetch();
+    
+    $user_ans_arr = explode(', ', $data['user']);
+    $correct_ans_arr = explode(', ', $data['correct']);
+    
+    $options = ['a' => $q_det['odpowiedz_a'], 'b' => $q_det['odpowiedz_b'], 'c' => $q_det['odpowiedz_c'], 'd' => $q_det['odpowiedz_d']];
+    
+    foreach ($options as $key => $val) {
+        $selected = in_array($key, $user_ans_arr);
+        $is_actually_correct = in_array($key, $correct_ans_arr);
+        
+        $prefix = $selected ? "[X] " : "[ ] ";
+        
+        // Kolorowanie: zielony jeśli użytkownik zaznaczył poprawnie LUB nie zaznaczył błędnej.
+        // Jednak instrukcja sugeruje kolorowanie całości odpowiedzi.
+        // Uprośćmy: zielony tekst dla poprawnych opcji, czerwony dla błędnych.
+        if ($is_actually_correct) {
+            $pdf->SetTextColor(0, 128, 0); // Zielony
+        } else {
+            $pdf->SetTextColor(255, 0, 0); // Czerwony
+        }
+        
+        $pdf->Cell(0, 6, iconv('UTF-8', 'ISO-8859-2', "    " . $prefix . strtoupper($key) . ") " . $val), 0, 1);
     }
-    $pdf->Ln(3);
+    
+    $pdf->SetTextColor(0, 0, 0);
+    if ($data['status']) {
+        $pdf->SetFont('Arial', 'I', 9);
+        $pdf->Cell(0, 6, iconv('UTF-8', 'ISO-8859-2', "Status: POPRAWNIE (+1 pkt)"), 0, 1);
+    } else {
+        $pdf->SetFont('Arial', 'I', 9);
+        $pdf->Cell(0, 6, iconv('UTF-8', 'ISO-8859-2', "Status: BLEDNIE (0 pkt)"), 0, 1);
+    }
+    $pdf->Ln(4);
 }
 
 $pdf_filename = "test_res_" . $idp . "_" . $idt . "_" . time() . ".pdf";

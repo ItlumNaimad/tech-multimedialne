@@ -29,9 +29,17 @@ if (isset($_POST['add_lesson'])) {
 
 // 2. Dodawanie Testu
 if (isset($_POST['add_test'])) {
+    $test_name = $_POST['test_name'];
     $stmt = $pdo->prepare("INSERT INTO test (idc, nazwa, max_time) VALUES (?, ?, ?)");
-    $stmt->execute([$_SESSION['user_id'], $_POST['test_name'], $_POST['max_time']]);
-    echo "<div class='alert alert-success'>Test stworzony!</div>";
+    $stmt->execute([$_SESSION['user_id'], $test_name, $_POST['max_time']]);
+    
+    // Tworzenie folderu na media testu (zgodnie z instrukcją)
+    $test_dir = "../media/" . $test_name;
+    if (!file_exists($test_dir)) {
+        mkdir($test_dir, 0777, true);
+    }
+    
+    echo "<div class='alert alert-success'>Test stworzony i folder przygotowany!</div>";
 }
 
 // 3. Dodawanie Pytań
@@ -41,9 +49,23 @@ if (isset($_POST['add_question'])) {
     $c = isset($_POST['correct_c']) ? 1 : 0;
     $d = isset($_POST['correct_d']) ? 1 : 0;
     
-    $stmt = $pdo->prepare("INSERT INTO pytania (idt, tresc_pytania, odpowiedz_a, odpowiedz_b, odpowiedz_c, odpowiedz_d, a, b, c, d) 
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$_POST['idt'], $_POST['q_text'], $_POST['ans_a'], $_POST['ans_b'], $_POST['ans_c'], $_POST['ans_d'], $a, $b, $c, $d]);
+    $idt = $_POST['idt'];
+    // Pobierz nazwę testu dla ścieżki pliku
+    $stmt_t = $pdo->prepare("SELECT nazwa FROM test WHERE idt = ?");
+    $stmt_t->execute([$idt]);
+    $t_name = $stmt_t->fetchColumn();
+    
+    $plik = "";
+    if (!empty($_FILES['q_file']['name'])) {
+        $target = "../media/" . $t_name . "/" . basename($_FILES['q_file']['name']);
+        if (move_uploaded_file($_FILES['q_file']['tmp_name'], $target)) {
+            $plik = basename($_FILES['q_file']['name']);
+        }
+    }
+    
+    $stmt = $pdo->prepare("INSERT INTO pytania (idt, tresc_pytania, odpowiedz_a, odpowiedz_b, odpowiedz_c, odpowiedz_d, a, b, c, d, plik_multimedialny) 
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$idt, $_POST['q_text'], $_POST['ans_a'], $_POST['ans_b'], $_POST['ans_c'], $_POST['ans_d'], $a, $b, $c, $d, $plik]);
     echo "<div class='alert alert-success'>Pytanie dodane!</div>";
 }
 ?>
@@ -64,7 +86,7 @@ if (isset($_POST['add_question'])) {
     </div>
 </nav>
 
-<div class="container">
+<div class="container pb-5">
     <div class="row">
         <!-- Zarządzanie Lekcjami -->
         <div class="col-md-8 mb-4">
@@ -106,7 +128,7 @@ if (isset($_POST['add_question'])) {
             <div class="card shadow-sm">
                 <div class="card-header bg-info text-white">Dodaj Pytanie do Testu</div>
                 <div class="card-body">
-                    <form method="POST">
+                    <form method="POST" enctype="multipart/form-data">
                         <select name="idt" class="form-select mb-2" required>
                             <?php
                             $tests = $pdo->query("SELECT idt, nazwa FROM test")->fetchAll();
@@ -114,26 +136,53 @@ if (isset($_POST['add_question'])) {
                             ?>
                         </select>
                         <textarea name="q_text" class="form-control mb-2" placeholder="Treść pytania" required></textarea>
-                        <div class="input-group mb-1"><span class="input-group-text">A</span><input type="text" name="ans_a" class="form-control"><div class="input-group-text"><input type="checkbox" name="correct_a"></div></div>
-                        <div class="input-group mb-1"><span class="input-group-text">B</span><input type="text" name="ans_b" class="form-control"><div class="input-group-text"><input type="checkbox" name="correct_b"></div></div>
-                        <div class="input-group mb-1"><span class="input-group-text">C</span><input type="text" name="ans_c" class="form-control"><div class="input-group-text"><input type="checkbox" name="correct_c"></div></div>
-                        <div class="input-group mb-1"><span class="input-group-text">D</span><input type="text" name="ans_d" class="form-control"><div class="input-group-text"><input type="checkbox" name="correct_d"></div></div>
-                        <button type="submit" name="add_question" class="btn btn-info w-100 mt-2">Dodaj Pytanie</button>
+                        <div class="mb-2">
+                            <label class="small text-muted">Plik multimedialny pytania</label>
+                            <input type="file" name="q_file" class="form-control form-control-sm">
+                        </div>
+                        <div class="input-group mb-1"><span class="input-group-text small">A</span><input type="text" name="ans_a" class="form-control form-control-sm"><div class="input-group-text"><input type="checkbox" name="correct_a"></div></div>
+                        <div class="input-group mb-1"><span class="input-group-text small">B</span><input type="text" name="ans_b" class="form-control form-control-sm"><div class="input-group-text"><input type="checkbox" name="correct_b"></div></div>
+                        <div class="input-group mb-1"><span class="input-group-text small">C</span><input type="text" name="ans_c" class="form-control form-control-sm"><div class="input-group-text"><input type="checkbox" name="correct_c"></div></div>
+                        <div class="input-group mb-1"><span class="input-group-text small">D</span><input type="text" name="ans_d" class="form-control form-control-sm"><div class="input-group-text"><input type="checkbox" name="correct_d"></div></div>
+                        <button type="submit" name="add_question" class="btn btn-info w-100 mt-2 btn-sm">Dodaj Pytanie</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Wyniki Pracowników -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-secondary text-white">Wyniki testów pracowników</div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light"><tr><th>ID</th><th>Pracownik</th><th>Test</th><th>Data</th><th>Punkty</th><th>Raport</th></tr></thead>
+                <tbody>
+                    <?php
+                    $results = $pdo->query("SELECT w.*, p.login as worker, t.nazwa as test_name 
+                                           FROM wyniki w 
+                                           JOIN pracownik p ON w.idp = p.idp 
+                                           JOIN test t ON w.idt = t.idt 
+                                           ORDER BY w.datetime DESC")->fetchAll();
+                    foreach ($results as $r) {
+                        echo "<tr><td>{$r['idw']}</td><td>{$r['worker']}</td><td>{$r['test_name']}</td><td>{$r['datetime']}</td><td><strong>{$r['punkty']}</strong></td>
+                              <td><a href='../pdf/{$r['plik_pdf']}' class='btn btn-sm btn-outline-success' target='_blank'>PDF</a></td></tr>";
+                    }
+                    ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- Logi Aktywności -->
-    <div class="card shadow-sm mb-5">
+    <div class="card shadow-sm">
         <div class="card-header bg-dark text-white">Logi aktywności pracowników</div>
         <div class="card-body p-0">
             <table class="table table-hover mb-0">
                 <thead class="table-light"><tr><th>ID</th><th>Rola</th><th>User ID</th><th>Akcja</th><th>Data</th></tr></thead>
                 <tbody>
                     <?php
-                    $logs = $pdo->query("SELECT * FROM logi_aktywnosci ORDER BY datetime DESC LIMIT 15")->fetchAll();
+                    $logs = $pdo->query("SELECT * FROM logi_aktywnosci ORDER BY datetime DESC LIMIT 20")->fetchAll();
                     foreach ($logs as $l) {
                         echo "<tr><td>{$l['id_logu']}</td><td>{$l['rola']}</td><td>{$l['id_uzytkownika']}</td><td>{$l['akcja']}</td><td>{$l['datetime']}</td></tr>";
                     }
