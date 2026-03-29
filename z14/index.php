@@ -140,6 +140,18 @@ $lessons_list = $pdo->query("SELECT idl, nazwa FROM lekcje ORDER BY idl ASC")->f
                     <?php echo $current_lesson['tresc']; // Wyświetlamy treść jako <article> dla lepszego SEO/Crawlerów ?>
                 </article>
 
+                <?php if (!empty($current_lesson['plik_pdf'])): ?>
+                    <section class="pdf-lesson-box mb-4">
+                        <div class="alert alert-info d-flex justify-content-between align-items-center">
+                            <span>Ta lekcja zawiera materiał w formacie PDF.</span>
+                            <a href="pdf/lekcje/<?php echo $current_lesson['plik_pdf']; ?>" class="btn btn-primary btn-sm" target="_blank">Otwórz PDF w nowym oknie</a>
+                        </div>
+                        <div class="ratio ratio-16x9 shadow-sm rounded overflow-hidden">
+                            <embed src="pdf/lekcje/<?php echo $current_lesson['plik_pdf']; ?>" type="application/pdf" width="100%" height="600px" />
+                        </div>
+                    </section>
+                <?php endif; ?>
+
                 <?php if (!empty($current_lesson['plik_multimedialny'])): ?>
                     <section class="multimedia-box pt-4">
                         <h5 class="mb-3">Dodatkowe materiały dydaktyczne:</h5>

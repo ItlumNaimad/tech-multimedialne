@@ -79,3 +79,18 @@ CREATE TABLE IF NOT EXISTS `logi_aktywnosci` (
 -- Zasilenie bazy danymi testowymi
 INSERT IGNORE INTO `coach` (`login`, `haslo`) VALUES ('coach1', 'pass1'), ('coach2', 'pass2'), ('coach3', 'pass3'), ('admin', 'admin');
 INSERT IGNORE INTO `pracownik` (`login`, `haslo`) VALUES ('prac1', 'pass1'), ('prac2', 'pass2'), ('prac3', 'pass3');
+
+ -- Znajdź definicję tabeli lekcje i dodaj kolumnę:
+CREATE TABLE IF NOT EXISTS `lekcje` (
+`idl` int(11) NOT NULL AUTO_INCREMENT,
+`idc` int(11) NOT NULL,
+`nazwa` varchar(255) NOT NULL,
+`tresc` text NOT NULL,
+`plik_multimedialny` varchar(255) DEFAULT NULL,
+`plik_pdf` varchar(255) DEFAULT NULL, -- Dodaj tę linię
+PRIMARY KEY (`idl`),
+FOREIGN KEY (`idc`) REFERENCES `coach`(`idc`) ON DELETE CASCADE)
+
+ALTER TABLE `lekcje`
+ADD COLUMN `plik_pdf` VARCHAR(255) DEFAULT NULL
+AFTER `plik_multimedialny`;

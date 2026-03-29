@@ -14,7 +14,9 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'coach') {
 // 1. Dodawanie Lekcji
 if (isset($_POST['add_lesson'])) {
     $nazwa = $_POST['nazwa'];
-    $tresc = $_POST['tresc'];
+    $tresc = $_POST['tresc'] ?? '';
+    
+    // Obsługa pliku multimedialnego
     $plik = "";
     if (!empty($_FILES['file']['name'])) {
         $target = "../lekcje/" . basename($_FILES['file']['name']);
@@ -22,9 +24,22 @@ if (isset($_POST['add_lesson'])) {
             $plik = basename($_FILES['file']['name']);
         }
     }
-    $stmt = $pdo->prepare("INSERT INTO lekcje (idc, nazwa, tresc, plik_multimedialny) VALUES (?, ?, ?, ?)");
-    $stmt->execute([$_SESSION['user_id'], $nazwa, $tresc, $plik]);
-    echo "<div class='alert alert-success'>Lekcja dodana!</div>";
+    
+    // Obsługa pliku PDF
+    $plik_pdf = "";
+    if (!empty($_FILES['file_pdf']['name'])) {
+        if (!file_exists("../pdf/lekcje/")) {
+            mkdir("../pdf/lekcje/", 0777, true);
+        }
+        $target_pdf = "../pdf/lekcje/" . basename($_FILES['file_pdf']['name']);
+        if (move_uploaded_file($_FILES['file_pdf']['tmp_name'], $target_pdf)) {
+            $plik_pdf = basename($_FILES['file_pdf']['name']);
+        }
+    }
+
+    $stmt = $pdo->prepare("INSERT INTO lekcje (idc, nazwa, tresc, plik_multimedialny, plik_pdf) VALUES (?, ?, ?, ?, ?)");
+    $stmt->execute([$_SESSION['user_id'], $nazwa, $tresc, $plik, $plik_pdf]);
+    echo "<div class='alert alert-success'>Lekcja dodana pomyślnie!</div>";
 }
 
 // 2. Dodawanie Testu
@@ -75,7 +90,8 @@ if (isset($_POST['add_question'])) {
     <meta charset="UTF-8">
     <title>Panel Coacha - E-learning</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+    <!-- CKEditor 5 (Classic) -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.2.1/classic/ckeditor.js"></script>
 </head>
 <body class="bg-light">
 
@@ -91,7 +107,7 @@ if (isset($_POST['add_question'])) {
         <!-- Zarządzanie Lekcjami -->
         <div class="col-md-8 mb-4">
             <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">Tworzenie Lekcji (CKEditor)</div>
+                <div class="card-header bg-primary text-white">Tworzenie Lekcji (CKEditor 5)</div>
                 <div class="card-body">
                     <form method="POST" enctype="multipart/form-data">
                         <div class="mb-3">
@@ -99,11 +115,18 @@ if (isset($_POST['add_question'])) {
                             <input type="text" name="nazwa" class="form-control" required>
                         </div>
                         <div class="mb-3">
+                            <label class="form-label">Treść Lekcji (opcjonalnie)</label>
                             <textarea name="tresc" id="lesson_editor"></textarea>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Plik (Grafika/MP3/MP4)</label>
-                            <input type="file" name="file" class="form-control">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Plik Multimedia (Grafika/MP3/MP4)</label>
+                                <input type="file" name="file" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-danger fw-bold">Wgraj PDF (Lekcja w PDF)</label>
+                                <input type="file" name="file_pdf" class="form-control" accept=".pdf">
+                            </div>
                         </div>
                         <button type="submit" name="add_lesson" class="btn btn-primary w-100">Opublikuj Lekcję</button>
                     </form>
@@ -193,6 +216,12 @@ if (isset($_POST['add_question'])) {
     </div>
 </div>
 
-<script>CKEDITOR.replace('lesson_editor');</script>
+<script>
+    ClassicEditor
+        .create( document.querySelector( '#lesson_editor' ) )
+        .catch( error => {
+            console.error( error );
+        } );
+</script>
 </body>
 </html>
