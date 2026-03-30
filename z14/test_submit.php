@@ -5,6 +5,12 @@
  */
 session_start();
 require_once 'database/database.php';
+
+// Jawne zdefiniowanie ścieżki do czcionek, aby uniknąć problemów z relatywnymi ścieżkami
+if (!defined('FPDF_FONTPATH')) {
+    define('FPDF_FONTPATH', __DIR__ . '/font/');
+}
+
 require_once 'tfpdf.php'; // Używamy tFPDF dla poprawnej obsługi UTF-8 i polskich znaków
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'pracownik') {
@@ -70,7 +76,14 @@ try {
     $pdf = new tFPDF('P', 'mm', 'A4');
     $pdf->AddPage();
     
-    // Dodajemy czcionkę Unicode (DejaVu)
+    // Dodajemy czcionkę Unicode (DejaVu) - sprawdzamy czy pliki istnieją
+    $fontFileNormal = FPDF_FONTPATH . 'unifont/DejaVuSansCondensed.ttf';
+    $fontFileBold = FPDF_FONTPATH . 'unifont/DejaVuSansCondensed-Bold.ttf';
+
+    if (!file_exists($fontFileNormal)) {
+        throw new Exception("Brak pliku czcionki: " . $fontFileNormal);
+    }
+
     $pdf->AddFont('DejaVu', '', 'DejaVuSansCondensed.ttf', true);
     $pdf->AddFont('DejaVu', 'B', 'DejaVuSansCondensed-Bold.ttf', true);
     
@@ -103,21 +116,20 @@ try {
             $is_user_selected = in_array((string)$ans['idodp'], $data['user']);
             $is_correct_ans = $ans['czy_poprawna'];
             
-            // Logika kolorowania zgodnie z instrukcją
             if ($is_user_selected && $is_correct_ans) {
-                $pdf->SetTextColor(0, 128, 0); // Zielony - zaznaczone prawidłowo
+                $pdf->SetTextColor(0, 128, 0);
                 $box = "[X] ";
                 $tag = " (Prawidłowa)";
             } elseif ($is_user_selected && !$is_correct_ans) {
-                $pdf->SetTextColor(255, 0, 0); // Czerwony - zaznaczone nieprawidłowo
+                $pdf->SetTextColor(255, 0, 0);
                 $box = "[X] ";
                 $tag = " (Błędna)";
             } elseif (!$is_user_selected && $is_correct_ans) {
-                $pdf->SetTextColor(255, 0, 0); // Czerwony - nie zaznaczono poprawnej (nieprawidłowo)
+                $pdf->SetTextColor(255, 0, 0);
                 $box = "[ ] ";
                 $tag = " (Prawidłowa - POMINIĘTO)";
             } else {
-                $pdf->SetTextColor(100, 100, 100); // Szary - nie zaznaczono i błędna
+                $pdf->SetTextColor(100, 100, 100);
                 $box = "[ ] ";
                 $tag = "";
             }
@@ -131,9 +143,9 @@ try {
 
     $pdf->Output('F', $pdf_path);
 } catch (Exception $e) {
-    // W razie błędu zapisujemy log, ale nie przerywamy wyświetlania wyniku na stronie
     error_log("Błąd generowania PDF: " . $e->getMessage());
     $pdf_filename = "";
+    $pdf_error = $e->getMessage();
 }
 
 $stmt_res = $pdo->prepare("INSERT INTO wyniki (idp, idt, punkty, plik_pdf) VALUES (?, ?, ?, ?)");
@@ -158,7 +170,10 @@ $stmt_res->execute([$idp, $idt, $total_points, $pdf_filename]);
                 <?php if ($pdf_filename): ?>
                     <a href="pdf/<?php echo $pdf_filename; ?>" class="btn btn-success btn-lg w-100 mb-2 shadow" target="_blank">Pobierz Raport PDF</a>
                 <?php else: ?>
-                    <div class="alert alert-warning small">Raport PDF nie został wygenerowany. Sprawdź logi serwera.</div>
+                    <div class="alert alert-warning small">
+                        Raport PDF nie został wygenerowany.<br>
+                        <?php if(isset($pdf_error)) echo "<strong>Szczegóły:</strong> " . htmlspecialchars($pdf_error); ?>
+                    </div>
                 <?php endif; ?>
                 <a href="index.php" class="btn btn-outline-secondary w-100">Wróć do strony głównej</a>
             </div>
