@@ -1,7 +1,7 @@
 <?php
 /**
  * Plik: test_submit.php
- * Cel: Sprawdzenie testu, generowanie PDF (Wersja STABILNA - Courier + Windows-1250).
+ * Cel: Sprawdzenie testu, generowanie PDF (Wersja STABILNA - FPDF + iconv).
  */
 session_start();
 require_once 'database/database.php';
@@ -55,34 +55,39 @@ $percent = count($questions) > 0 ? ($total_points / count($questions)) * 100 : 0
 $passed = ($percent >= $test['prog_zaliczenia']);
 
 $stmt_log = $pdo->prepare("INSERT INTO logi_aktywnosci (rola, id_uzytkownika, akcja) VALUES ('pracownik', ?, ?)");
-$stmt_log->execute([$idp, "Ukonczono test: " . $test['nazwa'] . ", wynik: $total_points"]);
+$stmt_log->execute([$idp, "Ukończono test: " . $test['nazwa'] . ", wynik: $total_points"]);
 
-// GENEROWANIE PDF - METODA COURIER (STABILNA DLA WIN-1250)
+// GENEROWANIE PDF - METODA STABILNA (ISO-8859-2)
 $pdf_filename = "test_res_" . $idp . "_" . $idt . "_" . time() . ".pdf";
 $pdf_path = "pdf/" . $pdf_filename;
 
+// Upewnij się, że katalog pdf istnieje i jest zapisywalny
 if (!file_exists('pdf')) {
     mkdir('pdf', 0777, true);
 }
 
-/**
- * Funkcja do konwersji na Windows-1250 (najlepsza obsługa polskich znaków w standardowym FPDF)
- */
+// Funkcja pomocnicza do konwersji polskich znaków dla FPDF (Windows-1250)
 function pl($text) {
-    return iconv('UTF-8', 'windows-1250//TRANSLIT', $text);
+    // Próbujemy konwersji na Windows-1250, która jest standardem dla FPDF w Polsce
+    if (function_exists('iconv')) {
+        return iconv('UTF-8', 'windows-1250//TRANSLIT', $text);
+    }
+    return $text; // Fallback
 }
+
+$pdf_error_msg = "";
 
 try {
     $pdf = new FPDF('P', 'mm', 'A4');
     $pdf->AddPage();
     
-    // Używamy czcionki COURIER - jest wbudowana i często lepiej radzi sobie z kodowaniem regionalnym w PDF
+    // Używamy czcionki COURIER - jest wbudowana i najbardziej stabilna
     $pdf->SetFont('Courier', 'B', 16);
     $pdf->Cell(0, 10, pl("RAPORT Z TESTU: " . $test['nazwa']), 0, 1, 'C');
     $pdf->Ln(5);
 
     $pdf->SetFont('Courier', '', 11);
-    $pdf->Cell(0, 7, pl("Uzytkownik: " . $_SESSION['username']), 0, 1);
+    $pdf->Cell(0, 7, pl("Użytkownik: " . $_SESSION['username']), 0, 1);
     $pdf->Cell(0, 7, pl("Data: " . date("Y-m-d H:i:s")), 0, 1);
     $pdf->Cell(0, 7, pl("Wynik: $total_points / " . count($questions) . " (" . round($percent) . "%)"), 0, 1);
     
@@ -128,8 +133,14 @@ try {
         $pdf->Ln(3);
     }
 
+    // Sprawdzamy czy ścieżka zapisu jest dostępna
+    if (!is_writable('pdf')) {
+        throw new Exception("Katalog 'pdf/' nie jest zapisywalny.");
+    }
+
     $pdf->Output('F', $pdf_path);
 } catch (Exception $e) {
+    $pdf_error_msg = $e->getMessage();
     $pdf_filename = "";
 }
 
@@ -155,7 +166,10 @@ $stmt_res->execute([$idp, $idt, $total_points, $pdf_filename]);
                 <?php if ($pdf_filename): ?>
                     <a href="pdf/<?php echo $pdf_filename; ?>" class="btn btn-success btn-lg w-100 mb-2 shadow" target="_blank">Pobierz Raport PDF</a>
                 <?php else: ?>
-                    <div class="alert alert-warning small">Raport PDF nie został wygenerowany.</div>
+                    <div class="alert alert-warning small">
+                        Raport PDF nie został wygenerowany.<br>
+                        <?php if($pdf_error_msg) echo "<strong>Błąd:</strong> " . htmlspecialchars($pdf_error_msg); ?>
+                    </div>
                 <?php endif; ?>
                 <a href="index.php" class="btn btn-outline-secondary w-100">Wróć do strony głównej</a>
             </div>
