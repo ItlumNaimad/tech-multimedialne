@@ -1,19 +1,22 @@
 <?php
 /**
  * Plik: test_submit.php
- * Cel: Sprawdzenie testu, generowanie PDF (V4 - Uprawnienia i Ścieżki).
+ * Cel: Sprawdzenie testu, generowanie PDF (V5 - Rozwiązanie ostateczne).
  */
 session_start();
 require_once 'database/database.php';
 
-// Próba nadania uprawnień do plików czcionek (częsty problem na hostingach)
-@chmod(__DIR__ . '/font/unifont/DejaVuSansCondensed.ttf', 0644);
-@chmod(__DIR__ . '/font/unifont/DejaVuSansCondensed-Bold.ttf', 0644);
-@chmod(__DIR__ . '/font/unifont/', 0755);
+// Ustawiamy ścieżki tak, aby tFPDF nie musiał nic "zgadywać"
+$font_dir = __DIR__ . '/font/';
+if (!file_exists($font_dir)) {
+    $font_dir = __DIR__ . '/Font/'; // Fallback dla wielkiej litery
+}
 
-// Definiujemy ścieżkę do czcionek tFPDF - używamy relatywnej dla większej przenośności
 if (!defined('FPDF_FONTPATH')) {
-    define('FPDF_FONTPATH', 'font/');
+    define('FPDF_FONTPATH', $font_dir);
+}
+if (!defined('_SYSTEM_TTFONTS')) {
+    define('_SYSTEM_TTFONTS', $font_dir . 'unifont/');
 }
 
 require_once 'tfpdf.php'; 
@@ -68,7 +71,6 @@ $passed = ($percent >= $test['prog_zaliczenia']);
 $stmt_log = $pdo->prepare("INSERT INTO logi_aktywnosci (rola, id_uzytkownika, akcja) VALUES ('pracownik', ?, ?)");
 $stmt_log->execute([$idp, "Ukończono test: " . $test['nazwa'] . ", wynik: $total_points"]);
 
-// GENEROWANIE PDF
 $pdf_filename = "test_res_" . $idp . "_" . $idt . "_" . time() . ".pdf";
 $pdf_path = "pdf/" . $pdf_filename;
 
@@ -80,14 +82,17 @@ try {
     $pdf = new tFPDF('P', 'mm', 'A4');
     $pdf->AddPage();
     
-    // Sprawdzamy dostępność pliku przez PHP przed tFPDF
-    $check_path = __DIR__ . '/font/unifont/DejaVuSansCondensed.ttf';
-    if (!is_readable($check_path)) {
-        throw new Exception("Błąd: Plik czcionki istnieje, ale PHP nie może go odczytać (uprawnienia). Ścieżka: $check_path");
+    $f_normal = _SYSTEM_TTFONTS . 'DejaVuSansCondensed.ttf';
+    $f_bold = _SYSTEM_TTFONTS . 'DejaVuSansCondensed-Bold.ttf';
+
+    // Ostateczny test czytelności przed wywołaniem biblioteki
+    if (!is_file($f_normal) || !is_readable($f_normal)) {
+         throw new Exception("BŁĄD: PHP nie może odczytać pliku czcionki: $f_normal. Sprawdź czy plik istnieje i ma uprawnienia 644.");
     }
 
-    $pdf->AddFont('DejaVu', '', 'DejaVuSansCondensed.ttf', true);
-    $pdf->AddFont('DejaVu', 'B', 'DejaVuSansCondensed-Bold.ttf', true);
+    // Podajemy PEŁNE ŚCIEŻKI - to wyłącza mechanizm szukania w tFPDF i rozwiązuje problem "Can't open file"
+    $pdf->AddFont('DejaVu', '', $f_normal, true);
+    $pdf->AddFont('DejaVu', 'B', $f_bold, true);
     
     $pdf->SetFont('DejaVu', 'B', 16);
     $pdf->Cell(0, 10, "RAPORT Z TESTU: " . $test['nazwa'], 0, 1, 'C');
@@ -119,21 +124,13 @@ try {
             $is_correct_ans = $ans['czy_poprawna'];
             
             if ($is_user_selected && $is_correct_ans) {
-                $pdf->SetTextColor(0, 128, 0);
-                $box = "[X] ";
-                $tag = " (Prawidłowa)";
+                $pdf->SetTextColor(0, 128, 0); $box = "[X] "; $tag = " (Prawidłowa)";
             } elseif ($is_user_selected && !$is_correct_ans) {
-                $pdf->SetTextColor(255, 0, 0);
-                $box = "[X] ";
-                $tag = " (Błędna)";
+                $pdf->SetTextColor(255, 0, 0); $box = "[X] "; $tag = " (Błędna)";
             } elseif (!$is_user_selected && $is_correct_ans) {
-                $pdf->SetTextColor(255, 0, 0);
-                $box = "[ ] ";
-                $tag = " (Prawidłowa - POMINIĘTO)";
+                $pdf->SetTextColor(255, 0, 0); $box = "[ ] "; $tag = " (Prawidłowa - POMINIĘTO)";
             } else {
-                $pdf->SetTextColor(100, 100, 100);
-                $box = "[ ] ";
-                $tag = "";
+                $pdf->SetTextColor(100, 100, 100); $box = "[ ] "; $tag = "";
             }
 
             $pdf->Cell(10);
@@ -145,7 +142,6 @@ try {
 
     $pdf->Output('F', $pdf_path);
 } catch (Exception $e) {
-    error_log("Błąd PDF: " . $e->getMessage());
     $pdf_filename = "";
     $pdf_error = $e->getMessage();
 }
@@ -174,7 +170,7 @@ $stmt_res->execute([$idp, $idt, $total_points, $pdf_filename]);
                 <?php else: ?>
                     <div class="alert alert-warning small">
                         Raport PDF nie został wygenerowany.<br>
-                        <strong>Szczegóły:</strong> <?php echo isset($pdf_error) ? htmlspecialchars($pdf_error) : 'Nieznany błąd systemu plików.'; ?>
+                        <strong>Szczegóły błędu:</strong> <?php echo isset($pdf_error) ? htmlspecialchars($pdf_error) : 'Problem z dostępem do plików na serwerze.'; ?>
                     </div>
                 <?php endif; ?>
                 <a href="index.php" class="btn btn-outline-secondary w-100">Wróć do strony głównej</a>
