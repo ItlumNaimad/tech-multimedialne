@@ -5,6 +5,10 @@
  */
 session_start();
 require_once 'database/database.php';
+
+// Ważne: FPDF szuka folderu 'font/' w katalogu roboczym, jeśli nie jest zdefiniowany
+if(!defined('FPDF_FONTPATH')) define('FPDF_FONTPATH', __DIR__ . '/font/');
+
 require_once 'fpdf.php'; // Biblioteka standardowa
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'pracownik') {
@@ -68,11 +72,11 @@ if (!file_exists('pdf')) {
 
 // Funkcja pomocnicza do konwersji polskich znaków dla FPDF (Windows-1250)
 function pl($text) {
-    // Próbujemy konwersji na Windows-1250, która jest standardem dla FPDF w Polsce
     if (function_exists('iconv')) {
+        // Konwersja na Windows-1250, która najlepiej współpracuje z czcionką Helvetica w FPDF
         return iconv('UTF-8', 'windows-1250//TRANSLIT', $text);
     }
-    return $text; // Fallback
+    return $text;
 }
 
 $pdf_error_msg = "";
@@ -81,12 +85,12 @@ try {
     $pdf = new FPDF('P', 'mm', 'A4');
     $pdf->AddPage();
     
-    // Używamy czcionki COURIER - jest wbudowana i najbardziej stabilna
-    $pdf->SetFont('Courier', 'B', 16);
+    // Używamy czcionki HELVETICA (pliki helvetica.php i helveticab.php są obecne w Twoim folderze font/)
+    $pdf->SetFont('Helvetica', 'B', 16);
     $pdf->Cell(0, 10, pl("RAPORT Z TESTU: " . $test['nazwa']), 0, 1, 'C');
     $pdf->Ln(5);
 
-    $pdf->SetFont('Courier', '', 11);
+    $pdf->SetFont('Helvetica', '', 11);
     $pdf->Cell(0, 7, pl("Użytkownik: " . $_SESSION['username']), 0, 1);
     $pdf->Cell(0, 7, pl("Data: " . date("Y-m-d H:i:s")), 0, 1);
     $pdf->Cell(0, 7, pl("Wynik: $total_points / " . count($questions) . " (" . round($percent) . "%)"), 0, 1);
@@ -103,10 +107,10 @@ try {
     $pdf->Ln(5);
 
     foreach ($report_data as $idx => $data) {
-        $pdf->SetFont('Courier', 'B', 11);
+        $pdf->SetFont('Helvetica', 'B', 11);
         $pdf->MultiCell(0, 7, pl(($idx+1) . ". " . $data['q']), 0, 'L');
         
-        $pdf->SetFont('Courier', '', 10);
+        $pdf->SetFont('Helvetica', '', 10);
         foreach ($data['all_options'] as $ans) {
             $is_user_selected = in_array((string)$ans['idodp'], $data['user']);
             $is_correct_ans = $ans['czy_poprawna'];
@@ -166,7 +170,7 @@ $stmt_res->execute([$idp, $idt, $total_points, $pdf_filename]);
                 <?php if ($pdf_filename): ?>
                     <a href="pdf/<?php echo $pdf_filename; ?>" class="btn btn-success btn-lg w-100 mb-2 shadow" target="_blank">Pobierz Raport PDF</a>
                 <?php else: ?>
-                    <div class="alert alert-warning small">
+                    <div class="alert alert-danger small">
                         Raport PDF nie został wygenerowany.<br>
                         <?php if($pdf_error_msg) echo "<strong>Błąd:</strong> " . htmlspecialchars($pdf_error_msg); ?>
                     </div>
