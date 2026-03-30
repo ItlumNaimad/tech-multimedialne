@@ -1,22 +1,20 @@
 <?php
 /**
  * Plik: test_submit.php
- * Cel: Sprawdzenie testu, generowanie PDF (V5 - Rozwiązanie ostateczne).
+ * Cel: Sprawdzenie testu, generowanie PDF (V6 - Ostateczna korekta ścieżek).
  */
 session_start();
 require_once 'database/database.php';
 
-// Ustawiamy ścieżki tak, aby tFPDF nie musiał nic "zgadywać"
-$font_dir = __DIR__ . '/font/';
-if (!file_exists($font_dir)) {
-    $font_dir = __DIR__ . '/Font/'; // Fallback dla wielkiej litery
-}
+// 1. WYKRYWANIE KATALOGU CZCIONEK (font vs Font)
+$base_dir = __DIR__;
+$font_folder = is_dir($base_dir . '/font') ? 'font' : (is_dir($base_dir . '/Font') ? 'Font' : 'font');
 
 if (!defined('FPDF_FONTPATH')) {
-    define('FPDF_FONTPATH', $font_dir);
+    define('FPDF_FONTPATH', $base_dir . '/' . $font_folder . '/');
 }
 if (!defined('_SYSTEM_TTFONTS')) {
-    define('_SYSTEM_TTFONTS', $font_dir . 'unifont/');
+    define('_SYSTEM_TTFONTS', FPDF_FONTPATH . 'unifont/');
 }
 
 require_once 'tfpdf.php'; 
@@ -82,17 +80,21 @@ try {
     $pdf = new tFPDF('P', 'mm', 'A4');
     $pdf->AddPage();
     
-    $f_normal = _SYSTEM_TTFONTS . 'DejaVuSansCondensed.ttf';
-    $f_bold = _SYSTEM_TTFONTS . 'DejaVuSansCondensed-Bold.ttf';
+    $f_name = 'DejaVuSansCondensed.ttf';
+    $f_bold_name = 'DejaVuSansCondensed-Bold.ttf';
+    $full_f_path = _SYSTEM_TTFONTS . $f_name;
 
-    // Ostateczny test czytelności przed wywołaniem biblioteki
-    if (!is_file($f_normal) || !is_readable($f_normal)) {
-         throw new Exception("BŁĄD: PHP nie może odczytać pliku czcionki: $f_normal. Sprawdź czy plik istnieje i ma uprawnienia 644.");
+    // 2. DIAGNOSTYKA PRZED URUCHOMIENIEM BIBLIOTEKI
+    if (!file_exists($full_f_path)) {
+        throw new Exception("PLIK NIE ISTNIEJE: $full_f_path. Sprawdź wielkość liter w nazwie folderu 'font/unifont/'.");
+    }
+    if (!is_readable($full_f_path)) {
+        throw new Exception("PLIK NIE JEST CZYTELNY: $full_f_path. Mimo uprawnień 755, PHP nie może go otworzyć.");
     }
 
-    // Podajemy PEŁNE ŚCIEŻKI - to wyłącza mechanizm szukania w tFPDF i rozwiązuje problem "Can't open file"
-    $pdf->AddFont('DejaVu', '', $f_normal, true);
-    $pdf->AddFont('DejaVu', 'B', $f_bold, true);
+    // 3. PRAWIDŁOWE DODANIE CZCIONEK (tylko nazwa pliku, biblioteka sama doklei ścieżkę)
+    $pdf->AddFont('DejaVu', '', $f_name, true);
+    $pdf->AddFont('DejaVu', 'B', $f_bold_name, true);
     
     $pdf->SetFont('DejaVu', 'B', 16);
     $pdf->Cell(0, 10, "RAPORT Z TESTU: " . $test['nazwa'], 0, 1, 'C');
@@ -105,24 +107,19 @@ try {
     
     $pdf->Ln(5);
     if ($passed) {
-        $pdf->SetTextColor(0, 128, 0);
-        $pdf->Cell(0, 10, "STATUS: ZALICZONY", 0, 1);
+        $pdf->SetTextColor(0, 128, 0); $pdf->Cell(0, 10, "STATUS: ZALICZONY", 0, 1);
     } else {
-        $pdf->SetTextColor(255, 0, 0);
-        $pdf->Cell(0, 10, "STATUS: NIEZALICZONY", 0, 1);
+        $pdf->SetTextColor(255, 0, 0); $pdf->Cell(0, 10, "STATUS: NIEZALICZONY", 0, 1);
     }
-    $pdf->SetTextColor(0, 0, 0);
-    $pdf->Ln(5);
+    $pdf->SetTextColor(0, 0, 0); $pdf->Ln(5);
 
     foreach ($report_data as $idx => $data) {
         $pdf->SetFont('DejaVu', 'B', 11);
         $pdf->MultiCell(0, 7, ($idx+1) . ". " . $data['q'], 0, 'L');
-        
         $pdf->SetFont('DejaVu', '', 10);
         foreach ($data['all_options'] as $ans) {
             $is_user_selected = in_array((string)$ans['idodp'], $data['user']);
             $is_correct_ans = $ans['czy_poprawna'];
-            
             if ($is_user_selected && $is_correct_ans) {
                 $pdf->SetTextColor(0, 128, 0); $box = "[X] "; $tag = " (Prawidłowa)";
             } elseif ($is_user_selected && !$is_correct_ans) {
@@ -132,14 +129,12 @@ try {
             } else {
                 $pdf->SetTextColor(100, 100, 100); $box = "[ ] "; $tag = "";
             }
-
             $pdf->Cell(10);
             $pdf->MultiCell(0, 6, $box . $ans['tresc'] . $tag, 0, 'L');
             $pdf->SetTextColor(0, 0, 0);
         }
         $pdf->Ln(3);
     }
-
     $pdf->Output('F', $pdf_path);
 } catch (Exception $e) {
     $pdf_filename = "";
@@ -159,9 +154,7 @@ $stmt_res->execute([$idp, $idt, $total_points, $pdf_filename]);
 <body class="bg-light d-flex align-items-center" style="min-height: 100vh;">
     <div class="container text-center">
         <div class="card shadow p-5" style="max-width: 600px; margin: auto;">
-            <h2 class="<?php echo $passed ? 'text-success' : 'text-danger'; ?> mb-4">
-                <?php echo $passed ? 'ZALICZONE!' : 'NIEZALICZONE'; ?>
-            </h2>
+            <h2 class="<?php echo $passed ? 'text-success' : 'text-danger'; ?> mb-4"><?php echo $passed ? 'ZALICZONE!' : 'NIEZALICZONE'; ?></h2>
             <p class="fs-4">Twój wynik: <strong><?php echo $total_points; ?> / <?php echo count($questions); ?></strong> (<?php echo round($percent); ?>%)</p>
             <hr>
             <div class="mt-4">
@@ -170,7 +163,7 @@ $stmt_res->execute([$idp, $idt, $total_points, $pdf_filename]);
                 <?php else: ?>
                     <div class="alert alert-warning small">
                         Raport PDF nie został wygenerowany.<br>
-                        <strong>Szczegóły błędu:</strong> <?php echo isset($pdf_error) ? htmlspecialchars($pdf_error) : 'Problem z dostępem do plików na serwerze.'; ?>
+                        <strong>Szczegóły błędu:</strong> <?php echo isset($pdf_error) ? htmlspecialchars($pdf_error) : 'Problem z dostępem do plików.'; ?>
                     </div>
                 <?php endif; ?>
                 <a href="index.php" class="btn btn-outline-secondary w-100">Wróć do strony głównej</a>
