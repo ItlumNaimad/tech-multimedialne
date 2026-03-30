@@ -1,17 +1,11 @@
 <?php
 /**
  * Plik: test_submit.php
- * Cel: Sprawdzenie testu, generowanie PDF (Ostateczne rozwiązanie Polish-ISO).
+ * Cel: Sprawdzenie testu, generowanie PDF (SYSTEM UNICODE).
  */
 session_start();
 require_once 'database/database.php';
-
-if (file_exists('fpdf.php')) {
-    require 'fpdf.php';
-    $has_fpdf = true;
-} else {
-    $has_fpdf = false;
-}
+require_once 'tfpdf.php'; // Używamy biblioteki Unicode
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'pracownik') {
     die("Brak uprawnień.");
@@ -21,11 +15,13 @@ $idt = (int)$_POST['idt'];
 $idp = $_SESSION['user_id'];
 $answers_post = $_POST['ans'] ?? [];
 
+// Pobierz dane testu
 $stmt_t = $pdo->prepare("SELECT * FROM test WHERE idt = ?");
 $stmt_t->execute([$idt]);
 $test = $stmt_t->fetch();
 if (!$test) die("Test nie istnieje.");
 
+// Pobierz pytania
 $stmt_q = $pdo->prepare("SELECT * FROM pytania WHERE idt = ?");
 $stmt_q->execute([$idt]);
 $questions = $stmt_q->fetchAll();
@@ -60,59 +56,80 @@ foreach ($questions as $q) {
 $percent = count($questions) > 0 ? ($total_points / count($questions)) * 100 : 0;
 $passed = ($percent >= $test['prog_zaliczenia']);
 
+// 1. Logowanie
+$stmt_log = $pdo->prepare("INSERT INTO logi_aktywnosci (rola, id_uzytkownika, akcja) VALUES ('pracownik', ?, ?)");
+$stmt_log->execute([$idp, "Ukończono test: " . $test['nazwa'] . ", wynik: $total_points"]);
+
+// 2. Generowanie PDF (Unicode)
 $pdf_filename = "";
-if ($has_fpdf) {
-    try {
-        $pdf = new FPDF('P', 'mm', 'A4');
-        $pdf->AddFont('ArialPL', '', 'arialpl.php');
-        $pdf->AddFont('ArialPL', 'B', 'arialplb.php');
-        $pdf->AddPage();
-        
-        $pdf->SetFont('ArialPL', 'B', 16);
-        $pdf->Cell(0, 10, iconv('UTF-8', 'ISO-8859-2', "RAPORT Z TESTU: " . $test['nazwa']), 0, 1, 'C');
-        $pdf->Ln(5);
+try {
+    $pdf = new tFPDF('P', 'mm', 'A4');
+    
+    // Dodajemy czcionkę Arial z polskimi znakami (plik ttf w folderze głównym)
+    $pdf->AddFont('Arial', '', 'arial.ttf', true);
+    $pdf->AddFont('Arial', 'B', 'arialbd.ttf', true);
+    
+    $pdf->AddPage();
+    $pdf->SetFont('Arial', 'B', 16);
+    $pdf->Cell(0, 10, "RAPORT Z TESTU: " . $test['nazwa'], 0, 1, 'C');
+    $pdf->Ln(5);
 
-        $pdf->SetFont('ArialPL', '', 11);
-        $pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Uzytkownik: " . $_SESSION['username']), 0, 1);
-        $pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Data: " . date("Y-m-d H:i:s")), 0, 1);
-        $pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Wynik: $total_points / " . count($questions) . " (" . round($percent) . "%)"), 0, 1);
-        
-        if ($passed) {
-            $pdf->SetTextColor(0, 120, 0);
-            $pdf->Cell(0, 10, "STATUS: ZALICZONY", 0, 1);
-        } else {
-            $pdf->SetTextColor(200, 0, 0);
-            $pdf->Cell(0, 10, "STATUS: NIEZALICZONY", 0, 1);
-        }
-        $pdf->SetTextColor(0, 0, 0);
-        $pdf->Ln(5);
+    $pdf->SetFont('Arial', '', 11);
+    $pdf->Cell(0, 7, "Użytkownik: " . $_SESSION['username'], 0, 1);
+    $pdf->Cell(0, 7, "Data wykonania: " . date("Y-m-d H:i:s"), 0, 1);
+    $pdf->Cell(0, 7, "Wynik punktowy: $total_points / " . count($questions), 0, 1);
+    $pdf->Cell(0, 7, "Procentowo: " . round($percent) . "%", 0, 1);
+    
+    $pdf->Ln(5);
+    if ($passed) {
+        $pdf->SetTextColor(0, 128, 0);
+        $pdf->SetFont('Arial', 'B', 12);
+        $pdf->Cell(0, 10, "STATUS: ZALICZONY", 0, 1);
+    } else {
+        $pdf->SetTextColor(200, 0, 0);
+        $pdf->SetFont('Arial', 'B', 12);
+        $pdf->Cell(0, 10, "STATUS: NIEZALICZONY", 0, 1);
+    }
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->Ln(5);
 
-        foreach ($report_data as $idx => $data) {
-            $pdf->SetFont('ArialPL', 'B', 11);
-            $pdf->MultiCell(0, 7, iconv('UTF-8', 'ISO-8859-2', ($idx+1) . ". " . $data['q']), 0, 'L');
+    // Pytania i Odpowiedzi (BEZ ICONV!)
+    foreach ($report_data as $idx => $data) {
+        $pdf->SetFont('Arial', 'B', 11);
+        $pdf->MultiCell(0, 7, ($idx+1) . ". " . $data['q'], 0, 'L');
+        
+        $pdf->SetFont('Arial', '', 10);
+        foreach ($data['all_options'] as $ans) {
+            $is_user_selected = in_array((string)$ans['idodp'], $data['user']);
+            $is_correct_ans = $ans['czy_poprawna'];
             
-            $pdf->SetFont('ArialPL', '', 10);
-            foreach ($data['all_options'] as $ans) {
-                $is_user_selected = in_array((string)$ans['idodp'], $data['user']);
-                $is_correct_ans = $ans['czy_poprawna'];
-                
-                if ($is_correct_ans) { $pdf->SetTextColor(0, 128, 0); $tag = " [POPRAWNA]"; }
-                elseif ($is_user_selected) { $pdf->SetTextColor(200, 0, 0); $tag = " [BLEDNA]"; }
-                else { $pdf->SetTextColor(100, 100, 100); $tag = ""; }
-
-                $box = $is_user_selected ? "[X] " : "[ ] ";
-                $pdf->Cell(10);
-                $pdf->MultiCell(0, 6, iconv('UTF-8', 'ISO-8859-2', $box . $ans['tresc']) . $tag, 0, 'L');
-                $pdf->SetTextColor(0, 0, 0);
+            $label = "";
+            if ($is_correct_ans) {
+                $pdf->SetTextColor(0, 128, 0);
+                $label = " (POPRAWNA ODPOWIEDŹ)";
+            } elseif ($is_user_selected) {
+                $pdf->SetTextColor(255, 0, 0);
+                $label = " (BŁĘDNA ODPOWIEDŹ)";
+            } else {
+                $pdf->SetTextColor(100, 100, 100);
             }
-            $pdf->Ln(3);
-        }
 
-        $pdf_filename = "test_res_" . $idp . "_" . $idt . "_" . time() . ".pdf";
-        $pdf->Output('F', "pdf/" . $pdf_filename);
-    } catch (Exception $e) { $pdf_filename = ""; }
+            $box = $is_user_selected ? "[X] " : "[ ] ";
+            $pdf->Cell(10);
+            $pdf->MultiCell(0, 6, $box . $ans['tresc'] . $label, 0, 'L');
+            $pdf->SetTextColor(0, 0, 0);
+        }
+        $pdf->Ln(3);
+    }
+
+    $pdf_filename = "test_res_" . $idp . "_" . $idt . "_" . time() . ".pdf";
+    $pdf->Output('F', "pdf/" . $pdf_filename);
+    
+} catch (Exception $e) {
+    $pdf_filename = "";
 }
 
+// 3. Zapis wyniku do bazy
 $stmt_res = $pdo->prepare("INSERT INTO wyniki (idp, idt, punkty, plik_pdf) VALUES (?, ?, ?, ?)");
 $stmt_res->execute([$idp, $idt, $total_points, $pdf_filename]);
 ?>
