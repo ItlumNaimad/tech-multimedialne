@@ -1,23 +1,11 @@
 <?php
 /**
  * Plik: test_submit.php
- * Cel: Sprawdzenie testu, generowanie PDF (V6 - Ostateczna korekta ścieżek).
+ * Cel: Sprawdzenie testu, generowanie PDF (Wersja STABILNA - FPDF + iconv).
  */
 session_start();
 require_once 'database/database.php';
-
-// 1. WYKRYWANIE KATALOGU CZCIONEK (font vs Font)
-$base_dir = __DIR__;
-$font_folder = is_dir($base_dir . '/font') ? 'font' : (is_dir($base_dir . '/Font') ? 'Font' : 'font');
-
-if (!defined('FPDF_FONTPATH')) {
-    define('FPDF_FONTPATH', $base_dir . '/' . $font_folder . '/');
-}
-if (!defined('_SYSTEM_TTFONTS')) {
-    define('_SYSTEM_TTFONTS', FPDF_FONTPATH . 'unifont/');
-}
-
-require_once 'tfpdf.php'; 
+require_once 'fpdf.php'; // Powrót do standardowej biblioteki
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'pracownik') {
     die("Brak uprawnień.");
@@ -66,9 +54,11 @@ foreach ($questions as $q) {
 $percent = count($questions) > 0 ? ($total_points / count($questions)) * 100 : 0;
 $passed = ($percent >= $test['prog_zaliczenia']);
 
+// Logowanie aktywności
 $stmt_log = $pdo->prepare("INSERT INTO logi_aktywnosci (rola, id_uzytkownika, akcja) VALUES ('pracownik', ?, ?)");
 $stmt_log->execute([$idp, "Ukończono test: " . $test['nazwa'] . ", wynik: $total_points"]);
 
+// GENEROWANIE PDF - METODA STABILNA (ISO-8859-2)
 $pdf_filename = "test_res_" . $idp . "_" . $idt . "_" . time() . ".pdf";
 $pdf_path = "pdf/" . $pdf_filename;
 
@@ -76,69 +66,74 @@ if (!file_exists('pdf')) {
     mkdir('pdf', 0777, true);
 }
 
+// Funkcja pomocnicza do konwersji polskich znaków dla FPDF
+function pl($text) {
+    return iconv('UTF-8', 'ISO-8859-2//TRANSLIT', $text);
+}
+
 try {
-    $pdf = new tFPDF('P', 'mm', 'A4');
+    $pdf = new FPDF('P', 'mm', 'A4');
     $pdf->AddPage();
     
-    $f_name = 'DejaVuSansCondensed.ttf';
-    $f_bold_name = 'DejaVuSansCondensed-Bold.ttf';
-    $full_f_path = _SYSTEM_TTFONTS . $f_name;
-
-    // 2. DIAGNOSTYKA PRZED URUCHOMIENIEM BIBLIOTEKI
-    if (!file_exists($full_f_path)) {
-        throw new Exception("PLIK NIE ISTNIEJE: $full_f_path. Sprawdź wielkość liter w nazwie folderu 'font/unifont/'.");
-    }
-    if (!is_readable($full_f_path)) {
-        throw new Exception("PLIK NIE JEST CZYTELNY: $full_f_path. Mimo uprawnień 755, PHP nie może go otworzyć.");
-    }
-
-    // 3. PRAWIDŁOWE DODANIE CZCIONEK (tylko nazwa pliku, biblioteka sama doklei ścieżkę)
-    $pdf->AddFont('DejaVu', '', $f_name, true);
-    $pdf->AddFont('DejaVu', 'B', $f_bold_name, true);
-    
-    $pdf->SetFont('DejaVu', 'B', 16);
-    $pdf->Cell(0, 10, "RAPORT Z TESTU: " . $test['nazwa'], 0, 1, 'C');
+    // Używamy standardowej czcionki Arial (zawsze dostępna w FPDF)
+    $pdf->SetFont('Arial', 'B', 16);
+    $pdf->Cell(0, 10, pl("RAPORT Z TESTU: " . $test['nazwa']), 0, 1, 'C');
     $pdf->Ln(5);
 
-    $pdf->SetFont('DejaVu', '', 11);
-    $pdf->Cell(0, 7, "Użytkownik: " . $_SESSION['username'], 0, 1);
-    $pdf->Cell(0, 7, "Data: " . date("Y-m-d H:i:s"), 0, 1);
-    $pdf->Cell(0, 7, "Wynik: $total_points / " . count($questions) . " (" . round($percent) . "%)", 0, 1);
+    $pdf->SetFont('Arial', '', 11);
+    $pdf->Cell(0, 7, pl("Użytkownik: " . $_SESSION['username']), 0, 1);
+    $pdf->Cell(0, 7, pl("Data: " . date("Y-m-d H:i:s")), 0, 1);
+    $pdf->Cell(0, 7, pl("Wynik: $total_points / " . count($questions) . " (" . round($percent) . "%)"), 0, 1);
     
     $pdf->Ln(5);
     if ($passed) {
-        $pdf->SetTextColor(0, 128, 0); $pdf->Cell(0, 10, "STATUS: ZALICZONY", 0, 1);
+        $pdf->SetTextColor(0, 128, 0);
+        $pdf->Cell(0, 10, "STATUS: ZALICZONY", 0, 1);
     } else {
-        $pdf->SetTextColor(255, 0, 0); $pdf->Cell(0, 10, "STATUS: NIEZALICZONY", 0, 1);
+        $pdf->SetTextColor(255, 0, 0);
+        $pdf->Cell(0, 10, "STATUS: NIEZALICZONY", 0, 1);
     }
-    $pdf->SetTextColor(0, 0, 0); $pdf->Ln(5);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->Ln(5);
 
     foreach ($report_data as $idx => $data) {
-        $pdf->SetFont('DejaVu', 'B', 11);
-        $pdf->MultiCell(0, 7, ($idx+1) . ". " . $data['q'], 0, 'L');
-        $pdf->SetFont('DejaVu', '', 10);
+        $pdf->SetFont('Arial', 'B', 11);
+        $pdf->MultiCell(0, 7, pl(($idx+1) . ". " . $data['q']), 0, 'L');
+        
+        $pdf->SetFont('Arial', '', 10);
         foreach ($data['all_options'] as $ans) {
             $is_user_selected = in_array((string)$ans['idodp'], $data['user']);
             $is_correct_ans = $ans['czy_poprawna'];
+            
             if ($is_user_selected && $is_correct_ans) {
-                $pdf->SetTextColor(0, 128, 0); $box = "[X] "; $tag = " (Prawidłowa)";
+                $pdf->SetTextColor(0, 128, 0);
+                $box = "[X] ";
+                $tag = " (Prawidlowa)";
             } elseif ($is_user_selected && !$is_correct_ans) {
-                $pdf->SetTextColor(255, 0, 0); $box = "[X] "; $tag = " (Błędna)";
+                $pdf->SetTextColor(255, 0, 0);
+                $box = "[X] ";
+                $tag = " (Bledna)";
             } elseif (!$is_user_selected && $is_correct_ans) {
-                $pdf->SetTextColor(255, 0, 0); $box = "[ ] "; $tag = " (Prawidłowa - POMINIĘTO)";
+                $pdf->SetTextColor(255, 0, 0);
+                $box = "[ ] ";
+                $tag = " (Prawidlowa - POMINIETO)";
             } else {
-                $pdf->SetTextColor(100, 100, 100); $box = "[ ] "; $tag = "";
+                $pdf->SetTextColor(100, 100, 100);
+                $box = "[ ] ";
+                $tag = "";
             }
+
             $pdf->Cell(10);
-            $pdf->MultiCell(0, 6, $box . $ans['tresc'] . $tag, 0, 'L');
+            $pdf->MultiCell(0, 6, pl($box . $ans['tresc'] . $tag), 0, 'L');
             $pdf->SetTextColor(0, 0, 0);
         }
         $pdf->Ln(3);
     }
+
     $pdf->Output('F', $pdf_path);
 } catch (Exception $e) {
+    error_log("Błąd generowania PDF: " . $e->getMessage());
     $pdf_filename = "";
-    $pdf_error = $e->getMessage();
 }
 
 $stmt_res = $pdo->prepare("INSERT INTO wyniki (idp, idt, punkty, plik_pdf) VALUES (?, ?, ?, ?)");
@@ -154,17 +149,16 @@ $stmt_res->execute([$idp, $idt, $total_points, $pdf_filename]);
 <body class="bg-light d-flex align-items-center" style="min-height: 100vh;">
     <div class="container text-center">
         <div class="card shadow p-5" style="max-width: 600px; margin: auto;">
-            <h2 class="<?php echo $passed ? 'text-success' : 'text-danger'; ?> mb-4"><?php echo $passed ? 'ZALICZONE!' : 'NIEZALICZONE'; ?></h2>
+            <h2 class="<?php echo $passed ? 'text-success' : 'text-danger'; ?> mb-4">
+                <?php echo $passed ? 'ZALICZONE!' : 'NIEZALICZONE'; ?>
+            </h2>
             <p class="fs-4">Twój wynik: <strong><?php echo $total_points; ?> / <?php echo count($questions); ?></strong> (<?php echo round($percent); ?>%)</p>
             <hr>
             <div class="mt-4">
                 <?php if ($pdf_filename): ?>
                     <a href="pdf/<?php echo $pdf_filename; ?>" class="btn btn-success btn-lg w-100 mb-2 shadow" target="_blank">Pobierz Raport PDF</a>
                 <?php else: ?>
-                    <div class="alert alert-warning small">
-                        Raport PDF nie został wygenerowany.<br>
-                        <strong>Szczegóły błędu:</strong> <?php echo isset($pdf_error) ? htmlspecialchars($pdf_error) : 'Problem z dostępem do plików.'; ?>
-                    </div>
+                    <div class="alert alert-warning small">Raport PDF nie został wygenerowany.</div>
                 <?php endif; ?>
                 <a href="index.php" class="btn btn-outline-secondary w-100">Wróć do strony głównej</a>
             </div>
