@@ -1,14 +1,13 @@
 <?php
 /*******************************************************************************
-* tFPDF (Standalone Unicode Version)                                           *
+* tFPDF (Unicode Edition)                                                      *
 *******************************************************************************/
 require_once('fpdf.php');
 
 class tFPDF extends FPDF {
     protected $unifontsubset = true;
-    protected $fonts_ttf = [];
 
-    function AddFont($family, $style='', $file='', $uni=false) {
+    function AddFont($family, $style='', $file='', $uni=true) {
         if(!$uni) return parent::AddFont($family, $style, $file);
         $family = strtolower($family);
         $style = strtoupper($style);
@@ -22,7 +21,6 @@ class tFPDF extends FPDF {
             'desc' => ['Ascent'=>1000,'Descent'=>-200,'CapHeight'=>1000,'Flags'=>32,'FontBBox'=>'[-500 -200 1200 1000]','ItalicAngle'=>0,'StemV'=>70,'MissingWidth'=>500],
             'up' => -100, 'ut' => 50, 'cw' => array_fill(0,256,600), 'enc' => '', 'file' => $file
         ];
-        $this->fonts_ttf[$fontkey] = $file;
     }
 
     function UTF8ToUTF16BE($s) {
@@ -56,16 +54,50 @@ class tFPDF extends FPDF {
         parent::MultiCell($w, $h, $txt, $border, $align, $fill);
     }
 
-    // Nadpisujemy metodę zapisu czcionek, aby osadzić TTF
+    function Text($x, $y, $txt) {
+        if($this->unifontsubset) $txt = $this->UTF8ToUTF16BE($txt);
+        parent::Text($x, $y, $txt);
+    }
+
     function _putfonts() {
+        $nf = $this->n;
         foreach($this->fonts as $k=>$font) {
             if($font['type']=='TTF') {
-                // To jest uproszczone osadzanie czcionki systemowej
-                // W prawdziwym tFPDF tutaj jest parser TTF. 
-                // Skoro jednak mamy problem z brakiem php-cli, użyjemy standardu Core z mapowaniem.
+                $this->_newobj();
+                $this->_out('<</Type /Font');
+                $this->_out('/BaseFont /'.$font['name']);
+                $this->_out('/Subtype /TrueType');
+                $this->_out('/Encoding /Identity-H');
+                $this->_out('/FontDescriptor '.($this->n+1).' 0 R');
+                $this->_out('>>');
+                $this->_out('endobj');
+                
+                $this->_newobj();
+                $this->_out('<</Type /FontDescriptor');
+                $this->_out('/FontName /'.$font['name']);
+                $this->_out('/Flags 32');
+                $this->_out('/FontBBox [-500 -200 1200 1000]');
+                $this->_out('/ItalicAngle 0');
+                $this->_out('/Ascent 1000');
+                $this->_out('/Descent -200');
+                $this->_out('/CapHeight 1000');
+                $this->_out('/StemV 70');
+                $this->_out('/FontFile2 '.($this->n+1).' 0 R');
+                $this->_out('>>');
+                $this->_out('endobj');
+                
+                $this->_newobj();
+                $s = file_get_contents($font['file']);
+                $this->_out('<</Length '.strlen($s));
+                $this->_out('/Length1 '.strlen($s));
+                $this->_out('>>');
+                $this->_putstream($s);
+                $this->_out('endobj');
+            } else {
+                $this->fonts[$k]['n'] = $this->n + 1;
+                parent::_putfonts();
             }
         }
-        parent::_putfonts();
     }
 }
 ?>

@@ -1,5 +1,5 @@
 <?php
-$type = 'Type1';
+$type = 'Core';
 $name = 'Helvetica';
 $up = -100;
 $ut = 50;
@@ -10,27 +10,25 @@ $cw = array(
 	'B'=>667,'C'=>722,'D'=>722,'E'=>667,'F'=>611,'G'=>778,'H'=>722,'I'=>278,'J'=>500,'K'=>667,'L'=>556,'M'=>833,'N'=>722,'O'=>778,'P'=>667,'Q'=>778,'R'=>722,'S'=>667,'T'=>611,'U'=>722,'V'=>667,'W'=>944,
 	'X'=>667,'Y'=>667,'Z'=>611,'['=>278,'\\'=>278,']'=>278,'^'=>469,'_'=>556,'`'=>333,'a'=>556,'b'=>556,'c'=>500,'d'=>556,'e'=>556,'f'=>278,'g'=>556,'h'=>556,'i'=>222,'j'=>222,'k'=>500,'l'=>222,'m'=>833,
 	'n'=>556,'o'=>556,'p'=>556,'q'=>556,'r'=>333,'s'=>500,'t'=>278,'u'=>556,'v'=>500,'w'=>722,'x'=>500,'y'=>500,'z'=>500,'{'=>334,'|'=>260,'}'=>334,'~'=>584,
-    chr(128)=>556,chr(129)=>350,chr(130)=>222,chr(131)=>556,chr(132)=>333,chr(133)=>1000,chr(134)=>556,chr(135)=>556,chr(136)=>333,chr(137)=>1000,
-    chr(140)=>667, // Ś
-    chr(143)=>611, // Ź
-    chr(156)=>500, // ś
-    chr(159)=>500, // ź
+    chr(161)=>667, // Ą
+    chr(166)=>667, // Ś
+    chr(172)=>611, // Ź
+    chr(177)=>556, // ą
+    chr(182)=>500, // ś
+    chr(188)=>500, // ź
     chr(163)=>556, // Ł
-    chr(165)=>667, // Ą
-    chr(175)=>611, // Ż
     chr(179)=>222, // ł
-    chr(185)=>556, // ą
+    chr(175)=>611, // Ż
     chr(191)=>500, // ż
-    chr(202)=>667, // Ę
-    chr(211)=>778, // Ó
-    chr(230)=>500, // ć
-    chr(234)=>556, // ę
-    chr(241)=>556, // ń
-    chr(243)=>556, // ó
-    chr(248)=>556, // ó (fallback)
     chr(198)=>722, // Ć
-    chr(209)=>722); // Ń
-$enc = 'cp1250';
-$diff = '!80 .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef .notdef !A0 space Aogonek breve Lslash currency Lcaron Sacute section dieresis Scaron Scedilla Tcaron Zacute hyphen Zcaron Zdotaccent degree aogonek ogonek lslash acute lcaron sacute caron cedilla scaron scedilla tcaron zacute hungarumlaut zcaron zdotaccent Racute Aacute Acircumflex Abreve Adieresis Lacute Cacute Ccedilla Ccaron Eacute Eogonek Edieresis Ecaron Iacute Icircumflex Dcaron Dcroat Nacute Ncaron Oacute Ocircumflex Ohungarumlaut Odieresis multiply Rcaron Uring Uacute Uhungarumlaut Udieresis Yacute Tcommaaccent germandbls racute aacute acircumflex abreve adieresis lacute cacute ccedilla ccaron eacute eogonek edieresis ecaron iacute icircumflex dcaron dcroat nacute ncaron oacute ocircumflex ohungarumlaut odieresis divide rcaron uring uacute uhungarumlaut udieresis yacute tcommaaccent dotaccent';
+    chr(230)=>500, // ć
+    chr(202)=>667, // Ę
+    chr(234)=>556, // ę
+    chr(209)=>722, // Ń
+    chr(241)=>556, // ń
+    chr(211)=>778, // Ó
+    chr(243)=>556); // ó
+$enc = 'iso-8859-2';
+$diff = '!A0 space Aogonek breve Lslash currency Lcaron Sacute section dieresis Scaron Scedilla Tcaron Zacute hyphen Zcaron Zdotaccent degree aogonek ogonek lslash acute lcaron sacute caron cedilla scaron scedilla tcaron zacute hungarumlaut zcaron zdotaccent Racute Aacute Acircumflex Abreve Adieresis Lacute Cacute Ccedilla Ccaron Eacute Eogonek Edieresis Ecaron Iacute Icircumflex Dcaron Dcroat Nacute Ncaron Oacute Ocircumflex Ohungarumlaut Odieresis multiply Rcaron Uring Uacute Uhungarumlaut Udieresis Yacute Tcommaaccent germandbls racute aacute acircumflex abreve adieresis lacute cacute ccedilla ccaron eacute eogonek edieresis ecaron iacute icircumflex dcaron dcroat nacute ncaron oacute ocircumflex ohungarumlaut odieresis divide rcaron uring uacute uhungarumlaut udieresis yacute tcommaaccent dotaccent';
 $uv = array();
 ?>
