@@ -28,6 +28,18 @@ if (isset($_SESSION['loggedin'])) {
             <h4 class="mb-0">Rejestracja</h4>
         </div>
         <div class="card-body p-4">
+            <!-- Miejsce na reklamę AdSense -->
+            <div class="adsense-box mb-4 text-center border-bottom pb-3">
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-1234567890123456"
+                     data-ad-slot="3333333333"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+                <small class="text-muted d-block mt-1">Reklama</small>
+            </div>
+
             <form action="../database/register_handler.php" method="POST">
                 <div class="mb-3">
                     <label class="form-label">Użytkownik</label>

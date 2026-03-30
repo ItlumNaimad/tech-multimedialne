@@ -1,12 +1,17 @@
 <?php
 /**
  * Plik: test_submit.php
- * Cel: Sprawdzenie testu, logowanie aktywności, generowanie PDF i zapis wyniku.
+ * Cel: Sprawdzenie testu (dynamiczne odpowiedzi), generowanie PDF, wynik i próg.
  */
 session_start();
 require_once 'database/database.php';
-// Zakładamy, że fpdf.php jest dostępny w tym samym folderze lub przez include_path
-require 'fpdf.php'; 
+
+// Sprawdź czy biblioteka FPDF istnieje, aby uniknąć Fatal Error i zerwania połączenia
+$has_fpdf = false;
+if (file_exists('fpdf.php')) {
+    require 'fpdf.php';
+    $has_fpdf = true;
+}
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'pracownik') {
     die("Brak uprawnień.");
@@ -16,10 +21,15 @@ $idt = (int)$_POST['idt'];
 $idp = $_SESSION['user_id'];
 $answers_post = $_POST['ans'] ?? [];
 
-// Pobierz poprawne odpowiedzi z bazy
-$stmt = $pdo->prepare("SELECT * FROM pytania WHERE idt = ?");
-$stmt->execute([$idt]);
-$questions = $stmt->fetchAll();
+// Pobierz dane testu (dla progu)
+$stmt_t = $pdo->prepare("SELECT * FROM test WHERE idt = ?");
+$stmt_t->execute([$idt]);
+$test = $stmt_t->fetch();
+
+// Pobierz pytania
+$stmt_q = $pdo->prepare("SELECT * FROM pytania WHERE idt = ?");
+$stmt_q->execute([$idt]);
+$questions = $stmt_q->fetchAll();
 
 $total_points = 0;
 $report_data = [];
@@ -28,106 +38,88 @@ foreach ($questions as $q) {
     $q_id = $q['idpyt'];
     $user_choices = $answers_post[$q_id] ?? [];
     
-    // Poprawne flagi z bazy
-    $correct = [
-        'a' => (bool)$q['a'],
-        'b' => (bool)$q['b'],
-        'c' => (bool)$q['c'],
-        'd' => (bool)$q['d']
-    ];
+    // Pobierz wszystkie możliwe odpowiedzi dla tego pytania
+    $stmt_ans = $pdo->prepare("SELECT * FROM odpowiedzi WHERE idpyt = ?");
+    $stmt_ans->execute([$q_id]);
+    $all_answers = $stmt_ans->fetchAll();
     
-    // Sprawdzenie czy użytkownik wybrał DOKŁADNIE to co w bazie
-    $is_correct = true;
-    foreach (['a', 'b', 'c', 'd'] as $letter) {
-        $selected = in_array($letter, $user_choices);
-        if ($selected !== $correct[$letter]) {
-            $is_correct = false;
-            break;
-        }
+    $correct_ids = [];
+    foreach ($all_answers as $ans) {
+        if ($ans['czy_poprawna']) $correct_ids[] = (string)$ans['idodp'];
     }
     
-    if ($is_correct) {
-        $total_points++;
-    }
+    // Sprawdzenie czy wybór użytkownika pokrywa się z poprawnymi odpowiedziami
+    sort($user_choices);
+    sort($correct_ids);
+    $is_correct = (!empty($correct_ids) && $user_choices === $correct_ids);
+    
+    if ($is_correct) $total_points++;
     
     $report_data[] = [
         'q' => $q['tresc_pytania'],
         'status' => $is_correct,
-        'user' => implode(', ', $user_choices),
-        'correct' => implode(', ', array_keys(array_filter($correct)))
+        'user' => $user_choices,
+        'all_options' => $all_answers,
+        'correct_ids' => $correct_ids
     ];
 }
 
-// 1. Logowanie aktywności
+$percent = count($questions) > 0 ? ($total_points / count($questions)) * 100 : 0;
+$passed = ($percent >= $test['prog_zaliczenia']);
+
+// 1. Logowanie
 $stmt_log = $pdo->prepare("INSERT INTO logi_aktywnosci (rola, id_uzytkownika, akcja) VALUES ('pracownik', ?, ?)");
-$stmt_log->execute([$idp, "Ukończono test ID: $idt, wynik: $total_points"]);
+$stmt_log->execute([$idp, "Ukończono test ID: $idt, wynik: $total_points, status: " . ($passed ? 'ZALICZONY' : 'NIEZALICZONY')]);
 
-// 2. Generowanie PDF
-$pdf = new FPDF();
-$pdf->AddPage();
-// Polskie znaki w FPDF wymagają specyficznego kodowania lub czcionek, tu używamy standardowego Arial i iconv
-$pdf->SetFont('Arial', 'B', 16);
-$pdf->Cell(0, 10, iconv('UTF-8', 'ISO-8859-2', 'Raport z wynikami testu'), 0, 1, 'C');
-$pdf->SetFont('Arial', '', 10);
-$pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Uzytkownik: " . $_SESSION['username']), 0, 1);
-$pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Data: " . date("Y-m-d H:i:s")), 0, 1);
-$pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Wynik koncowy: $total_points / " . count($questions)), 0, 1);
-$pdf->Ln(5);
+// 2. Generowanie PDF (tylko jeśli biblioteka istnieje)
+$pdf_filename = "";
+if ($has_fpdf) {
+    try {
+        $pdf = new FPDF();
+        $pdf->AddPage();
+        $pdf->SetFont('Arial', 'B', 16);
+        $pdf->Cell(0, 10, iconv('UTF-8', 'ISO-8859-2', 'Raport E-learning'), 0, 1, 'C');
+        $pdf->SetFont('Arial', '', 10);
+        $pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Uzytkownik: " . $_SESSION['username']), 0, 1);
+        $pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Test: " . $test['nazwa']), 0, 1);
+        $pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Wynik: $total_points / " . count($questions) . " (" . round($percent) . "%)"), 0, 1);
+        $pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Status: " . ($passed ? 'ZALICZONY' : 'NIEZALICZONY')), 0, 1);
+        $pdf->Ln(5);
 
-foreach ($report_data as $idx => $data) {
-    $pdf->SetFont('Arial', 'B', 11);
-    $pdf->SetTextColor(0, 0, 0);
-    $pdf->MultiCell(0, 7, iconv('UTF-8', 'ISO-8859-2', ($idx+1) . ". " . $data['q']));
-    
-    $pdf->SetFont('Arial', '', 10);
-    
-    // Pobierz dane pytania z bazy dla szczegółów opcji
-    $stmt_q_detail = $pdo->prepare("SELECT * FROM pytania WHERE tresc_pytania = ?");
-    $stmt_q_detail->execute([$data['q']]);
-    $q_det = $stmt_q_detail->fetch();
-    
-    $user_ans_arr = explode(', ', $data['user']);
-    $correct_ans_arr = explode(', ', $data['correct']);
-    
-    $options = ['a' => $q_det['odpowiedz_a'], 'b' => $q_det['odpowiedz_b'], 'c' => $q_det['odpowiedz_c'], 'd' => $q_det['odpowiedz_d']];
-    
-    foreach ($options as $key => $val) {
-        $selected = in_array($key, $user_ans_arr);
-        $is_actually_correct = in_array($key, $correct_ans_arr);
-        
-        $prefix = $selected ? "[X] " : "[ ] ";
-        
-        // Kolorowanie: zielony jeśli użytkownik zaznaczył poprawnie LUB nie zaznaczył błędnej.
-        // Jednak instrukcja sugeruje kolorowanie całości odpowiedzi.
-        // Uprośćmy: zielony tekst dla poprawnych opcji, czerwony dla błędnych.
-        if ($is_actually_correct) {
-            $pdf->SetTextColor(0, 128, 0); // Zielony
-        } else {
-            $pdf->SetTextColor(255, 0, 0); // Czerwony
+        foreach ($report_data as $idx => $data) {
+            $pdf->SetFont('Arial', 'B', 11);
+            $pdf->MultiCell(0, 7, iconv('UTF-8', 'ISO-8859-2', ($idx+1) . ". " . $data['q']));
+            $pdf->SetFont('Arial', '', 10);
+            
+            foreach ($data['all_options'] as $ans) {
+                $selected = in_array((string)$ans['idodp'], $data['user']);
+                $correct = $ans['czy_poprawna'];
+                
+                $prefix = $selected ? "[X] " : "[ ] ";
+                if ($correct) {
+                    $pdf->SetTextColor(0, 128, 0); // Zielony dla poprawnych
+                } else {
+                    $pdf->SetTextColor(255, 0, 0); // Czerwony dla błędnych
+                }
+                $pdf->Cell(0, 6, iconv('UTF-8', 'ISO-8859-2', "    " . $prefix . $ans['tresc']), 0, 1);
+            }
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->SetFont('Arial', 'I', 9);
+            $pdf->Cell(0, 6, iconv('UTF-8', 'ISO-8859-2', "Status: " . ($data['status'] ? "POPRAWNIE" : "BLEDNIE")), 0, 1);
+            $pdf->Ln(4);
         }
-        
-        $pdf->Cell(0, 6, iconv('UTF-8', 'ISO-8859-2', "    " . $prefix . strtoupper($key) . ") " . $val), 0, 1);
+
+        $pdf_filename = "test_res_" . $idp . "_" . $idt . "_" . time() . ".pdf";
+        $pdf_path = "pdf/" . $pdf_filename;
+        $pdf->Output('F', $pdf_path);
+    } catch (Exception $e) {
+        $pdf_filename = ""; // Błąd generowania
     }
-    
-    $pdf->SetTextColor(0, 0, 0);
-    if ($data['status']) {
-        $pdf->SetFont('Arial', 'I', 9);
-        $pdf->Cell(0, 6, iconv('UTF-8', 'ISO-8859-2', "Status: POPRAWNIE (+1 pkt)"), 0, 1);
-    } else {
-        $pdf->SetFont('Arial', 'I', 9);
-        $pdf->Cell(0, 6, iconv('UTF-8', 'ISO-8859-2', "Status: BLEDNIE (0 pkt)"), 0, 1);
-    }
-    $pdf->Ln(4);
 }
 
-$pdf_filename = "test_res_" . $idp . "_" . $idt . "_" . time() . ".pdf";
-$pdf_path = "pdf/" . $pdf_filename;
-$pdf->Output('F', $pdf_path);
-
-// 3. Zapis do bazy wyników
+// 3. Zapis wyniku
 $stmt_res = $pdo->prepare("INSERT INTO wyniki (idp, idt, punkty, plik_pdf) VALUES (?, ?, ?, ?)");
 $stmt_res->execute([$idp, $idt, $total_points, $pdf_filename]);
-
 ?>
 <!DOCTYPE html>
 <html lang="pl">
@@ -138,12 +130,19 @@ $stmt_res->execute([$idp, $idt, $total_points, $pdf_filename]);
 </head>
 <body class="bg-light d-flex align-items-center" style="height: 100vh;">
     <div class="container text-center">
-        <div class="card shadow p-5" style="max-width: 500px; margin: auto;">
-            <h2 class="text-primary mb-4">Test zakończony!</h2>
-            <p class="fs-4">Twój wynik: <strong><?php echo $total_points; ?> / <?php echo count($questions); ?></strong></p>
+        <div class="card shadow p-5" style="max-width: 600px; margin: auto;">
+            <h2 class="<?php echo $passed ? 'text-success' : 'text-danger'; ?> mb-4">
+                <?php echo $passed ? 'ZALICZONE!' : 'NIEZALICZONE'; ?>
+            </h2>
+            <p class="fs-4">Twój wynik: <strong><?php echo $total_points; ?> / <?php echo count($questions); ?></strong> (<?php echo round($percent); ?>%)</p>
+            <p class="text-muted">Próg zaliczenia: <?php echo $test['prog_zaliczenia']; ?>%</p>
             <hr>
             <div class="mt-4">
-                <a href="<?php echo $pdf_path; ?>" class="btn btn-success btn-lg w-100 mb-2" target="_blank">Pobierz Raport PDF</a>
+                <?php if ($pdf_filename): ?>
+                    <a href="pdf/<?php echo $pdf_filename; ?>" class="btn btn-success btn-lg w-100 mb-2 shadow" target="_blank">Pobierz Raport PDF</a>
+                <?php else: ?>
+                    <div class="alert alert-warning small">Raport PDF nie został wygenerowany (brak biblioteki lub błąd).</div>
+                <?php endif; ?>
                 <a href="index.php" class="btn btn-outline-secondary w-100">Wróć do strony głównej</a>
             </div>
         </div>

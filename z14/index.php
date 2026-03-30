@@ -23,7 +23,7 @@ if (isset($_GET['idl'])) {
         $stmt_log->execute([$_SESSION['user_id'], "Przeglądanie lekcji: " . $current_lesson['nazwa']]);
     }
 }
-$lessons_list = $pdo->query("SELECT idl, nazwa FROM lekcje ORDER BY idl ASC")->fetchAll();
+$lessons_list = $pdo->query("SELECT idl, nazwa FROM lekcje ORDER BY kolejnosc ASC, idl ASC")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="pl">
@@ -34,8 +34,8 @@ $lessons_list = $pdo->query("SELECT idl, nazwa FROM lekcje ORDER BY idl ASC")->f
     <title>Portal E-learningowy</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- Testowy skrypt Google AdSense (Zakomentowany lub z dummy-id) -->
-    <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0000000000000000" crossorigin="anonymous"></script> -->
+    <!-- Testowy skrypt Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1234567890123456" crossorigin="anonymous"></script>
     
     <style>
         body { overflow-x: hidden; }
@@ -49,7 +49,6 @@ $lessons_list = $pdo->query("SELECT idl, nazwa FROM lekcje ORDER BY idl ASC")->f
         .nav-link { color: #333; }
         .nav-link:hover { background-color: #e9ecef; }
         
-        /* Styl AdSense Placeholder */
         .adsense-placeholder { 
             border: 1px solid #ddd; 
             background: #fff;
@@ -64,16 +63,7 @@ $lessons_list = $pdo->query("SELECT idl, nazwa FROM lekcje ORDER BY idl ASC")->f
             position: relative;
             overflow: hidden;
         }
-        .adsense-placeholder::after {
-            content: "REKLAMA";
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            font-size: 0.6rem;
-            color: #ccc;
-        }
 
-        /* Poprawione style HTML5 */
         .multimedia-box { 
             margin-top: 25px; 
             border-top: 1px solid #eee; 
@@ -91,7 +81,7 @@ $lessons_list = $pdo->query("SELECT idl, nazwa FROM lekcje ORDER BY idl ASC")->f
 
 <div class="container-fluid">
     <div class="row">
-        <!-- Lewy panel nawigacyjny (Gwarantowana responsywność Bootstrap) -->
+        <!-- Lewy panel nawigacyjny -->
         <div class="col-lg-3 col-md-4 sidebar d-flex flex-column">
             <h4 class="mb-4">Menu Kursu</h4>
             
@@ -104,8 +94,8 @@ $lessons_list = $pdo->query("SELECT idl, nazwa FROM lekcje ORDER BY idl ASC")->f
                 <?php endforeach; ?>
                 
                 <hr>
-                <a class="nav-link fw-bold" href="index.php?page=podsumowanie">Podsumowanie</a>
-                <a class="nav-link fw-bold" href="index.php?page=testy">Testy</a>
+                <a class="nav-link fw-bold" href="index.php?page=podsumowanie">Historia wyników</a>
+                <a class="nav-link fw-bold" href="index.php?page=testy">Wszystkie Testy</a>
             </nav>
 
             <div class="user-info mt-4 pt-3 border-top">
@@ -114,15 +104,13 @@ $lessons_list = $pdo->query("SELECT idl, nazwa FROM lekcje ORDER BY idl ASC")->f
                 <a href="database/logout_handler.php" class="btn btn-sm btn-outline-danger w-100">Wyloguj</a>
             </div>
 
-            <!-- Blok AdSense zgodnie z wytycznymi Google -->
             <div class="adsense-placeholder shadow-sm">
                 <ins class="adsbygoogle"
                      style="display:block"
-                     data-ad-client="ca-pub-0000000000000000"
-                     data-ad-slot="1234567890"
+                     data-ad-client="ca-pub-1234567890123456"
+                     data-ad-slot="1111111111"
                      data-ad-format="auto"
                      data-full-width-responsive="true"></ins>
-                <span>Reklama Google AdSense</span>
             </div>
         </div>
 
@@ -137,15 +125,20 @@ $lessons_list = $pdo->query("SELECT idl, nazwa FROM lekcje ORDER BY idl ASC")->f
                 </div>
 
                 <article class="lesson-body mb-5">
-                    <?php echo $current_lesson['tresc']; // Wyświetlamy treść jako <article> dla lepszego SEO/Crawlerów ?>
+                    <?php echo $current_lesson['tresc']; ?>
                 </article>
+
+                <?php if ($current_lesson['idt']): ?>
+                    <div class="alert alert-warning shadow-sm d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Uwaga!</strong> Do tej lekcji przypisany jest test sprawdzający wiedzę.
+                        </div>
+                        <a href="test_view.php?idt=<?php echo $current_lesson['idt']; ?>" class="btn btn-warning fw-bold">Uruchom Test</a>
+                    </div>
+                <?php endif; ?>
 
                 <?php if (!empty($current_lesson['plik_pdf'])): ?>
                     <section class="pdf-lesson-box mb-4">
-                        <div class="alert alert-info d-flex justify-content-between align-items-center">
-                            <span>Ta lekcja zawiera materiał w formacie PDF.</span>
-                            <a href="pdf/lekcje/<?php echo $current_lesson['plik_pdf']; ?>" class="btn btn-primary btn-sm" target="_blank">Otwórz PDF w nowym oknie</a>
-                        </div>
                         <div class="ratio ratio-16x9 shadow-sm rounded overflow-hidden">
                             <embed src="pdf/lekcje/<?php echo $current_lesson['plik_pdf']; ?>" type="application/pdf" width="100%" height="600px" />
                         </div>
@@ -154,23 +147,17 @@ $lessons_list = $pdo->query("SELECT idl, nazwa FROM lekcje ORDER BY idl ASC")->f
 
                 <?php if (!empty($current_lesson['plik_multimedialny'])): ?>
                     <section class="multimedia-box pt-4">
-                        <h5 class="mb-3">Dodatkowe materiały dydaktyczne:</h5>
+                        <h5 class="mb-3">Multimedia do lekcji:</h5>
                         <?php 
                         $file = $current_lesson['plik_multimedialny'];
                         $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
                         $path = "lekcje/" . $file;
                         if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])): ?>
-                            <img src="<?php echo $path; ?>" class="shadow-sm mt-2" alt="Ilustracja do lekcji: <?php echo htmlspecialchars($current_lesson['nazwa']); ?>">
+                            <img src="<?php echo $path; ?>" class="shadow-sm img-fluid" alt="Grafika">
                         <?php elseif (in_array($ext, ['mp4', 'webm'])): ?>
-                            <video autoplay controls class="shadow-sm mt-2">
+                            <video controls class="shadow-sm w-100">
                                 <source src="<?php echo $path; ?>" type="video/<?php echo $ext; ?>">
-                                Twoja przeglądarka nie obsługuje wideo.
                             </video>
-                        <?php elseif (in_array($ext, ['mp3', 'wav'])): ?>
-                            <audio autoplay controls class="w-100 mt-2">
-                                <source src="<?php echo $path; ?>" type="audio/<?php echo $ext; ?>">
-                                Twoja przeglądarka nie obsługuje audio.
-                            </audio>
                         <?php endif; ?>
                     </section>
                 <?php endif; ?>
