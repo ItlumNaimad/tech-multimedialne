@@ -79,17 +79,14 @@ try {
     $pdf = new tFPDF('P', 'mm', 'A4');
     $pdf->AddPage();
     
-    // Dodajemy czcionkę używając PEŁNEJ ŚCIEŻKI jako trzeci parametr
-    // To wymusza na tFPDF użycie dokładnie tego pliku, omijając jego wewnętrzne szukanie
-    $fontPathNormal = __DIR__ . '/font/unifont/DejaVuSansCondensed.ttf';
-    $fontPathBold = __DIR__ . '/font/unifont/DejaVuSansCondensed-Bold.ttf';
-
-    if (!file_exists($fontPathNormal)) {
-        throw new Exception("Błąd krytyczny: Nie znaleziono pliku czcionki w ścieżce: " . $fontPathNormal);
+    // Sprawdzamy czy pliki istnieją fizycznie na serwerze przed próbą dodania
+    if (!file_exists(_SYSTEM_TTFONTS . 'DejaVuSansCondensed.ttf')) {
+        throw new Exception("Błąd: Plik czcionki nie istnieje w " . _SYSTEM_TTFONTS);
     }
 
-    $pdf->AddFont('DejaVu', '', $fontPathNormal, true);
-    $pdf->AddFont('DejaVu', 'B', $fontPathBold, true);
+    // tFPDF sam połączy _SYSTEM_TTFONTS z nazwą pliku przekazaną tutaj
+    $pdf->AddFont('DejaVu', '', 'DejaVuSansCondensed.ttf', true);
+    $pdf->AddFont('DejaVu', 'B', 'DejaVuSansCondensed-Bold.ttf', true);
     
     $pdf->SetFont('DejaVu', 'B', 16);
     $pdf->Cell(0, 10, "RAPORT Z TESTU: " . $test['nazwa'], 0, 1, 'C');
