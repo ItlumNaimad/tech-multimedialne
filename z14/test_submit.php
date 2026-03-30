@@ -78,6 +78,7 @@ if ($has_fpdf) {
         // Nagłówek
         $pdf->SetTextColor(0, 0, 0);
         $pdf->Cell(0, 10, iconv('UTF-8', 'windows-1250', "RAPORT Z TESTU: " . $test['nazwa']), 0, 1);
+        $pdf->Ln(2);
         $pdf->Cell(0, 7, iconv('UTF-8', 'windows-1250', "Uzytkownik: " . $_SESSION['username']), 0, 1);
         $pdf->Cell(0, 7, iconv('UTF-8', 'windows-1250', "Wynik: $total_points / " . count($questions) . " (" . round($percent) . "%)"), 0, 1);
         
