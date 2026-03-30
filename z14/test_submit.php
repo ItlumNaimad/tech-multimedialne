@@ -6,12 +6,16 @@
 session_start();
 require_once 'database/database.php';
 
-// Jawne zdefiniowanie ścieżki do czcionek, aby uniknąć problemów z relatywnymi ścieżkami
+// Definiujemy ścieżkę do czcionek tFPDF
 if (!defined('FPDF_FONTPATH')) {
     define('FPDF_FONTPATH', __DIR__ . '/font/');
 }
+// Niektóre wersje tFPDF używają _SYSTEM_TTFONTS do szukania plików ttf
+if (!defined('_SYSTEM_TTFONTS')) {
+    define('_SYSTEM_TTFONTS', __DIR__ . '/font/unifont/');
+}
 
-require_once 'tfpdf.php'; // Używamy tFPDF dla poprawnej obsługi UTF-8 i polskich znaków
+require_once 'tfpdf.php'; 
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'pracownik') {
     die("Brak uprawnień.");
@@ -63,11 +67,10 @@ $passed = ($percent >= $test['prog_zaliczenia']);
 $stmt_log = $pdo->prepare("INSERT INTO logi_aktywnosci (rola, id_uzytkownika, akcja) VALUES ('pracownik', ?, ?)");
 $stmt_log->execute([$idp, "Ukończono test: " . $test['nazwa'] . ", wynik: $total_points"]);
 
-// GENEROWANIE PDF - UTF-8 (tFPDF)
+// GENEROWANIE PDF
 $pdf_filename = "test_res_" . $idp . "_" . $idt . "_" . time() . ".pdf";
 $pdf_path = "pdf/" . $pdf_filename;
 
-// Upewnij się, że katalog pdf istnieje
 if (!file_exists('pdf')) {
     mkdir('pdf', 0777, true);
 }
@@ -76,16 +79,17 @@ try {
     $pdf = new tFPDF('P', 'mm', 'A4');
     $pdf->AddPage();
     
-    // Dodajemy czcionkę Unicode (DejaVu) - sprawdzamy czy pliki istnieją
-    $fontFileNormal = FPDF_FONTPATH . 'unifont/DejaVuSansCondensed.ttf';
-    $fontFileBold = FPDF_FONTPATH . 'unifont/DejaVuSansCondensed-Bold.ttf';
+    // Dodajemy czcionkę używając PEŁNEJ ŚCIEŻKI jako trzeci parametr
+    // To wymusza na tFPDF użycie dokładnie tego pliku, omijając jego wewnętrzne szukanie
+    $fontPathNormal = __DIR__ . '/font/unifont/DejaVuSansCondensed.ttf';
+    $fontPathBold = __DIR__ . '/font/unifont/DejaVuSansCondensed-Bold.ttf';
 
-    if (!file_exists($fontFileNormal)) {
-        throw new Exception("Brak pliku czcionki: " . $fontFileNormal);
+    if (!file_exists($fontPathNormal)) {
+        throw new Exception("Błąd krytyczny: Nie znaleziono pliku czcionki w ścieżce: " . $fontPathNormal);
     }
 
-    $pdf->AddFont('DejaVu', '', 'DejaVuSansCondensed.ttf', true);
-    $pdf->AddFont('DejaVu', 'B', 'DejaVuSansCondensed-Bold.ttf', true);
+    $pdf->AddFont('DejaVu', '', $fontPathNormal, true);
+    $pdf->AddFont('DejaVu', 'B', $fontPathBold, true);
     
     $pdf->SetFont('DejaVu', 'B', 16);
     $pdf->Cell(0, 10, "RAPORT Z TESTU: " . $test['nazwa'], 0, 1, 'C');
@@ -172,7 +176,7 @@ $stmt_res->execute([$idp, $idt, $total_points, $pdf_filename]);
                 <?php else: ?>
                     <div class="alert alert-warning small">
                         Raport PDF nie został wygenerowany.<br>
-                        <?php if(isset($pdf_error)) echo "<strong>Szczegóły:</strong> " . htmlspecialchars($pdf_error); ?>
+                        <?php if(isset($pdf_error)) echo "<strong>Szczegóły błędu:</strong> " . htmlspecialchars($pdf_error); ?>
                     </div>
                 <?php endif; ?>
                 <a href="index.php" class="btn btn-outline-secondary w-100">Wróć do strony głównej</a>
