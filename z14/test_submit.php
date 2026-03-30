@@ -79,38 +79,40 @@ if ($has_fpdf) {
     try {
         // Inicjalizacja oficjalnej biblioteki
         $pdf = new FPDF('P', 'mm', 'A4');
+        $pdf->AddFont('HelveticaPL', '', 'helveticapl.php');
+        $pdf->AddFont('HelveticaPL', 'B', 'helveticaplb.php');
         $pdf->AddPage();
         
-        // Ustawienie czcionki (Używamy ISO-8859-2 dla polskich znaków)
-        $pdf->SetFont('Helvetica', 'B', 16);
+        // Ustawienie czcionki (Używamy Windows-1250 dla polskich znaków)
+        $pdf->SetFont('HelveticaPL', 'B', 16);
         $pdf->SetTextColor(0, 0, 0);
-        $pdf->Cell(0, 10, iconv('UTF-8', 'ISO-8859-2', "RAPORT Z TESTU: " . $test['nazwa']), 0, 1, 'C');
+        $pdf->Cell(0, 10, iconv('UTF-8', 'windows-1250', "RAPORT Z TESTU: " . $test['nazwa']), 0, 1, 'C');
         $pdf->Ln(5);
 
-        $pdf->SetFont('Helvetica', '', 11);
-        $pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Uzytkownik: " . $_SESSION['username']), 0, 1);
-        $pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Data wykonania: " . date("Y-m-d H:i:s")), 0, 1);
-        $pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Wynik punktowy: $total_points / " . count($questions)), 0, 1);
-        $pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Procentowo: " . round($percent) . "%"), 0, 1);
+        $pdf->SetFont('HelveticaPL', '', 11);
+        $pdf->Cell(0, 7, iconv('UTF-8', 'windows-1250', "Uzytkownik: " . $_SESSION['username']), 0, 1);
+        $pdf->Cell(0, 7, iconv('UTF-8', 'windows-1250', "Data wykonania: " . date("Y-m-d H:i:s")), 0, 1);
+        $pdf->Cell(0, 7, iconv('UTF-8', 'windows-1250', "Wynik punktowy: $total_points / " . count($questions)), 0, 1);
+        $pdf->Cell(0, 7, iconv('UTF-8', 'windows-1250', "Procentowo: " . round($percent) . "%"), 0, 1);
         
         if ($passed) {
             $pdf->SetTextColor(0, 150, 0);
-            $pdf->SetFont('Helvetica', 'B', 12);
-            $pdf->Cell(0, 10, iconv('UTF-8', 'ISO-8859-2', "STATUS: ZALICZONY"), 0, 1);
+            $pdf->SetFont('HelveticaPL', 'B', 12);
+            $pdf->Cell(0, 10, iconv('UTF-8', 'windows-1250', "STATUS: ZALICZONY"), 0, 1);
         } else {
             $pdf->SetTextColor(200, 0, 0);
-            $pdf->SetFont('Helvetica', 'B', 12);
-            $pdf->Cell(0, 10, iconv('UTF-8', 'ISO-8859-2', "STATUS: NIEZALICZONY (Próg: " . $test['prog_zaliczenia'] . "%)"), 0, 1);
+            $pdf->SetFont('HelveticaPL', 'B', 12);
+            $pdf->Cell(0, 10, iconv('UTF-8', 'windows-1250', "STATUS: NIEZALICZONY (Próg: " . $test['prog_zaliczenia'] . "%)"), 0, 1);
         }
         $pdf->Ln(10);
 
         // Szczegóły pytań
         foreach ($report_data as $idx => $data) {
             $pdf->SetTextColor(0, 0, 0);
-            $pdf->SetFont('Helvetica', 'B', 11);
-            $pdf->MultiCell(0, 7, iconv('UTF-8', 'ISO-8859-2', ($idx+1) . ". " . $data['q']), 0, 'L');
+            $pdf->SetFont('HelveticaPL', 'B', 11);
+            $pdf->MultiCell(0, 7, iconv('UTF-8', 'windows-1250', ($idx+1) . ". " . $data['q']), 0, 'L');
             
-            $pdf->SetFont('Helvetica', '', 10);
+            $pdf->SetFont('HelveticaPL', '', 10);
             foreach ($data['all_options'] as $ans) {
                 $is_user_selected = in_array((string)$ans['idodp'], $data['user']);
                 $is_correct_ans = $ans['czy_poprawna'];
@@ -118,10 +120,10 @@ if ($has_fpdf) {
                 $label = "";
                 if ($is_correct_ans) {
                     $pdf->SetTextColor(0, 128, 0);
-                    $label = " (POPRAWNA)";
+                    $label = iconv('UTF-8', 'windows-1250', " (POPRAWNA)");
                 } elseif ($is_user_selected && !$is_correct_ans) {
                     $pdf->SetTextColor(255, 0, 0);
-                    $label = " (BLEDNA)";
+                    $label = iconv('UTF-8', 'windows-1250', " (BLEDNA)");
                 } else {
                     $pdf->SetTextColor(0, 0, 0);
                     $label = "";
@@ -129,7 +131,7 @@ if ($has_fpdf) {
 
                 $box = $is_user_selected ? "[X] " : "[ ] ";
                 $pdf->Cell(10);
-                $pdf->Cell(0, 6, iconv('UTF-8', 'ISO-8859-2', $box . $ans['tresc'] . $label), 0, 1);
+                $pdf->Cell(0, 6, iconv('UTF-8', 'windows-1250', $box . $ans['tresc']) . $label, 0, 1);
             }
             $pdf->Ln(4);
         }
