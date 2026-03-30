@@ -1,11 +1,11 @@
 <?php
 /**
  * Plik: test_submit.php
- * Cel: Sprawdzenie testu, generowanie PDF (Wersja STABILNA - FPDF + iconv).
+ * Cel: Sprawdzenie testu, generowanie PDF (Wersja STABILNA - Courier + Windows-1250).
  */
 session_start();
 require_once 'database/database.php';
-require_once 'fpdf.php'; // Powrót do standardowej biblioteki
+require_once 'fpdf.php'; // Biblioteka standardowa
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'pracownik') {
     die("Brak uprawnień.");
@@ -54,11 +54,10 @@ foreach ($questions as $q) {
 $percent = count($questions) > 0 ? ($total_points / count($questions)) * 100 : 0;
 $passed = ($percent >= $test['prog_zaliczenia']);
 
-// Logowanie aktywności
 $stmt_log = $pdo->prepare("INSERT INTO logi_aktywnosci (rola, id_uzytkownika, akcja) VALUES ('pracownik', ?, ?)");
-$stmt_log->execute([$idp, "Ukończono test: " . $test['nazwa'] . ", wynik: $total_points"]);
+$stmt_log->execute([$idp, "Ukonczono test: " . $test['nazwa'] . ", wynik: $total_points"]);
 
-// GENEROWANIE PDF - METODA STABILNA (ISO-8859-2)
+// GENEROWANIE PDF - METODA COURIER (STABILNA DLA WIN-1250)
 $pdf_filename = "test_res_" . $idp . "_" . $idt . "_" . time() . ".pdf";
 $pdf_path = "pdf/" . $pdf_filename;
 
@@ -66,22 +65,24 @@ if (!file_exists('pdf')) {
     mkdir('pdf', 0777, true);
 }
 
-// Funkcja pomocnicza do konwersji polskich znaków dla FPDF
+/**
+ * Funkcja do konwersji na Windows-1250 (najlepsza obsługa polskich znaków w standardowym FPDF)
+ */
 function pl($text) {
-    return iconv('UTF-8', 'ISO-8859-2//TRANSLIT', $text);
+    return iconv('UTF-8', 'windows-1250//TRANSLIT', $text);
 }
 
 try {
     $pdf = new FPDF('P', 'mm', 'A4');
     $pdf->AddPage();
     
-    // Używamy standardowej czcionki Arial (zawsze dostępna w FPDF)
-    $pdf->SetFont('Arial', 'B', 16);
+    // Używamy czcionki COURIER - jest wbudowana i często lepiej radzi sobie z kodowaniem regionalnym w PDF
+    $pdf->SetFont('Courier', 'B', 16);
     $pdf->Cell(0, 10, pl("RAPORT Z TESTU: " . $test['nazwa']), 0, 1, 'C');
     $pdf->Ln(5);
 
-    $pdf->SetFont('Arial', '', 11);
-    $pdf->Cell(0, 7, pl("Użytkownik: " . $_SESSION['username']), 0, 1);
+    $pdf->SetFont('Courier', '', 11);
+    $pdf->Cell(0, 7, pl("Uzytkownik: " . $_SESSION['username']), 0, 1);
     $pdf->Cell(0, 7, pl("Data: " . date("Y-m-d H:i:s")), 0, 1);
     $pdf->Cell(0, 7, pl("Wynik: $total_points / " . count($questions) . " (" . round($percent) . "%)"), 0, 1);
     
@@ -97,32 +98,29 @@ try {
     $pdf->Ln(5);
 
     foreach ($report_data as $idx => $data) {
-        $pdf->SetFont('Arial', 'B', 11);
+        $pdf->SetFont('Courier', 'B', 11);
         $pdf->MultiCell(0, 7, pl(($idx+1) . ". " . $data['q']), 0, 'L');
         
-        $pdf->SetFont('Arial', '', 10);
+        $pdf->SetFont('Courier', '', 10);
         foreach ($data['all_options'] as $ans) {
             $is_user_selected = in_array((string)$ans['idodp'], $data['user']);
             $is_correct_ans = $ans['czy_poprawna'];
             
             if ($is_user_selected && $is_correct_ans) {
                 $pdf->SetTextColor(0, 128, 0);
-                $box = "[X] ";
-                $tag = " (Prawidlowa)";
+                $tag = " [POPRAWNA]";
             } elseif ($is_user_selected && !$is_correct_ans) {
                 $pdf->SetTextColor(255, 0, 0);
-                $box = "[X] ";
-                $tag = " (Bledna)";
+                $tag = " [BLEDNA]";
             } elseif (!$is_user_selected && $is_correct_ans) {
                 $pdf->SetTextColor(255, 0, 0);
-                $box = "[ ] ";
-                $tag = " (Prawidlowa - POMINIETO)";
+                $tag = " [POPRAWNA - POMINIETO]";
             } else {
                 $pdf->SetTextColor(100, 100, 100);
-                $box = "[ ] ";
                 $tag = "";
             }
 
+            $box = $is_user_selected ? "[X] " : "[ ] ";
             $pdf->Cell(10);
             $pdf->MultiCell(0, 6, pl($box . $ans['tresc'] . $tag), 0, 'L');
             $pdf->SetTextColor(0, 0, 0);
@@ -132,7 +130,6 @@ try {
 
     $pdf->Output('F', $pdf_path);
 } catch (Exception $e) {
-    error_log("Błąd generowania PDF: " . $e->getMessage());
     $pdf_filename = "";
 }
 
