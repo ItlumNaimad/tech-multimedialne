@@ -152,17 +152,22 @@ $lessons_list = $pdo->query("SELECT idl, nazwa FROM lekcje ORDER BY kolejnosc AS
                         $file = $current_lesson['plik_multimedialny'];
                         $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
                         $path = "lekcje/" . $file;
-                        if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'])): ?>
-                            <img src="<?php echo $path; ?>" class="shadow-sm img-fluid" alt="Grafika">
-                        <?php elseif (in_array($ext, ['mp4', 'webm', 'ogg'])): ?>
-                            <video controls class="shadow-sm w-100">
-                                <source src="<?php echo $path; ?>" type="video/<?php echo $ext; ?>">
-                            </video>
-                        <?php elseif (in_array($ext, ['mp3', 'wav', 'ogg'])): ?>
-                            <audio controls class="w-100 mt-2">
-                                <source src="<?php echo $path; ?>" type="audio/<?php echo ($ext=='mp3'?'mpeg':$ext); ?>">
-                            </audio>
-                        <?php endif; ?>
+                        
+                        if (!file_exists($path)) {
+                            echo "<div class='alert alert-danger'>Błąd: Plik <strong>$file</strong> nie istnieje na serwerze w folderze lekcje/. Upewnij się, że został poprawnie wgrany.</div>";
+                        } else {
+                            if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'])): ?>
+                                <img src="<?php echo $path; ?>" class="shadow-sm img-fluid" alt="Grafika">
+                            <?php elseif (in_array($ext, ['mp4', 'webm', 'ogg'])): ?>
+                                <video controls class="shadow-sm w-100">
+                                    <source src="<?php echo $path; ?>" type="video/<?php echo $ext; ?>">
+                                </video>
+                            <?php elseif (in_array($ext, ['mp3', 'wav', 'ogg'])): ?>
+                                <audio controls class="w-100 mt-2">
+                                    <source src="<?php echo $path; ?>" type="audio/<?php echo ($ext=='mp3'?'mpeg':$ext); ?>">
+                                </audio>
+                            <?php endif; 
+                        } ?>
                     </section>
                 <?php endif; ?>
 

@@ -1,122 +1,61 @@
 <?php
-/*******************************************************************************
-* FPDF                                                                         *
-*                                                                              *
-* Version: 1.86                                                                *
-* Date:    2023-06-25                                                          *
-* Author:  Olivier PLATHEY                                                     *
-*******************************************************************************/
+/**
+ * Minimalna, funkcjonalna klasa FPDF (tylko do celów demonstracyjnych),
+ * aby zapobiec błędom "0 stron" i umożliwić otwarcie pliku.
+ * UWAGA: Dla pełnej funkcjonalności zaleca się pobranie oficjalnej biblioteki ze strony fpdf.org.
+ */
+class FPDF {
+    protected $buffer = "";
+    protected $page = 0;
+    protected $pages = [];
+    protected $state = 0;
+    protected $CurrentFont = ['family' => 'arial', 'style' => '', 'size' => 12];
 
-define('FPDF_VERSION','1.86');
+    function __construct($orientation='P', $unit='mm', $size='A4') {
+        $this->state = 1;
+    }
 
-class FPDF
-{
-protected $page;               // current page number
-protected $n;                  // current object number
-protected $offsets;            // array of object offsets
-protected $buffer;             // buffer holding in-memory PDF
-protected $pages;              // array containing pages for sequential output
-protected $state;              // current document state
-protected $compress;           // compression flag
-protected $k;                  // scale factor (number of points in user unit)
-protected $DefOrientation;     // default orientation
-protected $CurOrientation;     // current orientation
-protected $StdPageSizes;       // standard page sizes
-protected $DefPageSize;        // default page size
-protected $CurPageSize;        // current page size
-protected $CurRotation;        // current page rotation
-protected $PageSizes;          // used for different page sizes
-protected $wPt, $hPt;          // dimensions of current page in points
-protected $w, $h;              // dimensions of current page in user units
-protected $lMargin;            // left margin
-protected $tMargin;            // top margin
-protected $rMargin;            // right margin
-protected $bMargin;            // page break margin
-protected $cMargin;            // cell margin
-protected $x, $y;              // current position in user units
-protected $lasth;              // height of last printed cell
-protected $LineWidth;          // line width in user units
-protected $fontpath;           // path containing fonts
-protected $CoreFonts;          // array of core font names
-protected $fonts;              // array of used fonts
-protected $FontFiles;          // array of font files
-protected $encodings;          // array of encodings
-protected $cmaps;              // array of Adobe Font Metrics
-protected $FontFamily;         // current font family
-protected $FontStyle;          // current font style
-protected $underline;          // underlining flag
-protected $CurrentFont;        // current font info
-protected $FontSizePt;         // current font size in points
-protected $FontSize;           // current font size in user units
-protected $DrawColor;          // commands for drawing color
-protected $FillColor;          // commands for filling color
-protected $TextColor;          // commands for text color
-protected $ColorFlag;          // indicates whether fill and text colors are different
-protected $WithAlpha;          // indicates whether alpha channel is used
-protected $ws;                 // word spacing
-protected $images;             // array of used images
-protected $PageLinks;          // array of links in pages
-protected $links;              // array of internal links
-protected $AutoPageBreak;      // automatic page breaking
-protected $PageBreakTrigger;   // threshold used to trigger page breaks
-protected $InHeader;           // flag set when processing header
-protected $InFooter;           // flag set when processing footer
-protected $AliasNbPages;       // alias for total number of pages
-protected $ZoomMode;           // zoom display mode
-protected $LayoutMode;         // layout display mode
-protected $metadata;           // document properties
-protected $pdf_version;        // PDF version number
+    function AddPage() {
+        $this->page++;
+        $this->pages[$this->page] = "";
+    }
 
-/*
-* Simple stub of FPDF class to allow the application to run.
-* Note: This is NOT the full FPDF source code, but a minimal functional class
-* for the purpose of this exercise to avoid fatal errors.
-*/
+    function SetFont($family, $style='', $size=0) {
+        $this->CurrentFont = ['family' => strtolower($family), 'style' => strtoupper($style), 'size' => $size];
+    }
 
-function __construct($orientation='P', $unit='mm', $size='A4')
-{
-	$this->state = 0;
-	$this->page = 0;
-	$this->n = 2;
-	$this->buffer = '';
-	$this->pages = array();
-	$this->state = 1;
-    $this->k = 72/25.4;
-    $this->fontpath = '';
-    $this->CoreFonts = array('courier', 'helvetica', 'times', 'symbol', 'zapfdingbats');
-}
+    function Cell($w, $h=0, $txt='', $border=0, $ln=0, $align='', $fill=false, $link='') {
+        $this->pages[$this->page] .= " (".$txt.") Tj ";
+    }
 
-function AddPage($orientation='', $size='', $rotation=0)
-{
-	$this->page++;
-}
+    function MultiCell($w, $h, $txt, $border=0, $align='J', $fill=false) {
+        $this->pages[$this->page] .= " (".$txt.") Tj ";
+    }
 
-function SetFont($family, $style='', $size=0)
-{
-}
+    function Ln($h=null) { }
+    function SetTextColor($r, $g=null, $b=null) { }
 
-function Cell($w, $h=0, $txt='', $border=0, $ln=0, $align='', $fill=false, $link='')
-{
-}
+    function Output($dest='', $name='', $isUTF8=false) {
+        // Bardzo uproszczona struktura PDF, aby czytniki go rozpoznały
+        $pdf = "%PDF-1.3\n";
+        $pdf .= "1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n";
+        $pdf .= "2 0 obj << /Type /Pages /Kids [";
+        for($i=1;$i<=$this->page;$i++) $pdf .= ($i+2)." 0 R ";
+        $pdf .= "] /Count ".$this->page." >> endobj\n";
+        
+        for($i=1;$i<=$this->page;$i++) {
+            $content = "BT /F1 12 Tf 100 700 Td ".$this->pages[$i]." ET";
+            $pdf .= ($i+2)." 0 obj << /Type /Page /Parent 2 0 R /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >> /Contents ".($i+$this->page+2)." 0 R >> endobj\n";
+            $pdf .= ($i+$this->page+2)." 0 obj << /Length ".strlen($content)." >> stream\n".$content."\nendstream\nendobj\n";
+        }
+        $pdf .= "%%EOF";
 
-function MultiCell($w, $h, $txt, $border=0, $align='J', $fill=false)
-{
-}
-
-function Ln($h=null)
-{
-}
-
-function SetTextColor($r, $g=null, $b=null)
-{
-}
-
-function Output($dest='', $name='', $isUTF8=false)
-{
-    // Minimal mock output to satisfy the script
-    if($dest=='F')
-        file_put_contents($name, "%PDF-1.3\n%Minimal stub for exercise");
-    return "";
-}
+        if($dest == 'F') {
+            file_put_contents($name, $pdf);
+        } else {
+            header('Content-Type: application/pdf');
+            echo $pdf;
+        }
+    }
 }
 ?>
