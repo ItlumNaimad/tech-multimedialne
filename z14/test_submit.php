@@ -1,18 +1,19 @@
 <?php
 /**
  * Plik: test_submit.php
- * Cel: Sprawdzenie testu, generowanie PDF (Wersja UTF-8 z tFPDF).
+ * Cel: Sprawdzenie testu, generowanie PDF (V4 - Uprawnienia i Ścieżki).
  */
 session_start();
 require_once 'database/database.php';
 
-// Definiujemy ścieżkę do czcionek tFPDF
+// Próba nadania uprawnień do plików czcionek (częsty problem na hostingach)
+@chmod(__DIR__ . '/font/unifont/DejaVuSansCondensed.ttf', 0644);
+@chmod(__DIR__ . '/font/unifont/DejaVuSansCondensed-Bold.ttf', 0644);
+@chmod(__DIR__ . '/font/unifont/', 0755);
+
+// Definiujemy ścieżkę do czcionek tFPDF - używamy relatywnej dla większej przenośności
 if (!defined('FPDF_FONTPATH')) {
-    define('FPDF_FONTPATH', __DIR__ . '/font/');
-}
-// Niektóre wersje tFPDF używają _SYSTEM_TTFONTS do szukania plików ttf
-if (!defined('_SYSTEM_TTFONTS')) {
-    define('_SYSTEM_TTFONTS', __DIR__ . '/font/unifont/');
+    define('FPDF_FONTPATH', 'font/');
 }
 
 require_once 'tfpdf.php'; 
@@ -79,12 +80,12 @@ try {
     $pdf = new tFPDF('P', 'mm', 'A4');
     $pdf->AddPage();
     
-    // Sprawdzamy czy pliki istnieją fizycznie na serwerze przed próbą dodania
-    if (!file_exists(_SYSTEM_TTFONTS . 'DejaVuSansCondensed.ttf')) {
-        throw new Exception("Błąd: Plik czcionki nie istnieje w " . _SYSTEM_TTFONTS);
+    // Sprawdzamy dostępność pliku przez PHP przed tFPDF
+    $check_path = __DIR__ . '/font/unifont/DejaVuSansCondensed.ttf';
+    if (!is_readable($check_path)) {
+        throw new Exception("Błąd: Plik czcionki istnieje, ale PHP nie może go odczytać (uprawnienia). Ścieżka: $check_path");
     }
 
-    // tFPDF sam połączy _SYSTEM_TTFONTS z nazwą pliku przekazaną tutaj
     $pdf->AddFont('DejaVu', '', 'DejaVuSansCondensed.ttf', true);
     $pdf->AddFont('DejaVu', 'B', 'DejaVuSansCondensed-Bold.ttf', true);
     
@@ -144,7 +145,7 @@ try {
 
     $pdf->Output('F', $pdf_path);
 } catch (Exception $e) {
-    error_log("Błąd generowania PDF: " . $e->getMessage());
+    error_log("Błąd PDF: " . $e->getMessage());
     $pdf_filename = "";
     $pdf_error = $e->getMessage();
 }
@@ -173,7 +174,7 @@ $stmt_res->execute([$idp, $idt, $total_points, $pdf_filename]);
                 <?php else: ?>
                     <div class="alert alert-warning small">
                         Raport PDF nie został wygenerowany.<br>
-                        <?php if(isset($pdf_error)) echo "<strong>Szczegóły błędu:</strong> " . htmlspecialchars($pdf_error); ?>
+                        <strong>Szczegóły:</strong> <?php echo isset($pdf_error) ? htmlspecialchars($pdf_error) : 'Nieznany błąd systemu plików.'; ?>
                     </div>
                 <?php endif; ?>
                 <a href="index.php" class="btn btn-outline-secondary w-100">Wróć do strony głównej</a>
