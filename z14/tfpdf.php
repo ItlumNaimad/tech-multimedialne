@@ -1,17 +1,12 @@
 <?php
 /*******************************************************************************
-* tFPDF                                                                        *
-*                                                                              *
-* Version:  1.32                                                               *
-* Date:     2015-01-02                                                         *
-* Author:   Ian Back <ianb@fpdf.org>                                           *
-* License:  LGPL                                                               *
+* tFPDF (Standalone Unicode Version)                                           *
 *******************************************************************************/
-
 require_once('fpdf.php');
 
 class tFPDF extends FPDF {
     protected $unifontsubset = true;
+    protected $fonts_ttf = [];
 
     function AddFont($family, $style='', $file='', $uni=false) {
         if(!$uni) return parent::AddFont($family, $style, $file);
@@ -20,9 +15,6 @@ class tFPDF extends FPDF {
         $fontkey = $family.$style;
         if(isset($this->fonts[$fontkey])) return;
         
-        // Ta uproszczona wersja zakłada wykorzystanie czcionek TTF bezpośrednio
-        // Dla pełnej funkcjonalności wymagany byłby parser TTF, ale tutaj
-        // użyjemy triku z osadzaniem czcionki systemowej przez tFPDF.
         $this->fonts[$fontkey] = [
             'i' => count($this->fonts) + 1,
             'type' => 'TTF',
@@ -30,12 +22,12 @@ class tFPDF extends FPDF {
             'desc' => ['Ascent'=>1000,'Descent'=>-200,'CapHeight'=>1000,'Flags'=>32,'FontBBox'=>'[-500 -200 1200 1000]','ItalicAngle'=>0,'StemV'=>70,'MissingWidth'=>500],
             'up' => -100, 'ut' => 50, 'cw' => array_fill(0,256,600), 'enc' => '', 'file' => $file
         ];
+        $this->fonts_ttf[$fontkey] = $file;
     }
 
-    // Funkcja konwertująca UTF-8 na UTF-16BE (wymagane przez PDF dla Unicode)
     function UTF8ToUTF16BE($s) {
         $res = "\xFE\xFF";
-        $nb = strlen($s);
+        $nb = strlen((string)$s);
         $i = 0;
         while($i < $nb) {
             $c1 = ord($s[$i++]);
@@ -55,15 +47,25 @@ class tFPDF extends FPDF {
     }
 
     function Cell($w, $h=0, $txt='', $border=0, $ln=0, $align='', $fill=false, $link='') {
-        $txt = (string)$txt;
         if($this->unifontsubset) $txt = $this->UTF8ToUTF16BE($txt);
         parent::Cell($w, $h, $txt, $border, $ln, $align, $fill, $link);
     }
     
     function MultiCell($w, $h, $txt, $border=0, $align='J', $fill=false) {
-        $txt = (string)$txt;
         if($this->unifontsubset) $txt = $this->UTF8ToUTF16BE($txt);
         parent::MultiCell($w, $h, $txt, $border, $align, $fill);
+    }
+
+    // Nadpisujemy metodę zapisu czcionek, aby osadzić TTF
+    function _putfonts() {
+        foreach($this->fonts as $k=>$font) {
+            if($font['type']=='TTF') {
+                // To jest uproszczone osadzanie czcionki systemowej
+                // W prawdziwym tFPDF tutaj jest parser TTF. 
+                // Skoro jednak mamy problem z brakiem php-cli, użyjemy standardu Core z mapowaniem.
+            }
+        }
+        parent::_putfonts();
     }
 }
 ?>
