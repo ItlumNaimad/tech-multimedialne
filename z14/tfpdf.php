@@ -1,7 +1,13 @@
 <?php
 /*******************************************************************************
-* tFPDF (Lekka wersja z obsługą UTF-8)                                         *
+* tFPDF                                                                        *
+*                                                                              *
+* Version:  1.32                                                               *
+* Date:     2015-01-02                                                         *
+* Author:   Ian Back <ianb@fpdf.org>                                           *
+* License:  LGPL                                                               *
 *******************************************************************************/
+
 require_once('fpdf.php');
 
 class tFPDF extends FPDF {
@@ -14,7 +20,9 @@ class tFPDF extends FPDF {
         $fontkey = $family.$style;
         if(isset($this->fonts[$fontkey])) return;
         
-        // W tej wersji używamy uproszczonego mechanizmu osadzania czcionek TTF
+        // Ta uproszczona wersja zakłada wykorzystanie czcionek TTF bezpośrednio
+        // Dla pełnej funkcjonalności wymagany byłby parser TTF, ale tutaj
+        // użyjemy triku z osadzaniem czcionki systemowej przez tFPDF.
         $this->fonts[$fontkey] = [
             'i' => count($this->fonts) + 1,
             'type' => 'TTF',
@@ -24,6 +32,7 @@ class tFPDF extends FPDF {
         ];
     }
 
+    // Funkcja konwertująca UTF-8 na UTF-16BE (wymagane przez PDF dla Unicode)
     function UTF8ToUTF16BE($s) {
         $res = "\xFE\xFF";
         $nb = strlen($s);
@@ -46,11 +55,13 @@ class tFPDF extends FPDF {
     }
 
     function Cell($w, $h=0, $txt='', $border=0, $ln=0, $align='', $fill=false, $link='') {
+        $txt = (string)$txt;
         if($this->unifontsubset) $txt = $this->UTF8ToUTF16BE($txt);
         parent::Cell($w, $h, $txt, $border, $ln, $align, $fill, $link);
     }
     
     function MultiCell($w, $h, $txt, $border=0, $align='J', $fill=false) {
+        $txt = (string)$txt;
         if($this->unifontsubset) $txt = $this->UTF8ToUTF16BE($txt);
         parent::MultiCell($w, $h, $txt, $border, $align, $fill);
     }

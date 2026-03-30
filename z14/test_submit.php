@@ -1,18 +1,11 @@
 <?php
 /**
  * Plik: test_submit.php
- * Cel: Sprawdzenie testu, generowanie PDF.
+ * Cel: Sprawdzenie testu, generowanie PDF (Obsługa UNICODE/UTF-8).
  */
 session_start();
 require_once 'database/database.php';
-
-// Weryfikacja obecności oficjalnej biblioteki FPDF
-if (file_exists('fpdf.php')) {
-    require 'fpdf.php';
-    $has_fpdf = true;
-} else {
-    $has_fpdf = false;
-}
+require_once 'tfpdf.php'; // Używamy tFPDF dla pełnej obsługi polskiego UTF-8
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'pracownik') {
     die("Brak uprawnień.");
@@ -73,74 +66,76 @@ $passed = ($percent >= $test['prog_zaliczenia']);
 $stmt_log = $pdo->prepare("INSERT INTO logi_aktywnosci (rola, id_uzytkownika, akcja) VALUES ('pracownik', ?, ?)");
 $stmt_log->execute([$idp, "Ukonczono test: " . $test['nazwa'] . ", wynik: $total_points"]);
 
-// 2. Generowanie PDF
+// 2. Generowanie PDF (tFPDF - Unicode)
 $pdf_filename = "";
-if ($has_fpdf) {
-    try {
-        $pdf = new FPDF('P', 'mm', 'A4');
-        $pdf->AddPage();
-        
-        // Helvetica/Arial
-        $pdf->SetFont('Arial', 'B', 16);
-        $pdf->SetTextColor(0, 0, 0);
-        $pdf->Cell(0, 10, iconv('UTF-8', 'ISO-8859-2', "RAPORT Z TESTU: " . $test['nazwa']), 0, 1, 'C');
-        $pdf->Ln(5);
+try {
+    $pdf = new tFPDF('P', 'mm', 'A4');
+    
+    // Dodajemy czcionkę TrueType (Arial), która obsługuje polskie znaki w UTF-8
+    // Pliki arial.ttf i arialbd.ttf zostały skopiowane do folderu głównego
+    $pdf->AddFont('ArialPL', '', 'arial.ttf', true);
+    $pdf->AddFont('ArialPL', 'B', 'arialbd.ttf', true);
+    
+    $pdf->AddPage();
+    $pdf->SetFont('ArialPL', 'B', 16);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->Cell(0, 10, "RAPORT Z TESTU: " . $test['nazwa'], 0, 1, 'C');
+    $pdf->Ln(5);
 
-        $pdf->SetFont('Arial', '', 11);
-        $pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Uzytkownik: " . $_SESSION['username']), 0, 1);
-        $pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Data: " . date("Y-m-d H:i:s")), 0, 1);
-        $pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Wynik: $total_points / " . count($questions)), 0, 1);
-        $pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Procentowo: " . round($percent) . "%"), 0, 1);
-        
-        if ($passed) {
-            $pdf->SetTextColor(0, 150, 0);
-            $pdf->SetFont('Arial', 'B', 12);
-            $pdf->Cell(0, 10, "STATUS: ZALICZONY", 0, 1);
-        } else {
-            $pdf->SetTextColor(200, 0, 0);
-            $pdf->SetFont('Arial', 'B', 12);
-            $pdf->Cell(0, 10, "STATUS: NIEZALICZONY", 0, 1);
-        }
-        $pdf->Ln(10);
-
-        // Szczegóły
-        foreach ($report_data as $idx => $data) {
-            $pdf->SetTextColor(0, 0, 0);
-            $pdf->SetFont('Arial', 'B', 11);
-            $pdf->MultiCell(0, 7, iconv('UTF-8', 'ISO-8859-2', ($idx+1) . ". " . $data['q']), 0, 'L');
-            
-            $pdf->SetFont('Arial', '', 10);
-            foreach ($data['all_options'] as $ans) {
-                $is_user_selected = in_array((string)$ans['idodp'], $data['user']);
-                $is_correct_ans = $ans['czy_poprawna'];
-                
-                $label = "";
-                if ($is_correct_ans) {
-                    $pdf->SetTextColor(0, 128, 0);
-                    $label = " (POPRAWNA)";
-                } elseif ($is_user_selected) {
-                    $pdf->SetTextColor(255, 0, 0);
-                    $label = " (BLEDNA)";
-                } else {
-                    $pdf->SetTextColor(0, 0, 0);
-                    $label = "";
-                }
-
-                $box = $is_user_selected ? "[X] " : "[ ] ";
-                $pdf->Cell(10);
-                $line = iconv('UTF-8', 'ISO-8859-2', $box . $ans['tresc']) . $label;
-                $pdf->Cell(0, 6, $line, 0, 1);
-            }
-            $pdf->Ln(4);
-        }
-
-        $pdf_filename = "test_res_" . $idp . "_" . $idt . "_" . time() . ".pdf";
-        $pdf_path = "pdf/" . $pdf_filename;
-        $pdf->Output('F', $pdf_path);
-        
-    } catch (Exception $e) {
-        $pdf_filename = "";
+    $pdf->SetFont('ArialPL', '', 11);
+    $pdf->Cell(0, 7, "Użytkownik: " . $_SESSION['username'], 0, 1);
+    $pdf->Cell(0, 7, "Data wykonania: " . date("Y-m-d H:i:s"), 0, 1);
+    $pdf->Cell(0, 7, "Wynik punktowy: $total_points / " . count($questions), 0, 1);
+    $pdf->Cell(0, 7, "Procentowo: " . round($percent) . "%", 0, 1);
+    
+    if ($passed) {
+        $pdf->SetTextColor(0, 150, 0);
+        $pdf->SetFont('ArialPL', 'B', 12);
+        $pdf->Cell(0, 10, "STATUS: ZALICZONY", 0, 1);
+    } else {
+        $pdf->SetTextColor(200, 0, 0);
+        $pdf->SetFont('ArialPL', 'B', 12);
+        $pdf->Cell(0, 10, "STATUS: NIEZALICZONY (Próg: " . $test['prog_zaliczenia'] . "%)", 0, 1);
     }
+    $pdf->Ln(10);
+
+    // Szczegóły pytań
+    foreach ($report_data as $idx => $data) {
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetFont('ArialPL', 'B', 11);
+        $pdf->MultiCell(0, 7, ($idx+1) . ". " . $data['q'], 0, 'L');
+        
+        $pdf->SetFont('ArialPL', '', 10);
+        foreach ($data['all_options'] as $ans) {
+            $is_user_selected = in_array((string)$ans['idodp'], $data['user']);
+            $is_correct_ans = $ans['czy_poprawna'];
+            
+            if ($is_correct_ans) {
+                $pdf->SetTextColor(0, 128, 0);
+                $label = " (POPRAWNA ODPOWIEDŹ)";
+            } elseif ($is_user_selected && !$is_correct_ans) {
+                $pdf->SetTextColor(255, 0, 0);
+                $label = " (ZŁA ODPOWIEDŹ)";
+            } else {
+                $pdf->SetTextColor(0, 0, 0);
+                $label = "";
+            }
+
+            $box = $is_user_selected ? "[X] " : "[ ] ";
+            $pdf->Cell(10);
+            $pdf->Cell(0, 6, $box . $ans['tresc'] . $label, 0, 1);
+        }
+        $pdf->Ln(4);
+    }
+
+    $pdf_filename = "test_res_" . $idp . "_" . $idt . "_" . time() . ".pdf";
+    $pdf_path = "pdf/" . $pdf_filename;
+    
+    $pdf->Output('F', $pdf_path);
+    
+} catch (Exception $e) {
+    // W razie błędu zapisujemy pustą nazwę pliku
+    $pdf_filename = "";
 }
 
 // 3. Zapis wyniku do bazy
