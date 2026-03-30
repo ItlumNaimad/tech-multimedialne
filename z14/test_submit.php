@@ -82,34 +82,31 @@ if ($has_fpdf) {
         $pdf->Cell(0, 7, iconv('UTF-8', 'windows-1250', "Wynik: $total_points / " . count($questions) . " (" . round($percent) . "%)"), 0, 1);
         
         if ($passed) {
-            $pdf->SetTextColor(0, 150, 0);
+            $pdf->SetTextColor(0, 150, 0); // ZIELONY
             $pdf->Cell(0, 10, iconv('UTF-8', 'windows-1250', "STATUS: ZALICZONY"), 0, 1);
         } else {
-            $pdf->SetTextColor(200, 0, 0);
+            $pdf->SetTextColor(200, 0, 0); // CZERWONY
             $pdf->Cell(0, 10, iconv('UTF-8', 'windows-1250', "STATUS: NIEZALICZONY"), 0, 1);
         }
         $pdf->Ln(10);
 
         foreach ($report_data as $idx => $data) {
-            $pdf->SetTextColor(0, 0, 0);
+            $pdf->SetTextColor(0, 0, 0); // Czarny dla pytania
             $pdf->MultiCell(0, 7, iconv('UTF-8', 'windows-1250', ($idx+1) . ". " . $data['q']));
             
             foreach ($data['all_options'] as $ans) {
                 $is_user_selected = in_array((string)$ans['idodp'], $data['user']);
-                $is_correct = $ans['czy_poprawna'];
+                $is_correct_ans = $ans['czy_poprawna'];
                 
-                // Wybór koloru
-                if ($is_correct) {
-                    $pdf->SetTextColor(0, 128, 0); // Zielony dla poprawnych odpowiedzi
+                $label = "";
+                if ($is_correct_ans) {
+                    $pdf->SetTextColor(0, 128, 0); // Zielony dla poprawnych
                     $label = " (POPRAWNA)";
-                } else {
-                    $pdf->SetTextColor(0, 0, 0);
-                    $label = "";
-                }
-                
-                if ($is_user_selected && !$is_correct) {
-                    $pdf->SetTextColor(255, 0, 0); // Czerwony, jeśli użytkownik zaznaczył błędną
+                } elseif ($is_user_selected && !$is_correct_ans) {
+                    $pdf->SetTextColor(255, 0, 0); // Czerwony dla błędnych zaznaczeń
                     $label = " (BLEDNA)";
+                } else {
+                    $pdf->SetTextColor(0, 0, 0); // Czarny dla reszty
                 }
 
                 $box = $is_user_selected ? "[X] " : "[ ] ";
