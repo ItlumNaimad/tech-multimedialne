@@ -1,11 +1,11 @@
 <?php
 /**
  * Plik: test_submit.php
- * Cel: Sprawdzenie testu, generowanie PDF (Wersja stabilna Courier).
+ * Cel: Sprawdzenie testu, generowanie PDF (Wersja UTF-8 z tFPDF).
  */
 session_start();
 require_once 'database/database.php';
-require_once 'fpdf.php'; // Używamy tylko oryginalnej, czystej biblioteki
+require_once 'tfpdf.php'; // Używamy tFPDF dla poprawnej obsługi UTF-8 i polskich znaków
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'pracownik') {
     die("Brak uprawnień.");
@@ -55,25 +55,33 @@ $percent = count($questions) > 0 ? ($total_points / count($questions)) * 100 : 0
 $passed = ($percent >= $test['prog_zaliczenia']);
 
 $stmt_log = $pdo->prepare("INSERT INTO logi_aktywnosci (rola, id_uzytkownika, akcja) VALUES ('pracownik', ?, ?)");
-$stmt_log->execute([$idp, "Ukonczono test: " . $test['nazwa'] . ", wynik: $total_points"]);
+$stmt_log->execute([$idp, "Ukończono test: " . $test['nazwa'] . ", wynik: $total_points"]);
 
-// GENEROWANIE PDF - METODA STABILNA
+// GENEROWANIE PDF - UTF-8 (tFPDF)
 $pdf_filename = "test_res_" . $idp . "_" . $idt . "_" . time() . ".pdf";
 $pdf_path = "pdf/" . $pdf_filename;
 
+// Upewnij się, że katalog pdf istnieje
+if (!file_exists('pdf')) {
+    mkdir('pdf', 0777, true);
+}
+
 try {
-    $pdf = new FPDF('P', 'mm', 'A4');
+    $pdf = new tFPDF('P', 'mm', 'A4');
     $pdf->AddPage();
     
-    // Używamy czcionki COURIER - jest wbudowana i najbardziej stabilna dla ISO-8859-2
-    $pdf->SetFont('Courier', 'B', 16);
-    $pdf->Cell(0, 10, iconv('UTF-8', 'ISO-8859-2', "RAPORT Z TESTU: " . $test['nazwa']), 0, 1, 'C');
+    // Dodajemy czcionkę Unicode (DejaVu)
+    $pdf->AddFont('DejaVu', '', 'DejaVuSansCondensed.ttf', true);
+    $pdf->AddFont('DejaVu', 'B', 'DejaVuSansCondensed-Bold.ttf', true);
+    
+    $pdf->SetFont('DejaVu', 'B', 16);
+    $pdf->Cell(0, 10, "RAPORT Z TESTU: " . $test['nazwa'], 0, 1, 'C');
     $pdf->Ln(5);
 
-    $pdf->SetFont('Courier', '', 11);
-    $pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Uzytkownik: " . $_SESSION['username']), 0, 1);
-    $pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Data: " . date("Y-m-d H:i:s")), 0, 1);
-    $pdf->Cell(0, 7, iconv('UTF-8', 'ISO-8859-2', "Wynik: $total_points / " . count($questions) . " (" . round($percent) . "%)"), 0, 1);
+    $pdf->SetFont('DejaVu', '', 11);
+    $pdf->Cell(0, 7, "Użytkownik: " . $_SESSION['username'], 0, 1);
+    $pdf->Cell(0, 7, "Data: " . date("Y-m-d H:i:s"), 0, 1);
+    $pdf->Cell(0, 7, "Wynik: $total_points / " . count($questions) . " (" . round($percent) . "%)", 0, 1);
     
     $pdf->Ln(5);
     if ($passed) {
@@ -87,28 +95,35 @@ try {
     $pdf->Ln(5);
 
     foreach ($report_data as $idx => $data) {
-        $pdf->SetFont('Courier', 'B', 11);
-        $pdf->MultiCell(0, 7, iconv('UTF-8', 'ISO-8859-2', ($idx+1) . ". " . $data['q']), 0, 'L');
+        $pdf->SetFont('DejaVu', 'B', 11);
+        $pdf->MultiCell(0, 7, ($idx+1) . ". " . $data['q'], 0, 'L');
         
-        $pdf->SetFont('Courier', '', 10);
+        $pdf->SetFont('DejaVu', '', 10);
         foreach ($data['all_options'] as $ans) {
             $is_user_selected = in_array((string)$ans['idodp'], $data['user']);
             $is_correct_ans = $ans['czy_poprawna'];
             
-            if ($is_correct_ans) {
-                $pdf->SetTextColor(0, 128, 0);
-                $tag = " [POPRAWNA]";
-            } elseif ($is_user_selected) {
-                $pdf->SetTextColor(255, 0, 0);
-                $tag = " [BLEDNA]";
+            // Logika kolorowania zgodnie z instrukcją
+            if ($is_user_selected && $is_correct_ans) {
+                $pdf->SetTextColor(0, 128, 0); // Zielony - zaznaczone prawidłowo
+                $box = "[X] ";
+                $tag = " (Prawidłowa)";
+            } elseif ($is_user_selected && !$is_correct_ans) {
+                $pdf->SetTextColor(255, 0, 0); // Czerwony - zaznaczone nieprawidłowo
+                $box = "[X] ";
+                $tag = " (Błędna)";
+            } elseif (!$is_user_selected && $is_correct_ans) {
+                $pdf->SetTextColor(255, 0, 0); // Czerwony - nie zaznaczono poprawnej (nieprawidłowo)
+                $box = "[ ] ";
+                $tag = " (Prawidłowa - POMINIĘTO)";
             } else {
-                $pdf->SetTextColor(100, 100, 100);
+                $pdf->SetTextColor(100, 100, 100); // Szary - nie zaznaczono i błędna
+                $box = "[ ] ";
                 $tag = "";
             }
 
-            $box = $is_user_selected ? "[X] " : "[ ] ";
             $pdf->Cell(10);
-            $pdf->MultiCell(0, 6, iconv('UTF-8', 'ISO-8859-2', $box . $ans['tresc']) . $tag, 0, 'L');
+            $pdf->MultiCell(0, 6, $box . $ans['tresc'] . $tag, 0, 'L');
             $pdf->SetTextColor(0, 0, 0);
         }
         $pdf->Ln(3);
@@ -116,6 +131,8 @@ try {
 
     $pdf->Output('F', $pdf_path);
 } catch (Exception $e) {
+    // W razie błędu zapisujemy log, ale nie przerywamy wyświetlania wyniku na stronie
+    error_log("Błąd generowania PDF: " . $e->getMessage());
     $pdf_filename = "";
 }
 
@@ -141,7 +158,7 @@ $stmt_res->execute([$idp, $idt, $total_points, $pdf_filename]);
                 <?php if ($pdf_filename): ?>
                     <a href="pdf/<?php echo $pdf_filename; ?>" class="btn btn-success btn-lg w-100 mb-2 shadow" target="_blank">Pobierz Raport PDF</a>
                 <?php else: ?>
-                    <div class="alert alert-warning small">Raport PDF nie został wygenerowany.</div>
+                    <div class="alert alert-warning small">Raport PDF nie został wygenerowany. Sprawdź logi serwera.</div>
                 <?php endif; ?>
                 <a href="index.php" class="btn btn-outline-secondary w-100">Wróć do strony głównej</a>
             </div>
