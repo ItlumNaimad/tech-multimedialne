@@ -6,10 +6,11 @@
 session_start();
 require_once 'database/database.php';
 
-// Ważne: FPDF szuka folderu 'font/' w katalogu roboczym, jeśli nie jest zdefiniowany
+// Zdefiniowanie ścieżki do folderu z czcionkami (tFPDF zajrzy stąd do podfolderu unifont/)
 if(!defined('FPDF_FONTPATH')) define('FPDF_FONTPATH', __DIR__ . '/font/');
 
-require_once 'fpdf.php'; // Biblioteka standardowa
+// Podmiana fpdf.php na tfpdf.php
+require_once 'tfpdf.php';
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'pracownik') {
     die("Brak uprawnień.");
@@ -80,21 +81,32 @@ function pl($text) {
 }
 
 $pdf_error_msg = "";
+// Zapis pliku
+$pdf_filename = "test_res_" . $idp . "_" . $idt . "_" . time() . ".pdf";
+$pdf_path = "pdf/" . $pdf_filename;
+
+// Upewnij się, że katalog pdf istnieje i jest zapisywalny
+if (!file_exists('pdf')) {
+    mkdir('pdf', 0777, true);
+}
+
+$pdf_error_msg = "";
 
 try {
-    $pdf = new FPDF('P', 'mm', 'A4');
+    $pdf = new tFPDF();
     $pdf->AddPage();
-    
-    // Używamy czcionki HELVETICA (pliki helvetica.php i helveticab.php są obecne w Twoim folderze font/)
-    $pdf->SetFont('Helvetica', 'B', 16);
-    $pdf->Cell(0, 10, pl("RAPORT Z TESTU: " . $test['nazwa']), 0, 1, 'C');
-    $pdf->Ln(5);
 
-    $pdf->SetFont('Helvetica', '', 11);
-    $pdf->Cell(0, 7, pl("Użytkownik: " . $_SESSION['username']), 0, 1);
-    $pdf->Cell(0, 7, pl("Data: " . date("Y-m-d H:i:s")), 0, 1);
-    $pdf->Cell(0, 7, pl("Wynik: $total_points / " . count($questions) . " (" . round($percent) . "%)"), 0, 1);
-    
+    // Załadowanie czcionki Unicode
+    $pdf->AddFont('DejaVu', '', 'DejaVuSansCondensed.ttf', true);
+
+    // Ustawienie czcionki jako domyślnej
+    $pdf->SetFont('DejaVu', '', 12);
+
+    $pdf->Cell(0, 10, 'Wynik Testu', 0, 1, 'C');
+    $pdf->Cell(0, 10, 'Użytkownik: ' . $_SESSION['username'], 0, 1);
+    $pdf->Cell(0, 10, 'Data: ' . date('Y-m-d H:i:s'), 0, 1);
+    $pdf->Cell(0, 10, 'Wynik: ' . $total_points . ' pkt', 0, 1);
+
     $pdf->Ln(5);
     if ($passed) {
         $pdf->SetTextColor(0, 128, 0);
@@ -107,23 +119,26 @@ try {
     $pdf->Ln(5);
 
     foreach ($report_data as $idx => $data) {
-        $pdf->SetFont('Helvetica', 'B', 11);
-        $pdf->MultiCell(0, 7, pl(($idx+1) . ". " . $data['q']), 0, 'L');
-        
-        $pdf->SetFont('Helvetica', '', 10);
+        // Zamiast Helvetica, używamy załadowanego DejaVu.
+        $pdf->SetFont('DejaVu', '', 11);
+
+        // Brak funkcji pl() - podajemy czysty tekst UTF-8
+        $pdf->MultiCell(0, 7, ($idx+1) . ". " . $data['q'], 0, 'L');
+
+        $pdf->SetFont('DejaVu', '', 10);
         foreach ($data['all_options'] as $ans) {
             $is_user_selected = in_array((string)$ans['idodp'], $data['user']);
             $is_correct_ans = $ans['czy_poprawna'];
-            
+
             if ($is_user_selected && $is_correct_ans) {
                 $pdf->SetTextColor(0, 128, 0);
                 $tag = " [POPRAWNA]";
             } elseif ($is_user_selected && !$is_correct_ans) {
                 $pdf->SetTextColor(255, 0, 0);
-                $tag = " [BLEDNA]";
+                $tag = " [BŁĘDNA]"; // Tutaj też możemy używać polskich znaków wprost
             } elseif (!$is_user_selected && $is_correct_ans) {
                 $pdf->SetTextColor(255, 0, 0);
-                $tag = " [POPRAWNA - POMINIETO]";
+                $tag = " [POPRAWNA - POMINIĘTO]";
             } else {
                 $pdf->SetTextColor(100, 100, 100);
                 $tag = "";
@@ -131,18 +146,19 @@ try {
 
             $box = $is_user_selected ? "[X] " : "[ ] ";
             $pdf->Cell(10);
-            $pdf->MultiCell(0, 6, pl($box . $ans['tresc'] . $tag), 0, 'L');
+
+            // Brak funkcji pl()
+            $pdf->MultiCell(0, 6, $box . $ans['tresc'] . $tag, 0, 'L');
             $pdf->SetTextColor(0, 0, 0);
         }
         $pdf->Ln(3);
     }
 
-    // Sprawdzamy czy ścieżka zapisu jest dostępna
     if (!is_writable('pdf')) {
         throw new Exception("Katalog 'pdf/' nie jest zapisywalny.");
     }
 
-    $pdf->Output('F', $pdf_path);
+    $pdf->Output('F', __DIR__ . '/pdf/' . $pdf_filename);
 } catch (Exception $e) {
     $pdf_error_msg = $e->getMessage();
     $pdf_filename = "";
@@ -150,6 +166,7 @@ try {
 
 $stmt_res = $pdo->prepare("INSERT INTO wyniki (idp, idt, punkty, plik_pdf) VALUES (?, ?, ?, ?)");
 $stmt_res->execute([$idp, $idt, $total_points, $pdf_filename]);
+
 ?>
 <!DOCTYPE html>
 <html lang="pl">
