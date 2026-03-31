@@ -19,7 +19,7 @@ session_destroy();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Damian Skonieczny - Tech Multimedialne</title>
+    <title>Damian Skonieczny - Technologie Multimedialne</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
@@ -82,6 +82,7 @@ session_destroy();
             letter-spacing: -1px;
             background: linear-gradient(135deg, #ffffff, #94a3b8);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -176,6 +177,7 @@ session_destroy();
             font-weight: 600;
             background: linear-gradient(135deg, #60a5fa, #c084fc);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         
@@ -354,11 +356,19 @@ session_destroy();
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 const interactionDistance = 250;
 
-                // Przyciągaj kropki w stronę kursora
+                // Przyciągaj kropki w stronę kursora z systemem odpychania w samym centrum
                 if (distance < interactionDistance) {
                     const force = (interactionDistance - distance) / interactionDistance;
-                    this.x += dx * force * 0.02;
-                    this.y += dy * force * 0.02;
+                    
+                    if (distance > 40) {
+                        // Zwykłe przyciąganie z daleka
+                        this.x += dx * force * 0.02;
+                        this.y += dy * force * 0.02;
+                    } else if (distance > 0) {
+                        // Odpychanie gdy są za blisko środka punktu, zapobiega wejściu bezpośrednio w środek
+                        this.x -= (dx / distance) * force * 1.5;
+                        this.y -= (dy / distance) * force * 1.5;
+                    }
                     this.opacity = this.baseOpacity + force * 0.5;
                 } else {
                     this.opacity = this.baseOpacity;
@@ -385,12 +395,25 @@ session_destroy();
                 particles[i].update();
                 particles[i].draw();
                 
-                // Połączenia (linie) między kropkami, które są blisko siebie
-                for (let j = i; j < particles.length; j++) {
+                // Pobieraj połączenia tylko od i+1, unikaj duplikowania fizyki (zastosowano j = i + 1)
+                for (let j = i + 1; j < particles.length; j++) {
                     const dx = particles[i].x - particles[j].x;
                     const dy = particles[i].y - particles[j].y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
 
+                    // Odpychanie się cząsteczek od siebie (zapobieganie tworzeniu się stałej, skomasowanej bryły)
+                    if (distance < 35 && distance > 0) {
+                        const repulsion = (35 - distance) / 35;
+                        const forceX = (dx / distance) * repulsion * 0.5;
+                        const forceY = (dy / distance) * repulsion * 0.5;
+                        
+                        particles[i].x += forceX;
+                        particles[i].y += forceY;
+                        particles[j].x -= forceX;
+                        particles[j].y -= forceY;
+                    }
+
+                    // Rysowanie połączeń
                     if (distance < 120) {
                         ctx.beginPath();
                         ctx.strokeStyle = `rgba(59, 130, 246, ${0.1 * (1 - distance / 120)})`; // delikatnie znikające linie
