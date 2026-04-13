@@ -35,7 +35,6 @@ document.getElementById('chatbot-form').addEventListener('submit', function(e) {
 
     // Dodaj pytanie użytkownika
     chatBox.innerHTML += `<div class="user-msg text-end mb-2"><span class="badge bg-primary">Ty</span> ${question}</div>`;
-    input.value = '';
     chatBox.scrollTop = chatBox.scrollHeight;
 
     // Animacja ust bota (początek rozmowy)
@@ -43,6 +42,8 @@ document.getElementById('chatbot-form').addEventListener('submit', function(e) {
 
     // Wyślij do API
     const formData = new FormData(this);
+    input.value = '';
+    
     fetch('api_chatbot.php', {
         method: 'POST',
         body: formData
