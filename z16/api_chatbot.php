@@ -55,6 +55,9 @@ if (isset($resData['candidates'][0]['content']['parts'][0]['text'])) {
     $answer = trim($resData['candidates'][0]['content']['parts'][0]['text']);
     // Czyszczenie z ewentualnych znaczników markdown np. pogrubień
     $answer = str_replace(['**', '*'], '', $answer);
+} else {
+    // Dodano do debugowania: błąd zwrócony przez Google API
+    $answer .= " SZCZEGÓŁY Z SERWERA GOOGLE: " . strip_tags($response);
 }
 
 // Zapis do bazy
