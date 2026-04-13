@@ -37,6 +37,6 @@ $options = [
 try {
      $pdo = new PDO($dsn, $user, $pass, $options);
 } catch (\PDOException $e) {
-     die("Błąd połączenia z bazą danych.");
+     die("Błąd połączenia z bazą danych: " . $e->getMessage());
 }
 ?>
