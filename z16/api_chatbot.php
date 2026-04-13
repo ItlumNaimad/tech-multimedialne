@@ -17,25 +17,44 @@ $stmt_cms = $pdo->prepare("SELECT * FROM cms WHERE id_cms = ?");
 $stmt_cms->execute([$id_cms]);
 $cms = $stmt_cms->fetch();
 
-// Normalizacja pytania (małe litery, brak znaków przystankowych, spacji)
-$norm_q = strtolower($question);
-$norm_q = preg_replace('/[^\p{L}\p{N}\s]/u', '', $norm_q); // Usuń znaki przystankowe
-$norm_q = preg_replace('/\s+/', ' ', $norm_q); // Nadmiarowe spacje na pojedyncze
+$apiKey = $_ENV['GEMINI_API_KEY'] ?? '';
 
-$answer = "";
+if (!$apiKey) {
+    echo json_encode(['answer' => 'Przepraszam, ale brakuje klucza Google Gemini API w konfiguracji serwera.']);
+    exit;
+}
 
-if (preg_match('/\b(cześć|czesc|dzień dobry|hejka|siema|witaj|witam)\b/', $norm_q)) {
-    $answer = "Witaj Szanowny Kliencie!";
-} elseif (preg_match('/\b(kontakt|adres|telefon)\b/', $norm_q)) {
-    $answer = "Kontakt: " . ($cms['contact'] ?: "Niestety nie mamy danych kontaktowych w bazie.");
-} elseif (preg_match('/\b(nawigacja|mapa|dojazd|jak do nas dotrzeć)\b/', $norm_q)) {
-    $answer = "Jak do nas dotrzeć: Sprawdź zakładkę Mapa lub skorzystaj z linku: " . ($cms['google_map_link'] ? "Mamy mapę w systemie." : "Brak mapy.");
-} elseif (preg_match('/\b(oferta|co oferujecie)\b/', $norm_q)) {
-    $answer = "Nasza oferta: " . ($cms['offer'] ?: "Brak oferty w bazie.");
-} elseif ($norm_q === "?" || $norm_q === "h" || preg_match('/\b(pomoc|lista pytań)\b/', $norm_q)) {
-    $answer = "Mogę odpowiedzieć na pytania o: cześć, kontakt (adres, telefon), nawigacja (mapa), oferta. Wpisz jedno z tych słów.";
-} else {
-    $answer = "Jestem tylko początkującym botem i nie znam odpowiedzi na to pytanie. Ale chętnie się uczę!";
+$systemInst = "Jesteś wirtualnym asystentem na stronie internetowej firmy. Odpowiadaj maksymalnie zwięźle, prosto, bez zbędnego formatowania tekstu i po polsku na pytania klientów. Na podstawie poniższych danych o firmie udziel precyzyjnej odpowiedzi klientowi na jego zapytanie. Jeśli pytanie nie dotyczy firmy, uprzejmie powiedz, że jesteś jedynie asystentem firmowym i pomagasz tylko wtym zakresie.\n";
+$systemInst .= "O firmie: " . strip_tags($cms['about_company'] ?? '') . "\n";
+$systemInst .= "Kontakt: " . strip_tags($cms['contact'] ?? '') . "\n";
+$systemInst .= "Oferta: " . strip_tags($cms['offer'] ?? '') . "\n";
+
+$data = [
+    "contents" => [
+        [
+            "parts" => [
+                ["text" => $systemInst . "\n\nPytanie klienta: " . $question]
+            ]
+        ]
+    ]
+];
+
+$ch = curl_init("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey);
+curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+$response = curl_exec($ch);
+curl_close($ch);
+
+$resData = json_decode($response, true);
+$answer = "Przepraszam, wystąpił techniczny problem ze zrozumieniem Twojego zapytania (Błąd API).";
+
+if (isset($resData['candidates'][0]['content']['parts'][0]['text'])) {
+    $answer = trim($resData['candidates'][0]['content']['parts'][0]['text']);
+    // Czyszczenie z ewentualnych znaczników markdown np. pogrubień
+    $answer = str_replace(['**', '*'], '', $answer);
 }
 
 // Zapis do bazy

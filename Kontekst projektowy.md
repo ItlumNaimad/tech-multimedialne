@@ -30,3 +30,15 @@ Technologie wykorzystywane:
 - Zapisywanie postępów w pracy w pliku Sprawozdanie.md z kontekstem pracy i zapisywać go dla każdego zadania (gdy robimy zadanie 15 to w folderze z15 itp.)
 - Sprawozdanie powinno mieć ton mniej profejsonalny, by było widać, że jest pisane jako uczący się student.
 - W sprawozdaniu nie zapisywać informacji o autorze projektu (od tego będzie oddzielna tabelka, której w tym projekcie nie ma)
+
+### Standard łączenia z bazą danych (np. db_connect.php)
+
+Staraj się unikać sztywno wpisanego usera `root` czy lokalnego hosta `localhost`, aby można było płynnie testować aplikację na danym hostingu. Stosuj poniższy szablon z podpięciem do plików środowiskowych:
+
+```php
+$host = $_ENV['DB_HOST'] ?? '127.0.0.1';
+$db   = $_ENV['DB_NAME'] ?? 'damskopb_z16'; // zmodyfikuj przyrostek pod aktualne zadanie, jeśli to potrzebne
+$user = $_ENV['DB_USER'] ?? 'damskopb_z16'; // zmodyfikuj przyrostek pod aktualne zadanie, jeśli to potrzebne
+$pass = $_ENV['DB_PASS'] ?? '';
+$charset = $_ENV['DB_CHARSET'] ?? 'utf8mb4';
+```
