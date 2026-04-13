@@ -39,8 +39,11 @@ $data = [
     ]
 ];
 
-$ch = curl_init("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-8b:generateContent?key=" . $apiKey);
-curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+$ch = curl_init("https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent");
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Content-Type: application/json',
+    'X-goog-api-key: ' . $apiKey
+]);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
