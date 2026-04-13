@@ -1,1 +1,5 @@
 node_modules
+.env
+# Ignoruj pliki tymczasowe IDE
+.idea/
+.vscode/

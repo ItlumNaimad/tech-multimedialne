@@ -17,7 +17,7 @@ Technologie wykorzystywane:
 
 ### System tworzenia każdego zadania
 
-- Każde zadanie w oddzielnym folderze (zadanie 4 w folderze z4, zadanie 113 w folderze z13 it...)
+- Każde zadanie w oddzielnym folderze (zadanie 4 w folderze z4, zadanie 13 w folderze z13 itp...)
 - Czasami zadanie jest podzielone na podzadania np. z12a i z12b
 - Każde zadanie ma mieć oddzieloną bazę danych. Zapisuj potrzebne zapytania SQL w pliku database.sql, który będzie zaimportowany do hostingowego PHPMyAdmin
 - W folderze do każdego zadania będzie plik .pdf z instrukcją i wymaganiami które trzeba spełnić by wykonać zadanie. Przykłady nazw: "z16 CMS 2023-05-07.pdf", "z12a SCADA 2025-03-17.pdf",  "z13 ToDo 2025-04-06.pdf"

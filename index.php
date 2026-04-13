@@ -258,7 +258,7 @@ session_destroy();
             <a href="z13" class="card"><span>Zadanie 13</span><div class="card-icon">→</div></a>
             <a href="z14" class="card"><span>Zadanie 14</span><div class="card-icon">→</div></a>
             <a href="z15" class="card"><span>Zadanie 15</span><div class="card-icon">→</div></a>
-            <a href="projekt" class="card projekt"><span>Projekt</span><div class="card-icon">✨</div></a>
+            <a href="projekt" class="card projekt"><span>Projekt</span><div class="card-icon"></div></a>
         </div>
     </div>
 
