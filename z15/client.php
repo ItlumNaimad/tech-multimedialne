@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 require_once 'db_connect.php';
 if (!isset($_SESSION['user']) || $_SESSION['user']['typ'] != 'klient') {
@@ -121,7 +121,7 @@ if ($view_id) {
                         <a href="?view=<?= $t['id'] ?>" class="list-group-item list-group-item-action <?= $view_id == $t['id'] ? 'active' : '' ?>">
                             <div class="d-flex w-100 justify-content-between">
                                 <h6 class="mb-1 text-truncate" style="max-width: 150px;"><?= htmlspecialchars($t['temat']) ?></h6>
-                                <small><?= $t['status'] == 'otwarte' ? '🟢' : '🔴' ?></small>
+                                <small><?= $t['status'] == 'otwarte' ? '🟢' : ($t['status'] == 'w_trakcie' ? '🟡' : '🔴') ?></small>
                             </div>
                             <small class="<?= $view_id == $t['id'] ? 'text-white' : 'text-muted' ?>"><?= $t['zag_nazwa'] ?></small>
                         </a>
@@ -138,9 +138,13 @@ if ($view_id) {
                 <div class="card shadow">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5><?= htmlspecialchars($view_ticket['temat']) ?></h5>
-                        <span class="badge <?= $view_ticket['status'] == 'otwarte' ? 'bg-success' : 'bg-danger' ?>"><?= strtoupper($view_ticket['status']) ?></span>
+                        <?php
+                            $status_color = $view_ticket['status'] == 'otwarte' ? 'bg-success' : ($view_ticket['status'] == 'w_trakcie' ? 'bg-warning text-dark' : 'bg-danger');
+                            $status_texts = ['otwarte' => 'OTWARTE', 'w_trakcie' => 'W TRAKCIE ROZWIĄZYWANIA', 'zamkniete' => 'ZAMKNIĘTE'];
+                        ?>
+                        <span class="badge <?= $status_color ?>" id="ticket-status"><?= $status_texts[$view_ticket['status']] ?? strtoupper($view_ticket['status']) ?></span>
                     </div>
-                    <div class="card-body" style="height: 400px; overflow-y: auto;">
+                    <div class="card-body" id="chat-box" style="height: 400px; overflow-y: auto;">
                         <?php foreach($messages as $m): ?>
                             <div class="msg-box <?= $m['typ'] == 'klient' ? 'msg-klient' : 'msg-pracownik' ?>">
                                 <strong><?= $m['typ'] == 'pracownik' ? 'Pracownik: ' . htmlspecialchars($m['nazwisko']) : 'Ty' ?></strong>
@@ -149,9 +153,9 @@ if ($view_id) {
                             </div>
                         <?php endforeach; ?>
                     </div>
-                    <?php if($view_ticket['status'] == 'otwarte'): ?>
+                    <?php if($view_ticket['status'] != 'zamkniete'): ?>
                         <div class="card-footer">
-                            <form method="POST" class="d-flex">
+                            <form method="POST" class="d-flex" id="chat-form">
                                 <input type="hidden" name="zgl_id" value="<?= $view_ticket['id'] ?>">
                                 <input type="text" name="tresc" class="form-control me-2" placeholder="Napisz wiadomość..." required>
                                 <button type="submit" name="reply_ticket" class="btn btn-primary">Wyślij</button>
@@ -188,5 +192,84 @@ if ($view_id) {
         </div>
     </div>
 </div>
+
+<?php if($view_ticket): ?>
+<script>
+let lastMsgId = <?= !empty($messages) ? end($messages)['id'] : 0 ?>;
+const zglId = <?= $view_ticket['id'] ?>;
+
+function fetchMessages() {
+    fetch(`api_chat.php?zgl_id=${zglId}&last_id=${lastMsgId}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.messages && data.messages.length > 0) {
+                const chatBox = document.getElementById('chat-box');
+                data.messages.forEach(msg => {
+                    const isClient = msg.typ === 'klient';
+                    const div = document.createElement('div');
+                    div.className = 'msg-box ' + (isClient ? 'msg-klient' : 'msg-pracownik');
+                    
+                    const p = document.createElement('p');
+                    p.className = 'mb-0';
+                    p.innerText = msg.tresc; 
+                    p.innerHTML = p.innerHTML.replace(/\n/g, '<br>');
+
+                    div.innerHTML = `<strong>${isClient ? 'Ty' : 'Pracownik: ' + msg.nazwisko}</strong>
+                                     ${p.outerHTML}
+                                     <small class="text-muted" style="font-size: 0.75rem;">${msg.data_godzina}</small>`;
+                    chatBox.appendChild(div);
+                    lastMsgId = msg.id;
+                });
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+            if (data.status === 'w_trakcie') {
+                const badge = document.getElementById('ticket-status');
+                if (badge && badge.innerText === 'OTWARTE') {
+                    badge.className = 'badge bg-warning text-dark';
+                    badge.innerText = 'W TRAKCIE ROZWIĄZYWANIA';
+                    
+                    // Pokaz formularz oceny bez reloadu jesli pracownik dolaczyl - po reloadzie bedzie i tak
+                    if(!document.querySelector('select[name="ocena"]')) {
+                        location.reload();
+                    }
+                }
+            } else if (data.status === 'zamkniete' && '<?= $view_ticket['status'] ?>' !== 'zamkniete') {
+                location.reload(); 
+            }
+        });
+}
+setInterval(fetchMessages, 3000);
+
+const chatForm = document.getElementById('chat-form');
+if (chatForm) {
+    chatForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const trescInput = this.querySelector('[name="tresc"]');
+        const tresc = trescInput.value;
+        if (!tresc) return;
+        
+        trescInput.disabled = true;
+        const formData = new FormData();
+        formData.append('zgl_id', zglId);
+        formData.append('tresc', tresc);
+        
+        fetch('api_chat.php', { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    trescInput.value = '';
+                    fetchMessages();
+                }
+                trescInput.disabled = false;
+                trescInput.focus();
+            });
+    });
+}
+
+const chatBox = document.getElementById('chat-box');
+if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+</script>
+<?php endif; ?>
+
 </body>
 </html>

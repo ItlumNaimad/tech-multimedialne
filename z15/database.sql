@@ -1,4 +1,4 @@
-﻿CREATE TABLE IF NOT EXISTS uzytkownicy (
+CREATE TABLE IF NOT EXISTS uzytkownicy (
     id INT AUTO_INCREMENT PRIMARY KEY,
     login VARCHAR(50) NOT NULL UNIQUE,
     haslo VARCHAR(255) NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS zgloszenia (
     id_pracownika INT,
     id_zagadnienia INT NOT NULL,
     temat VARCHAR(255) NOT NULL,
-    status ENUM('otwarte', 'zamkniete') DEFAULT 'otwarte',
+    status ENUM('otwarte', 'w_trakcie', 'zamkniete') DEFAULT 'otwarte',
     ocena INT NULL DEFAULT NULL,
     data_utworzenia DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_klienta) REFERENCES uzytkownicy(id),
