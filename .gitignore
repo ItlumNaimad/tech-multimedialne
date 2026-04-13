@@ -3,3 +3,4 @@ node_modules
 # Ignoruj pliki tymczasowe IDE
 .idea/
 .vscode/
+Kontekst projektowy.md
