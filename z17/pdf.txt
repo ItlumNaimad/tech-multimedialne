@@ -1,0 +1,204 @@
+Forum dyskusyjne (automatyczne filtrowanie wulgaryzmów, usuwanie niebezpiecznych linków)   
+ 
+Internetowe forum dyskusyjne  to popularna forma służ ąca do wymiany informacji  na wybrany temat/gru pę tematów .  
+Fora dyskusyjne prowadzone są na stronach portali społecznościowych, instytucji, czasopism, przedsiębiorstw, uczelni . 
+Najwięcej jednak jest forów zakładanych prywatnie. 
+Fora są zazwyczaj rozbudowanymi skryptami działającymi w technologii PHP, które tworzą administratorzy stron WWW lub 
+też adaptują z gotowych skryptów, z których wiele jest dostępnych jako wolne oprogramowanie.  Oprogramowanie to 
+pozwala administratorowi zdefiniować początkow ą treść forum, która jest podzielona na tematy. Kolejne tematy i wątki 
+mogą tworzyć sami użytkownicy. Następnie inni użytkownicy mogą odpisywać na wiadomość, która rozpoczęła wątek, co 
+prowadzi do kontynuacji wątku.  Kompetentnym i aktywnym użytkownikom forum administrator może przydzielać prawa 
+moderatorów, które pozwalają im tworzyć nowe tematy, kasować wiadomości, porządkować wątki i przypisywać je do 
+właściwych tematów, blokować wątki itp. zgodnie z obowiązującymi na danym forum regułami postępowania. 
+Użytkownicy muszą stosować się do przyjętego regulaminu, w przeciwn ym razie mogą być zablokowani.  
+Na wielu rozbudowanych forach istnieją całe hierarchie moderatorów, o różnym zakresie praw i obowiązków, 
+kontrolowane przez administratorów forów, z kolei na innych moderatorzy są demokratycznie wybierani przez ogół 
+użytkowników, lub nawet wybierani losowo.  
+Przejrzyj portale poświęcone niektórym gotowym skryptom do tworzenia internetowych forów dyskusyjnych,  
+zwróć uwagę, że większość z nich bazuje na technologii PHP oraz MySQL . Przeanalizuj, jakie są wymagania tych skryptów 
+co do wersji PHP i MySQL.  Poniższy link  przedstawia najpopularniejsze bezpłatne technologie do tworzenia forum 
+dyskusyjnego: https://www.google.com/search?q=Best+Free+Forum+Software%2FPlatforms+for+2026  
+Zwróć uwagę, że niektóre komercyjne produkty , których pełne wersje kosztują ponad $100/miesiąc są często błędnie 
+klasyfikowane w rankingach, jako bezpłatne tylko dlatego, że np. posiadają możliwość dwutygodniowego okresu próbnego. 
+Niektóre technologie kiedyś były bezpłatne, a potem stały się komercyjne i odwrotnie, technologie za które kiedyś trzeba 
+było płacić, a nie odniosły sukcesu rynkowego – stały się bezpłatne. 
+ 
+Nazwa skryptów Technologia Link Licencja 
+Flarum PHP + MySQL/MariaDB/PostgreSQL + Laravel https://flarum.org/  MIT Licence 
+phpBB PHP + MySQL/MariaDB/PostgreSQL/Oracle/ 
+Microsoft SQL Server/SQLite + Symfony 
+https://www.phpbb.com/ GPL niekomercyjna  
+NodeBB Node.js + Redis/MongoDB/PostgreSQL https://NodeBB.org  GPL niekomercyjna 
+Simple Machines Forum PHP + MySQL/PostreSQL/SQLite https://simplemachines.org/  GPL niekomercyjna 
+UBB.threads PHP + MySQL i in. http://www.ubbcentral.com/  komercyjna 
+Invision Power Board PHP + MySQL lub MS SQL Server lub Oracle https://invisioncommunity.com/  komercyjna  
+MyBulletinBoard PHP + MySQL lub PostgreSQL oraz SQLite https://mybb.com/  GPL niekomercyjna 
+Phorum PHP + MySQL lub PostgreSQL https://www.phorum.org/  GPL niekomercyjna 
+PunBB PHP + MySQL lub PostreSQL lub SQLite http://punbb.informer.com/  GPL niekomercyjna 
+vBulletin AJAX (Asynchronous JavaScript and XML) + MySQL https://www.vbulletin.com/  komercyjna 
+ 
+Czasami nie ma potrzeby instalowania samodzielnego i rozbudowanego forum dyskusyjnego.  W takich sytuacjach często 
+wystarcza doinstalować komponent do systemu CMS, który się administruje np. do systemu WordPress.  
+Poniżej podano kilka przykładowych pluginów do WordPressa realizujących funkcję forum. 
+• bbPress  https://www.wpbeginner.com/wp-tutorials/how-to-add-a-forum-in-wordpress-with-bbpress/  
+• BuddyPress  https://www.buddyboss.com/tutorials/buddypress-install-and-setup/  
+ 
+ 
+1. Zainstaluj na swoim hostingu phpBB i przetestuj funkcjonalność tego forum: 
+a. stwórz kilku zwykłych użytkowników oraz moderatorów, 
+b. sprawdź, jakie są mechanizmy zarządzania użytkownikami, 
+c. sprawdź jakie prawa mają zwykli użytkownicy, a jakie moderatorzy, np. kto może zakładać nowe tematy, 
+d. sprawdź, czy można zmienić predefiniowane prawa przypisane zwykłym użytkownikom, 
+e. sprawdź, czy można automatycznie blokować użytkowników umieszczających niecenzuralne słowa na forum, 
+f. sprawdź, jak można zmienić status zwykłego użytkownika na moderatora, 
+g. każdy stworzony użytkownik powinien założyć kilka tematów i postów, 
+h. zablokuj wybranego stworzonego użytkownika i sprawdź, jak wyglądają jego posty,  
+i. sprawdź, jak można usunąć posty zablokowanego użytkownika, 
+ 
+2. Doinstaluj jeden z pluginów implementujących forum dyskusyjne do swojego WordPressa.  
+a. Przetestuj funkcjonalność tego forum – stwórz kilku użytkowników, stwórz kilka tematów i postów.  
+b. Sprawdź, jakie są wbudowane mechanizmy zarządzania użytkownikami. 
+c. Sprawdź, czy można automatycznie blokować użytkowników umieszczających niecenzuralne słowa na forum. 
+3. Zdecydowana większość istniejących w Internecie forów dyskusyjnych powstała poprzez instalację gotowych 
+skryptów, bez wprowadzania w nich nawet najmniejszych zmian.  Gotowe skrypty implementujące fora 
+dyskusyjne są dość złożonymi skryptami , czasami trudnymi w modyfikacji, dlatego w niektórych sytuacjach , 
+gdy są ściśle określone wymagania co do funkcji forum dyskusyjnego,  wygodniej jest stworzyć od początku 
+do końca własne forum dyskusyjne, które nie bazuje na żadnym gotowym rozwiązaniu. 
+ 
+4. Stwórz forum dyskusyjne o następujących funkcjach / cechach: 
+a. Rejestracja i logowanie użytkowników. W początkowej fazie realizacji zadania wykorzystaj tabelę bazy 
+danych oraz skrypty dotyczące logowania, rejestracji i sesji z poprzednich zadań. Następnie skrypty te 
+będziesz modyfikować zgodnie z potrzebami tego zadania. 
+b. Uprawnienie użytkowników 
+• Administrator forum (admin/admin) 
+• Może zablokować lub usunąć każdego użytkownika. 
+• Może usunąć wszystkie posty dowolnego użytkownika. 
+• Może usunąć dowolny temat lub wątek. 
+• Zwykły użytkownik, który jest tworzony po zarejestrowaniu się użytkownika. 
+• Może tworzyć nowe tematy forum. 
+• Może tworzyć wątki i wysyłać posty we wszystkich dyskusjach. 
+• Może dodawać pliki multimedialne do swoich postów. 
+• Może usunąć utworzony przez siebie wątek  
+• wyświetla mu się ikona kosza tylko przy wątkach, które sam stworzył, 
+• nie może usunąć tematów, nawet tych, które sam zapoczątkował. 
+• Gość forum – osoba niezalogowana 
+• Może przeglądać całą strukturę forum. 
+• Nie może dodawać tematów, postów, ani żadnych komentarzy,  ani w żaden sposób 
+wpływać na zawartość forum. 
+c. Automatyczne blokowanie postów użytkownika, który używa wulgaryzmów na forum: 
+• w sieci m.in. na githubie  znajduje się wiele gotowych rozwiązań zawierających słowniki 
+wulgaryzmów, należy wykorzystać któryś z nich do filtrowania treści tworzonego forum, 
+• najwygodniej jest wybrać taki słownik, który jest bezpośrednio przygotowany do 
+wykorzystania go w tworzeniu aplikacji z użyciem PHP,  
+• można także stworzyć skrypt, który wyłuska wulgaryzmy i zbuduje tablicę, ze słowników 
+wulgaryzmów nie tworzonych z myślą o programowaniu aplikacji webowej  
+https://gist.github.com/sylweriusz/8b41d76c9cfb49635eb37dc6af0ab257  
+https://marcinmazurek.com.pl/polskie-wulgaryzmy  
+https://pl.wiktionary.org/wiki/Indeks:Polski_-_Wulgaryzmy 
+ 
+• stwórz liczniki wulgaryzmów użytych przez poszczególnych użytkowników forum: 
+• Gdy dany użytkownik użyje wulgaryzmu jeden raz – jego post zostanie usunięty oraz 
+będzie wygenerowany automatyczny post z informacją: data i godzina + informacja, że 
+ostatni post określonego z nazwy użytkownika został usunięty z powodu użycia 
+wulgaryzmu np.  
+2021-05-22 11:14 Usunięto post użytkownika Jacek, ze względu na użyty wulgaryzm.  
+Jest to oficjalne ostrzeżenie dla użytkownika Jacek, przy kolejnym użytym 
+wulgaryzmie użytkownik ten zostanie zabanowany. 
+• Gdy użytkownik użyje wulgaryzmu drugi raz – jego post zostanie usunięty oraz będzie 
+wygenerowany automatyczny post z informacją: data i godzina + informacja, że ostatni 
+post określonego z nazwy użytkownika został usunięty z powodu użycia wulgaryzmu 
+oraz że użytkownik został zabanowany np. 
+2021-05-22 12:15 Usunięto post użytkownika Jacek, ze względu na użyty wulgaryzm.  
+Użytkownik Jacek został zabanowany z powodu używania wulgaryzmów. 
+ 
+  
+d. Automatycznie usuwaj z postów użytkowników niebezpieczne linki – zastępuj je informacją: 
+2021-05-29 12:42 Usunięto niebezpieczny link 
+• w sieci m.in. na githubie znajduje się znajduje się wiele gotowych rozwiązań zawierających 
+adresy URL niebezpiecznych stron, należy wykorzystać któryś z nich dla zwiększenia 
+bezpieczeństwa eksploatacji tworzonego forum,  
+• najwygodniej jest wybrać takie rozwiązanie, które jest bezpośrednio przygotowane do 
+wykorzystania go w tworzeniu aplikacji z użyciem PHP,  
+• można także stworzyć skrypt, który wyłuska adresy URL i zbuduje tablicę, z plików nie 
+tworzonych z myślą o programowaniu aplikacji webowej 
+• poniżej zamieszczono w różnych formatach BD tzw. niebezpiecznych adresów URL, należy 
+jednak pamiętać, że co chwilę powstają nowe niebezpieczne portale i korzystanie z jakiegoś 
+repozytorium, którego nikt nie aktualizuje od kilku tygodni nie zapewnia żadnego 
+bezpieczeństwa – potrzebne są ciągłe aktualizacje: 
+• format tekstowy, tylko aktywne domeny, jedna domena per linia: 
+https://hole.cert.pl/domains/v2/domains.txt 
+• format TSV (tab-separated values): https://hole.cert.pl/domains/v2/domains.csv  
+• format JSON: https://hole.cert.pl/domains/v2/domains.json 
+• format XML: https://hole.cert.pl/domains/v2/domains.xml 
+• format kompatybilny z wtyczką uBlock Origin i AdGuard AdBlocker: 
+ https://hole.cert.pl/domains/v2/domains_adblock.txt – dodanie listy do rozszerzenia  
+• format hosts: https://hole.cert.pl/domains/v2/domains_hosts.txt 
+• format .rsc, ograniczony do 4096 bajtów, dla systemów MikroTik/RouterOS: 
+https://hole.cert.pl/domains/v2/domains_mikrotik.rsc 
+• format blacklisty Response Policy Zones – https://hole.cert.pl/domains/v2/domains_rpz.db 
+ 
+5. Work Smart, Not Hard . Zanim zabierzesz się do realizacji forum – zastanów się z których wcześniejszych 
+projektów najlepiej skorzystać, aby nie zaczynać pracy nad forum od zera – w wielu zadaniach korzystałeś z 
+rejestracji i logowania użytkowników, realizowałeś też funkcję komunikatora  z funkcją wysyłania 
+komunikatów do wybranych użytkowników , a także załączałeś pliki multimedialne. Wszystkie te 
+funkcjonalności są do wykorzystania w tym zadaniu.  
+ 
+6. Utwórz zawartość forum 
+a. Zbuduj skrypty implementujące strukturę forum:  
+• zakładanie tematów,  
+• dodawanie postów do tematów, 
+• usuwanie własnych postów. 
+b. Każdy dodany element forum np. temat, post itd. powinien zawierać gdzieś z boku informację o jego 
+autorze, dacie i godzinie tworzenia. 
+c. Zarejestruj, a następnie zaloguj kilku użytkowników. 
+d. Z ich poziomu stwórz kilka tematów oraz zbuduj dyskusję wokół każdego z nich.  
+e. Przetestuj automatyczne blokowanie postów z przekleństwami. 
+f. Przetestuj automatyczne usuwanie z treści postów niebezpiecznych linków. 
+g. Proszę nie używać innych wulgaryzmów  niż słowo cholera w stworzonym przez siebie forum .  
+Ta aplikacja dostępna jest także dla niezalogowanych użytkowników, którzy zawsze powinni mieć jak 
+najlepsze zdanie o studentach PBŚ       . 
+ 
+  
+Przykładowa organizacja informacji w tworzonym forum 
+ 
+Temat 1 
+Temat 2 
+Temat 3 
+Nowy Temat 
+ 
+Login: 
+ 
+Hasło: 
+ 
+ 
+Temat 1 
+• Testuję sobie słowa grzeczne i nie tylko (autor: Jacek) 
+• Cholera2 jest groźną chorobą (autor: Tomek) 
+ 
+• I gościa już prawie nie ma, a był taki fajny , tylko ‘2’ doklejone 
+do tego strasznego słowa uratowało jego cztery litery  na 
+pokładzie tego cudownego forum :( (autor: Jacek) 
+• Itd. 
+ 
+ 
+7. Dodatkowe zadania opcjonalne: 
+ 
+a. Po kliknięciu na autora danego tematu/postu wyświetlają się wszystkie założone przez niego tematy i 
+wysłane posty. 
+ 
+b. Po kliknięciu na ikonę koperty wyświetlaną przy nazwie autora danego tematu/postu – można wysłać 
+do niego komunikat prywatny. 
+ 
+c. Rozbuduj zarządzanie zawartością forum, przez dodanie moderatorów, określ prawa poszczególnych 
+użytkowników 
+• Moderator – ma prawo dodawać tematy i wątki. 
+• Zwykły użytkownik – ma prawo dodawać jedynie wątki. 
+ 
+d. Wprowadź elementy automatycznej cenzury zawartości postów użytkowników: 
+• Utwórz trzy zdania, które nie zawierają żadnych wulgaryzmów, ale np.  
+są aspołeczne, obraźliwe lub zawierają elementy tzw. mowy nienawiści.  
+• Umieść te trzy zdania z odpowiednim komentarzem w regulaminie forum,  
+który powinien być pierwszym tematem w forum. 
+Podpowiedzi dotyczące tworzenia automatycznej cenzury forum: 
+https://pl.wikipedia.org/wiki/Trollowanie  
+https://magazyn-ksp.policja.gov.pl/mag/poradniki/110910,Trolling-i-Doxing.html   

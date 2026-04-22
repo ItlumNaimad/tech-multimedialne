@@ -1,0 +1,159 @@
+© Piotr Grad    grad@pbs.edu.pl    Politechnika Bydgoska Wydział Telekomunikacji, Informatyki i Elektrotechniki 
+ 
+Photo Gallery 
+ 
+Internetowa galeria zdjęć to  aplikacja do prezentacji, przechowywania , udostępniania, a czasami sprzedaż y 
+fotografii lub grafik  w Internecie . Wykorzystywana również przez artystów do sprzedaży obrazów lub rzeźb 
+eksponowanych na zdjęciach. Profesjonalni fotografowie wykorzystują ją także  do eksponowania efektów swojej 
+pracy oraz zbierania zamówień od potencjalnych klientów.  
+ 
+Galeria zdjęć z wykle składa się ze strony głównej , na której można wybrać kategorie i podkategorie tematyczne. 
+Po ich wyborze następuje wyświetlenie  miniatur zdjęć, których kliknięcie powoduje wyświetlenie zdjęć w pełnym 
+rozmiarze. Dobrze zaprojektowana galeria zdjęć  działa płynnie zarówno na komputerach , jak  i smartfonach. 
+Aplikacja taka powinna mieć wbudowane funkcje do łatwego poruszania się wewnątrz galerii: szybkie 
+przesuwanie, przeglądanie miniatur oraz zdjęć w pełnym rozmiarze oraz powiększanie wybranych zdjęć. Wiele 
+aplikacji, które przeznaczone są do sprzedaży zdjęć – posiada także wbudowaną funkcję wyświetlania znaku 
+wodnego w galeriach oznaczonych jako komercyjne. 
+ 
+Istnieje wiele popularnych, open -source’owych internetowych galerii zdjęć opartych o technologię 
+PHP+MySQL/MariaDB: 
+• https://coppermine-gallery.com/  
+• http://galleryproject.org/  
+• https://www.tinywebgallery.com/  
+• https://www.piwigo.org/  
+• https://github.com/pixelpost/pixelpost  
+ 
+Niektóre systemy zarządzania treścią (CMS) współpracują z dedykowanymi komponentami do realizacji 
+internetowych galerii zdjęć: 
+• Wordpress 
+• https://wordpress.org/plugins/nextgen-gallery/ 
+• https://wordpress.org/plugins/foogallery/  
+• https://wordpress.org/plugins/envira-gallery-lite/  
+• Drupal 
+• https://www.drupal.org/project/photoswipe 
+• https://www.drupal.org/project/juicebox  
+• Joomla 
+• https://extensions.joomla.org/extension/phoca-gallery-plugin/  
+• https://extensions.joomla.org/extension/sigplus/  
+ 
+Zadania 
+ 
+1. Część opcjonalna: zainstaluj wybraną internetową galerię zdjęć . Stwórz kilka  kategorii zdjęć i prześlij do ni ch 
+zdjęcia pobrane z Internetu , pasujące do stworzonych kategorii . Załóż konta kilku użytkowników i skomentuj 
+oraz oceń niektóre z przesłanych zdjęć. 
+2. Część opcjonalna: zainstaluj na swoim hostingu Wordpress i doinstaluj do niego komponenty umożliwiające 
+stworzenie internetowej galerii zdjęć. Stwórz kilka kategorii zdjęć i prześlij do nich zdjęcia pobrane z Internetu, 
+pasujące do stworzonych kategorii. Załóż konta kilku użytkowników , skomentuj i oceń niektóre z przesłanych 
+zdjęć. 
+ 
+3. Budowanie nowych, ciekawych galerii zdjęć artystycznych oraz galerii zdjęć przetworzonych z wykorzystaniem 
+narzędzi np. Gimpa, Photoshopa itd., wymaga zapoznania się z popularnymi rozwiązaniami stosowanymi w 
+internetowych galeriach. Stworzenie własnej, oryginalnej internetowej galerii zdjęć musi być zatem 
+poprzedzone poznaniem popularnych rozwiązań funkcjonalnych wykorzystywanych przez webmasterów do 
+zarządzania internetowymi repozytoriami zdjęć. 
+© Piotr Grad    grad@pbs.edu.pl    Politechnika Bydgoska Wydział Telekomunikacji, Informatyki i Elektrotechniki 
+ 
+4. W celu rozpoznania technologii internetowych stosowanych w galeriach zdjęć odwiedź m.in. poniższe strony. 
+Niektóre z podanych poniżej portali mogą być komercyjne, ale nie zakładaj kont wymagających uiszczania 
+opłat – skorzystaj z opcji BEZPŁATNEGO okresu próbnego. Przeglądając różnorodne galerie internetowe 
+zapisuj w katalogu na lokalnym dysku najciekawsze Twoim zdaniem zdjęcia i grafiki, które będą potem 
+potrzebne do stworzenia jednej z galerii zdjęć: https://artdoc.gallery/pages/themes , https://lookat.gallery/ 
+http://www.iso400.pl - zapoznaj się z zawartością kategorii portret i informacjami zawartymi w opisie Twoje 
+Konto oraz  Zbuduj s tronę . 
+W zależności od własnych preferencji i zwykle systemu wbudowanego posiadanego telefonu przejrzyj jeden 
+lub obydwa poniższe portale: https://photos.google.com/ https://www.icloud.com/photos/ - zwróć uwagę jak 
+zorganizowane jest zarządzanie albumami zdjęć przez firmę Google / Apple. 
+ 
+5. Czasami zamiast skorzystać z gotowych galerii  zdjęć lub pluginów WordPressa lub innego CMS -a, bardziej 
+opłaca się utworzyć autorską galerię zdjęć, grafik lub innych elementów, które przedstawiają oferowane przez 
+określone firmy produkty, usługi itd. Nie zawsze „gotowe” galerie internetowe spełniają wymagania dotyczące 
+funkcjonalności i pozwalają odpowiednio wyeksponować treść portalu , zintegrować się z innymi elementami 
+portalu np. rejestrować zdjęcia najczęściej oglądane przez określonych klientów, którzy kupują określone 
+towary lub usługi. W takiej sytuacji najwygodniej jest przejrzeć źródła najbardziej zbliżonej funkcjonalnie 
+„gotowej” galerii zdjęć, a następnie na jej wzór stworzyć podobną galerię dostosowaną do indywidualnych 
+potrzeb klienta i zawierających dodatkowe elementy, których nie ma w tych „gotowcach”. 
+ 
+6. Utwórz na hostingu podkatalog do kolejnego zadania  i utwórz w nim internetową galerię zdjęć wg podanej 
+specyfikacji. Skorzystaj z Bootstrapa lub innej biblioteki lub szablonu, umożliwiającego wygodne poruszanie 
+się między zdjęciami w poszczególnych galeriach.  Zwróć uwagę, że m.in. dla Bootstrapa stworzono wiele 
+mechanizmów umożliwiających bardzo wygodne zarządzanie wyświetlaniem zdjęć i nie ma sensu 
+implementować własnych mechanizmów przeglądania zdjęć – o wiele wygodniej jest wykorzystać te, które są 
+dostępne. 
+ 
+7. Na podstawie doświadczeń zdobytych podczas realizacji poprzednich zadań stwórz internetową galerię zdjęć 
+o poniżej zdefiniowanych  cechach. Zwróć uwagę, że przydatnym punktem wyjścia do tworzenia tej galerii 
+może być np. forum dyskusyjne. Definicja użytkowników portalu: 
+• Administrator (admin/admin) 
+o ma uprawnienia do usuwania/zawieszania wszystkich użytkowników,  
+o ma uprawnienia do usuwania pojedynczych zdjęć oraz całych galerii, 
+o ma uprawnienia do nadawania zwykłym użytkownikom uprawnień moderatorów. 
+• Moderator (funkcja opcjonalna) 
+o ma uprawnienia do usuwania/zawieszania zwykłych użytkowników,  
+o ma uprawnienia do usuwania pojedynczych zdjęć oraz całych galerii. 
+• Zwykły użytkownik 
+o wymagana jest rejestracja takiego użytkownika, podczas której tworzony jest dla niego katalog 
+macierzysty o takiej samej nazwie jak jego login,  
+o w katalogu macierzystym będą przechowywane  podkatalogi, w których znajdować się będą pliki 
+zdjęć należące do kolejnych galerii danego użytkownika, 
+o numeryczne nazwy tych podkatalogów powinny być tworzone automatycznie  z wykorzystaniem 
+mechanizmu autonumerowania – podczas definiowania nazwy galerii użytkownika np. 
+/kowalsky/1 (podkatalog numeryczny skojarzony np. z nazwą galerii Postać stojąca) 
+/kowalsky /2 (podkatalog numeryczny skojarzony np. z nazwą galerii Postać siedząca) 
+/kowalsky/3 (podkatalog numeryczny skojarzony np. z nazwą galerii Portrety) 
+/kowalsky/4 (podkatalog numeryczny skojarzony np. z nazwą galerii Ciekawe) 
+  
+© Piotr Grad    grad@pbs.edu.pl    Politechnika Bydgoska Wydział Telekomunikacji, Informatyki i Elektrotechniki 
+ 
+o prawa zwykłego użytkownika 
+o może tworzyć/usuwać własną galerię i dodawać/usuwać zdjęcia do/z utworzonej galerii i 
+opatrywać każde zdjęcie tytułem,  
+o może określić cechę stworzonej galerii:  
+▪ prywatna – widoczna jedynie dla użytkownika, który ją stworzył, 
+▪ publiczna – widoczna dla wszystkich użytkowników, zdjęcia bez znaków wodnych, 
+▪ komercyjna – powinna wyświetlać na każdym zdjęciu przypisanym do tej galerii 
+wyraźny znak wodny – Copyright-restricted, 
+o może tworzyć komentarze do zdjęć w swoich i cudzych galeriach, 
+o może oceniać zdjęcia jedynie w cudzych galeriach – oceny system od 1 do 5 gwiazdek, 
+o może zastosować jeden z wybranych filtrów w stosunku do zdjęcia umieszczanego w galerii: 
+greyscale, sepia i inne. 
+i. Gość portalu 
+• może przeglądać zdjęcia z dowolnej kategorii , czytać przypisane do nich komentarze i zapoznawać 
+się z ich średnią oceną, 
+• nie może zakładać własnej galerii  ani dodawać komentarzy do jakichkolwiek zdjęć , ani oceniać 
+jakichkolwiek zdjęć. 
+ 
+8. Wykorzystując wybrany szablon np. Bootstrapa zbuduj portal internetowy, w którym: 
+a. w lewej lub górnej części będzie wyświetlone menu umożliwiające wybór galerii  
+np. Postać stojąca / Postać siedząca / Portrety / Ciekawe  
+b. w prawej lub dolnej części będzie się wyświetlała galeria wybrana w lewej lub górnej części, wyświetlanie 
+fotografii z określonej galerii ma być zrealizowane z wykorzystaniem zapytania SQL-owego   
+Select .. from Nazwa_tabeli where $nazwa_galerii = wybrana_galeria; 
+ 
+Postać stojąca   
+Postać siedząca  
+Portrety  
+Ciekawe   
+ 
+ 
+Postać stojąca 
+ 
+  
+  
+ 
+  
+  
+ 
+  
+  
+ 
+ 
+9. Rozbuduj aplikację o część mobilną, umożliwiającą dodawanie zdjęcia ze smartfonu do wybranej galerii.  
+Inne funkcjonalności zawarte w aplikacji webowej nie muszą być uwzględnione w wersji aplikacji mobilnej. 
+ 
+10. Przesłane do internetowej galerii zdjęcia nie mogą przedstawiać żadnych nielegalnych oraz niemoralnych 
+treści, obrażać uczucia religijne, narodowe itd. Należy pamiętać, że portal ten będzie dostępny bez 
+rejestracji i logowania i w związku z tym jego zawartość może  być dostępna dla każdego. Byłoby rzeczą 
+absolutnie niedopuszczalną, gdyby zdarzył się przypadek, w którym jakieś kontrowersyjne zdjęcia znalazły 
+się w Państwa portalach i zostałyby one skojarzone z Politechniką Bydgoską. 
+ 
+11. Sporządź i wyślij sprawozdanie 
