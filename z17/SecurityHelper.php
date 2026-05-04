@@ -48,7 +48,7 @@ class SecurityHelper {
 
         if (file_exists(self::$certDomainsFile)) {
             $domains = file(self::$certDomainsFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-            return $domains ? $domains : [];
+            return $domains ? array_flip($domains) : [];
         }
         return [];
     }
@@ -62,22 +62,22 @@ class SecurityHelper {
             return $text; // brak domen do odfiltrowania
         }
 
-        // Proste wyszukiwanie linków w tekście i sprawdzanie domeny
-        // Łapiemy wszystkie URLe
-        $pattern = '/\b(?:https?:\/\/|www\.)[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|\/))/i';
+        // Szersze wyszukiwanie linków w tekście i sprawdzanie domeny (obsługuje domeny bez http:// i www.)
+        // Grupa 1 przechwytuje samą domenę do sprawdzenia
+        $pattern = '/\b(?:https?:\/\/)?([a-z0-9\-]+\.[a-z0-9\-\.]+)[^\s()<>]*/i';
         
         $filteredText = preg_replace_callback($pattern, function($matches) use ($domains) {
             $url = $matches[0];
-            $host = parse_url((strpos($url, 'http') === 0 ? $url : 'http://' . $url), PHP_URL_HOST);
-            if ($host) {
-                // Rozwiązanie problemu encji HTML (np. gdy &lt; znajduje się wewnątrz zmatchowanego tekstu przez regex po htmlspecialchars)
-                // Wyczyść ewentualne encje do sprawdzenia hosta
-                $host = preg_replace('/^www\./', '', $host);
-                if (in_array($host, $domains)) {
-                    // Zwracamy zamazany link w bezpiecznym HTML (ponieważ sam link jest po htmlspecialchars, można go wstawić)
-                    return '<span class="blurred-link" style="filter: blur(5px); user-select: none; text-decoration: line-through; pointer-events: none;" title="Zablokowany szkodliwy link" data-bs-toggle="tooltip" data-bs-placement="top">' . $url . '</span>';
-                }
+            $hostCandidate = mb_strtolower($matches[1], 'UTF-8');
+            
+            // Wyczyść ewentualne www. do sprawdzenia hosta
+            $hostCandidate = preg_replace('/^www\./', '', $hostCandidate);
+            
+            if (isset($domains[$hostCandidate])) {
+                // Zwracamy zamazany link w bezpiecznym HTML (ponieważ sam link jest po htmlspecialchars, można go wstawić)
+                return '<span class="blurred-link" style="filter: blur(5px); user-select: none; text-decoration: line-through; pointer-events: none;" title="Zablokowany szkodliwy link" data-bs-toggle="tooltip" data-bs-placement="top">' . $url . '</span>';
             }
+            
             return $url; // Zwracamy oryginał jeśli jest bezpieczny
         }, $text);
 
