@@ -13,9 +13,12 @@ $success = '';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
+    $password_confirm = trim($_POST['password_confirm']);
     
-    if (empty($username) || empty($password)) {
+    if (empty($username) || empty($password) || empty($password_confirm)) {
         $error = "Wypełnij wszystkie pola.";
+    } elseif ($password !== $password_confirm) {
+        $error = "Hasła nie są identyczne.";
     } elseif (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
         $error = "Login może zawierać tylko litery, cyfry i podkreślenia.";
     } else {
@@ -53,6 +56,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <div class="mb-3">
         <label class="form-label">Hasło</label>
         <input type="password" name="password" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Powtórz hasło</label>
+        <input type="password" name="password_confirm" class="form-control" required>
     </div>
     <button type="submit" class="btn btn-primary d-block w-100"><i class="bi bi-person-plus"></i> Zarejestruj</button>
 </form>
