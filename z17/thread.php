@@ -1,38 +1,19 @@
 <?php
 require_once 'db_connect.php';
-require_once 'header.php';
+require_once 'auth.php';
 require_once 'SecurityHelper.php';
 updateSessionUser($pdo, getCurrentUserId());
 
 $thread_id = $_GET['id'] ?? $_POST['thread_id'] ?? null;
-if (!$thread_id) {
-    if (isset($_POST['ajax'])) {
+
+// AJAX post submission - MUST BE BEFORE header.php
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['ajax'])) {
+    header('Content-Type: application/json');
+
+    if (!$thread_id) {
         echo json_encode(['error' => 'Nie podano ID wątku.']);
         exit;
     }
-    echo "Nie podano ID wątku.";
-    require_once 'footer.php';
-    exit;
-}
-
-// Fetch thread info
-$stmt = $pdo->prepare("SELECT th.*, t.id as topic_id, t.title as topic_title FROM threads th JOIN topics t ON th.topic_id = t.id WHERE th.id = ?");
-$stmt->execute([$thread_id]);
-$thread = $stmt->fetch();
-
-if (!$thread) {
-    if (isset($_POST['ajax'])) {
-        echo json_encode(['error' => 'Wątek nie istnieje.']);
-        exit;
-    }
-    echo "Wątek nie istnieje.";
-    require_once 'footer.php';
-    exit;
-}
-
-// AJAX post submission
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['ajax'])) {
-    header('Content-Type: application/json');
 
     if (!isLoggedIn()) {
         echo json_encode(['error' => 'Musisz być zalogowany.']);
@@ -115,6 +96,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['ajax'])) {
         exit;
     }
 }
+
+require_once 'header.php';
+
+if (!$thread_id) {
+    echo "Nie podano ID wątku.";
+    require_once 'footer.php';
+    exit;
+}
+
+// Fetch thread info
+$stmt = $pdo->prepare("SELECT th.*, t.id as topic_id, t.title as topic_title FROM threads th JOIN topics t ON th.topic_id = t.id WHERE th.id = ?");
+$stmt->execute([$thread_id]);
+$thread = $stmt->fetch();
+
+if (!$thread) {
+    if (isset($_POST['ajax'])) {
+        echo json_encode(['error' => 'Wątek nie istnieje.']);
+        exit;
+    }
+    echo "Wątek nie istnieje.";
+    require_once 'footer.php';
+    exit;
+}
+
+// Fetch thread info
 
 // Fetch all posts to display normally
 $stmt = $pdo->prepare("SELECT p.*, u.username FROM posts p LEFT JOIN users u ON p.created_by = u.id WHERE p.thread_id = ? ORDER BY p.created_at ASC");
