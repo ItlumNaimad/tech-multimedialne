@@ -61,8 +61,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['ajax'])) {
             exit;
         }
     } else {
-        // Filtrowanie linków
-        $content = SecurityHelper::filterBadLinks($content);
+        // Zabezpieczenie przed XSS, potem filtrowanie linków (pozwala na bezpieczne wstrzyknięcie zamazanego HTML)
+        $safe_content = htmlspecialchars($content, ENT_QUOTES, 'UTF-8');
+        $filtered_content = SecurityHelper::filterBadLinks($safe_content);
         
         // Plik
         $media_path = null;
@@ -79,14 +80,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['ajax'])) {
         }
         
         $stmt = $pdo->prepare("INSERT INTO posts (thread_id, content, created_by, media_path) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$thread_id, htmlspecialchars($content), $user_id, $media_path]);
+        $stmt->execute([$thread_id, $filtered_content, $user_id, $media_path]);
         $post_id = $pdo->lastInsertId();
 
         echo json_encode([
             'success' => true,
             'post' => [
                 'id' => $post_id,
-                'content' => nl2br(htmlspecialchars($content)),
+                'content' => nl2br($filtered_content),
                 'username' => $username,
                 'created_at' => date('Y-m-d H:i:s'),
                 'media_path' => $media_path,

@@ -70,10 +70,12 @@ class SecurityHelper {
             $url = $matches[0];
             $host = parse_url((strpos($url, 'http') === 0 ? $url : 'http://' . $url), PHP_URL_HOST);
             if ($host) {
+                // Rozwiązanie problemu encji HTML (np. gdy &lt; znajduje się wewnątrz zmatchowanego tekstu przez regex po htmlspecialchars)
+                // Wyczyść ewentualne encje do sprawdzenia hosta
                 $host = preg_replace('/^www\./', '', $host);
                 if (in_array($host, $domains)) {
-                    $date = date('Y-m-d H:i');
-                    return $date . " Usunięto niebezpieczny link";
+                    // Zwracamy zamazany link w bezpiecznym HTML (ponieważ sam link jest po htmlspecialchars, można go wstawić)
+                    return '<span class="blurred-link" style="filter: blur(5px); user-select: none; text-decoration: line-through; pointer-events: none;" title="Zablokowany szkodliwy link" data-bs-toggle="tooltip" data-bs-placement="top">' . $url . '</span>';
                 }
             }
             return $url; // Zwracamy oryginał jeśli jest bezpieczny
