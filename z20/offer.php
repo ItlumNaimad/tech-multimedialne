@@ -77,13 +77,9 @@ require_once 'header.php';
                 </div>
 
                 <?php 
-                // Przygotowanie linku do Google Maps z pinezką (markerem)
-                $mapQuery = "";
-                if (!empty($offer['lat']) && !empty($offer['lng'])) {
-                    $mapQuery = $offer['lat'] . "," . $offer['lng'];
-                } else {
-                    $mapQuery = urlencode($offer['city'] . " " . $offer['address']);
-                }
+                // Przygotowanie linku do Google Maps z pinezką (markerem) opartą na adresie
+                $mapQuery = urlencode($offer['city'] . " " . $offer['address']);
+                
                 $googleMapsIframeUrl = "https://maps.google.com/maps?q=" . $mapQuery . "&t=&z=15&ie=UTF8&iwloc=&output=embed";
                 $googleMapsLink = "https://maps.google.com/?q=" . $mapQuery;
                 ?>
@@ -101,14 +97,6 @@ require_once 'header.php';
                     <br><br>
                     <a href="<?= htmlspecialchars($offer['geoportal_url']) ?>" target="_blank" class="btn btn-info text-white"><i class="bi bi-globe"></i> Zobacz na Geoportalu</a>
                 </div>
-                <?php else: ?>
-                    <?php 
-                        // Domyślny geoportal link oparty na koordynatach, jeśli podane
-                        if (!empty($offer['lat']) && !empty($offer['lng'])) {
-                            $geoLink = "https://mapy.geoportal.gov.pl/imap/Imgp_2.html?locale=pl&gui=new&sessionID=&bbox=" . ($offer['lng'] - 0.01) . "," . ($offer['lat'] - 0.01) . "," . ($offer['lng'] + 0.01) . "," . ($offer['lat'] + 0.01);
-                            echo '<div class="alert alert-secondary"><i class="bi bi-compass"></i> Zobacz współrzędne w państwowym systemie GIS: <br><br><a href="'.$geoLink.'" target="_blank" class="btn btn-secondary btn-sm"><i class="bi bi-globe"></i> Otwórz Geoportal (przybliżona lokalizacja)</a></div>';
-                        }
-                    ?>
                 <?php endif; ?>
             </div>
         </div>

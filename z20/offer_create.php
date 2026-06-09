@@ -20,17 +20,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $zipcode = trim($_POST['zipcode'] ?? '');
     $city = trim($_POST['city'] ?? '');
     $address = trim($_POST['address'] ?? '');
-    $lat = !empty($_POST['lat']) ? (float)$_POST['lat'] : null;
-    $lng = !empty($_POST['lng']) ? (float)$_POST['lng'] : null;
     $geoportal_url = trim($_POST['geoportal_url'] ?? '');
 
     if (empty($title) || empty($price) || empty($zipcode) || empty($city)) {
         $error = "Wypełnij wszystkie wymagane pola (Tytuł, Cena, Kod pocztowy, Miasto).";
     } else {
         try {
-            $stmt = $pdo->prepare("INSERT INTO offers (user_id, category_id, type, title, description, price, area, zipcode, city, address, lat, lng, geoportal_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt = $pdo->prepare("INSERT INTO offers (user_id, category_id, type, title, description, price, area, zipcode, city, address, geoportal_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
-                getCurrentUserId(), $category_id, $type, $title, $description, $price, $area, $zipcode, $city, $address, $lat, $lng, $geoportal_url
+                getCurrentUserId(), $category_id, $type, $title, $description, $price, $area, $zipcode, $city, $address, $geoportal_url
             ]);
             $offer_id = $pdo->lastInsertId();
 
@@ -133,17 +131,6 @@ require_once 'header.php';
             <div class="col-md-4 mb-3">
                 <label class="form-label fw-bold">Adres / Ulica</label>
                 <input type="text" name="address" class="form-control">
-            </div>
-        </div>
-        
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label class="form-label fw-bold">Szerokość geograficzna (Lat)</label>
-                <input type="text" name="lat" class="form-control" placeholder="np. 53.1234">
-            </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label fw-bold">Długość geograficzna (Lng)</label>
-                <input type="text" name="lng" class="form-control" placeholder="np. 18.1234">
             </div>
         </div>
         
