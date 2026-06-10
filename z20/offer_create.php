@@ -141,7 +141,7 @@ require_once 'header.php';
 
         <h4 class="mt-4 mb-3 border-bottom pb-2">Zdjęcia</h4>
         <div class="mb-4">
-            <label class="form-label fw-bold">Wybierz zdjęcia</label>
+            <label class="form-label fw-bold">Wybierz zdjęcia <small class="text-muted fw-normal">(Przytrzymaj klawisz CTRL, aby zaznaczyć wiele zdjęć naraz)</small></label>
             <input type="file" name="photos[]" class="form-control" multiple accept="image/*">
         </div>
 
