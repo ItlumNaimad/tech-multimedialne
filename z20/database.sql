@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS `offers` (
   `address` varchar(255) DEFAULT NULL,
   `lat` decimal(10,8) DEFAULT NULL,
   `lng` decimal(11,8) DEFAULT NULL,
+  `parcel_id` varchar(100) DEFAULT NULL,
   `geoportal_url` varchar(1024) DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),

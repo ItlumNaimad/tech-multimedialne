@@ -104,23 +104,33 @@ require_once 'header.php';
                 <?php endif; ?>
 
                 <?php
-                // Budowanie precyzyjnych linków GIS na podstawie współrzędnych
+                // Budowanie precyzyjnych linków GIS na podstawie współrzędnych i działki
                 $hasCoords = !empty($offer['lat']) && !empty($offer['lng']);
+                $hasParcel = !empty($offer['parcel_id']);
+                
                 $lat = $hasCoords ? $offer['lat'] : 52.2296756; // Domyślnie Warszawa jeśli brak
                 $lng = $hasCoords ? $offer['lng'] : 21.0122287;
                 
                 $linkGeoportalKrajowy = "https://geoportal-krajowy.pl/na-mapie#x={$lng}&y={$lat}&z=16.93";
                 $linkGeoportal360 = "https://geoportal360.pl/map/#clk={$lng},{$lat},16";
+                
+                if ($hasParcel) {
+                    $linkGeoportalGov = "https://mapy.geoportal.gov.pl/imap/Imgp_2.html?gpmap=gp0&dzialka=" . urlencode($offer['parcel_id']);
+                } else {
+                    $linkGeoportalGov = "https://mapy.geoportal.gov.pl/imap/Imgp_2.html?gpmap=gp0";
+                }
                 $linkEmapa = "https://polska.e-mapa.net/"; // Nie wspiera lat/lng w URI w ten sam sposób
                 ?>
 
                 <div class="mt-4">
                     <h5>Narzędzia GIS do sprawdzenia nieruchomości</h5>
                     <p class="text-muted small">Wykorzystaj poniższe państwowe i komercyjne geoportale, aby zweryfikować granice działek, obszary chronione, uzbrojenie terenu oraz inne parametry. 
-                    <?php if ($hasCoords): ?>
-                        <span class="text-success"><i class="bi bi-check-circle-fill"></i> Współrzędne zostały wykryte automatycznie z adresu! Zostaniesz przeniesiony prosto na działkę.</span>
+                    <?php if ($hasParcel): ?>
+                        <span class="text-success fw-bold"><i class="bi bi-check-circle-fill"></i> Zlokalizowano dokładny numer działki ewidencyjnej z urzędu: <?= htmlspecialchars($offer['parcel_id']) ?>! Zostaniesz przeniesiony prosto na nią.</span>
+                    <?php elseif ($hasCoords): ?>
+                        <span class="text-primary"><i class="bi bi-check-circle-fill"></i> Współrzędne zostały wykryte automatycznie. Zostaniesz przeniesiony w jej obszar.</span>
                     <?php else: ?>
-                        <span class="text-warning"><i class="bi bi-exclamation-triangle-fill"></i> System nie zdołał namierzyć dokładnych współrzędnych z podanego adresu. Musisz wyszukać posesję ręcznie na stronie portalu.</span>
+                        <span class="text-warning"><i class="bi bi-exclamation-triangle-fill"></i> System nie zdołał namierzyć dokładnych współrzędnych. Musisz wyszukać posesję ręcznie.</span>
                     <?php endif; ?>
                     </p>
                     <ul class="list-group">
@@ -133,8 +143,8 @@ require_once 'header.php';
                             <a href="<?= $linkGeoportal360 ?>" target="_blank" class="btn btn-sm <?= $hasCoords ? 'btn-primary' : 'btn-outline-secondary' ?>">Otwórz <i class="bi bi-box-arrow-up-right"></i></a>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span><strong>Geoportal.gov.pl</strong> (dane państwowe, usługi API)</span>
-                            <a href="https://www.geoportal.gov.pl/pl/dane/" target="_blank" class="btn btn-sm btn-outline-secondary">Otwórz <i class="bi bi-box-arrow-up-right"></i></a>
+                            <span><strong>Geoportal.gov.pl</strong> (dane państwowe, granice działek)</span>
+                            <a href="<?= $linkGeoportalGov ?>" target="_blank" class="btn btn-sm <?= $hasParcel ? 'btn-success' : 'btn-outline-secondary' ?>">Otwórz <i class="bi bi-box-arrow-up-right"></i></a>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <span><strong>Polska e-mapa</strong> (zagospodarowanie przestrzenne)</span>

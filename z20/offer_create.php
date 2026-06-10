@@ -28,9 +28,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Automatyczne pobieranie współrzędnych (Geocoding - Photon API z bazą OSM)
         $lat = null;
         $lng = null;
-        // Optymalizujemy zapytanie omijając kod pocztowy, jeśli to tylko miasto i ulica
-        $searchQuery = urlencode($city . ', ' . $address);
+        $parcel_id = null;
         
+        $searchQuery = urlencode($city . ', ' . $address);
         $options = [
             "http" => [
                 "header" => "User-Agent: PortalOgloszeniowy/1.0\r\n"
@@ -48,14 +48,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $lat = (float)$data['features'][0]['geometry']['coordinates'][1];
                 }
             }
-        } catch (Exception $e) {
-            // Ignorujemy błędy połączenia z API
-        }
+        } catch (Exception $e) {}
+
+        // Automatyczne pobieranie numeru działki z Geoportalu (UUG + ULDK)
+        try {
+            $uugUrl = "https://services.gugik.gov.pl/uug/?request=GetAddress&address=" . urlencode($city . "," . $address);
+            $uugResponse = @file_get_contents($uugUrl);
+            if ($uugResponse) {
+                $uugData = json_decode($uugResponse, true);
+                if (!empty($uugData['results']['1']['x']) && !empty($uugData['results']['1']['y'])) {
+                    $x = $uugData['results']['1']['x'];
+                    $y = $uugData['results']['1']['y'];
+                    
+                    // Mamy x, y w układzie 1992 (EPSG:2180), pobieramy numer działki
+                    $uldkUrl = "https://uldk.gugik.gov.pl/?request=GetParcelByXY&xy={$x},{$y}&result=id";
+                    $uldkResponse = @file_get_contents($uldkUrl);
+                    if ($uldkResponse) {
+                        $lines = explode("\n", trim($uldkResponse));
+                        if ($lines[0] === '0' && isset($lines[1])) {
+                            $parcel_id = trim($lines[1]);
+                        }
+                    }
+                }
+            }
+        } catch (Exception $e) {}
 
         try {
-            $stmt = $pdo->prepare("INSERT INTO offers (user_id, category_id, type, title, description, price, area, zipcode, city, address, lat, lng, geoportal_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt = $pdo->prepare("INSERT INTO offers (user_id, category_id, type, title, description, price, area, zipcode, city, address, lat, lng, parcel_id, geoportal_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
-                getCurrentUserId(), $category_id, $type, $title, $description, $price, $area, $zipcode, $city, $address, $lat, $lng, $geoportal_url
+                getCurrentUserId(), $category_id, $type, $title, $description, $price, $area, $zipcode, $city, $address, $lat, $lng, $parcel_id, $geoportal_url
             ]);
             $offer_id = $pdo->lastInsertId();
 
