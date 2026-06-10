@@ -25,10 +25,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($title) || empty($price) || empty($zipcode) || empty($city)) {
         $error = "Wypełnij wszystkie wymagane pola (Tytuł, Cena, Kod pocztowy, Miasto).";
     } else {
+        // Automatyczne pobieranie współrzędnych (Geocoding - OpenStreetMap Nominatim)
+        $lat = null;
+        $lng = null;
+        $searchQuery = urlencode($city . ' ' . $address . ' ' . $zipcode);
+        
+        $options = [
+            "http" => [
+                "header" => "User-Agent: PortalOgloszeniowy/1.0\r\n"
+            ]
+        ];
+        $context = stream_context_create($options);
+        $nominatimUrl = "https://nominatim.openstreetmap.org/search?format=json&q=" . $searchQuery . "&limit=1";
+        
         try {
-            $stmt = $pdo->prepare("INSERT INTO offers (user_id, category_id, type, title, description, price, area, zipcode, city, address, geoportal_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $response = @file_get_contents($nominatimUrl, false, $context);
+            if ($response) {
+                $data = json_decode($response, true);
+                if (!empty($data) && isset($data[0]['lat']) && isset($data[0]['lon'])) {
+                    $lat = (float)$data[0]['lat'];
+                    $lng = (float)$data[0]['lon'];
+                }
+            }
+        } catch (Exception $e) {
+            // Ignorujemy błędy połączenia z API
+        }
+
+        try {
+            $stmt = $pdo->prepare("INSERT INTO offers (user_id, category_id, type, title, description, price, area, zipcode, city, address, lat, lng, geoportal_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
-                getCurrentUserId(), $category_id, $type, $title, $description, $price, $area, $zipcode, $city, $address, $geoportal_url
+                getCurrentUserId(), $category_id, $type, $title, $description, $price, $area, $zipcode, $city, $address, $lat, $lng, $geoportal_url
             ]);
             $offer_id = $pdo->lastInsertId();
 

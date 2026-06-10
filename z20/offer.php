@@ -77,8 +77,12 @@ require_once 'header.php';
                 </div>
 
                 <?php 
-                // Przygotowanie linku do Google Maps z pinezką (markerem) opartą na adresie
-                $mapQuery = urlencode($offer['city'] . " " . $offer['address']);
+                // Przygotowanie linku do Google Maps z pinezką (markerem)
+                if (!empty($offer['lat']) && !empty($offer['lng'])) {
+                    $mapQuery = $offer['lat'] . "," . $offer['lng'];
+                } else {
+                    $mapQuery = urlencode($offer['city'] . " " . $offer['address']);
+                }
                 
                 $googleMapsIframeUrl = "https://maps.google.com/maps?q=" . $mapQuery . "&t=&z=15&ie=UTF8&iwloc=&output=embed";
                 $googleMapsLink = "https://maps.google.com/?q=" . $mapQuery;
@@ -99,17 +103,34 @@ require_once 'header.php';
                 </div>
                 <?php endif; ?>
 
+                <?php
+                // Budowanie precyzyjnych linków GIS na podstawie współrzędnych
+                $hasCoords = !empty($offer['lat']) && !empty($offer['lng']);
+                $lat = $hasCoords ? $offer['lat'] : 52.2296756; // Domyślnie Warszawa jeśli brak
+                $lng = $hasCoords ? $offer['lng'] : 21.0122287;
+                
+                $linkGeoportalKrajowy = "https://geoportal-krajowy.pl/na-mapie#x={$lng}&y={$lat}&z=16.93";
+                $linkGeoportal360 = "https://geoportal360.pl/map/#clk={$lng},{$lat},16";
+                $linkEmapa = "https://polska.e-mapa.net/"; // Nie wspiera lat/lng w URI w ten sam sposób
+                ?>
+
                 <div class="mt-4">
                     <h5>Narzędzia GIS do sprawdzenia nieruchomości</h5>
-                    <p class="text-muted small">Wykorzystaj poniższe państwowe i komercyjne geoportale, aby zweryfikować granice działek, obszary chronione, uzbrojenie terenu oraz inne parametry dla adresu: <strong><?= htmlspecialchars($offer['city']) ?>, <?= htmlspecialchars($offer['address']) ?></strong></p>
+                    <p class="text-muted small">Wykorzystaj poniższe państwowe i komercyjne geoportale, aby zweryfikować granice działek, obszary chronione, uzbrojenie terenu oraz inne parametry. 
+                    <?php if ($hasCoords): ?>
+                        <span class="text-success"><i class="bi bi-check-circle-fill"></i> Współrzędne zostały wykryte automatycznie z adresu! Zostaniesz przeniesiony prosto na działkę.</span>
+                    <?php else: ?>
+                        <span class="text-warning"><i class="bi bi-exclamation-triangle-fill"></i> System nie zdołał namierzyć dokładnych współrzędnych z podanego adresu. Musisz wyszukać posesję ręcznie na stronie portalu.</span>
+                    <?php endif; ?>
+                    </p>
                     <ul class="list-group">
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <span><strong>Geoportal Krajowy</strong> (granice działek, uzbrojenie terenu)</span>
-                            <a href="https://geoportal-krajowy.pl/na-mapie" target="_blank" class="btn btn-sm btn-outline-secondary">Otwórz <i class="bi bi-box-arrow-up-right"></i></a>
+                            <a href="<?= $linkGeoportalKrajowy ?>" target="_blank" class="btn btn-sm <?= $hasCoords ? 'btn-primary' : 'btn-outline-secondary' ?>">Otwórz <i class="bi bi-box-arrow-up-right"></i></a>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <span><strong>Geoportal 360</strong> (ceny nieruchomości, księgi wieczyste)</span>
-                            <a href="https://geoportal360.pl/map/" target="_blank" class="btn btn-sm btn-outline-secondary">Otwórz <i class="bi bi-box-arrow-up-right"></i></a>
+                            <a href="<?= $linkGeoportal360 ?>" target="_blank" class="btn btn-sm <?= $hasCoords ? 'btn-primary' : 'btn-outline-secondary' ?>">Otwórz <i class="bi bi-box-arrow-up-right"></i></a>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <span><strong>Geoportal.gov.pl</strong> (dane państwowe, usługi API)</span>
@@ -117,7 +138,7 @@ require_once 'header.php';
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <span><strong>Polska e-mapa</strong> (zagospodarowanie przestrzenne)</span>
-                            <a href="https://polska.e-mapa.net/" target="_blank" class="btn btn-sm btn-outline-secondary">Otwórz <i class="bi bi-box-arrow-up-right"></i></a>
+                            <a href="<?= $linkEmapa ?>" target="_blank" class="btn btn-sm btn-outline-secondary">Otwórz <i class="bi bi-box-arrow-up-right"></i></a>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <span><strong>Jakość powietrza (GIOŚ)</strong> (pomiary środowiskowe)</span>
@@ -125,7 +146,7 @@ require_once 'header.php';
                         </li>
                     </ul>
                     <div class="mt-2 text-end">
-                        <small class="text-muted">Źródła wiedzy GIS: <a href="https://gis-support.pl/dane-do-pobrania/" target="_blank">Dane do pobrania</a> | <a href="https://gis-support.pl/wtyczka-gis-support/" target="_blank">Wtyczki GIS</a></small>
+                        <small class="text-muted">Inne źródła: <a href="https://gis-support.pl/dane-do-pobrania/" target="_blank">Dane do pobrania (GIS Support)</a></small>
                     </div>
                 </div>
             </div>
