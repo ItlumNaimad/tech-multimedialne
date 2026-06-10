@@ -20,14 +20,18 @@ if (!function_exists('loadEnv')) {
     }
 }
 
-// Ścieżka do .env w głównym katalogu projektu
-loadEnv(__DIR__ . '/../.env');
+// Ścieżka do .env w bieżącym katalogu lub katalogu nadrzędnym
+if (file_exists(__DIR__ . '/.env')) {
+    loadEnv(__DIR__ . '/.env');
+} else {
+    loadEnv(__DIR__ . '/../.env');
+}
 
-$host = getenv('DB_HOST') ?: 'localhost';
+$host = getenv('DB_HOST') ?: '127.0.0.1';
 $db   = getenv('DB_NAME') ?: 'damskopb_z19'; 
 $user = getenv('DB_USER') ?: 'root';
 $pass = getenv('DB_PASS') ?: '';
-$charset = 'utf8mb4';
+$charset = getenv('DB_CHARSET') ?: 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
 $options = [
@@ -39,6 +43,6 @@ $options = [
 try {
     $pdo = new PDO($dsn, $user, $pass, $options);
 } catch (\PDOException $e) {
-    throw new \PDOException($e->getMessage(), (int)$e->getCode());
+    die("Błąd połączenia z bazą danych Z19. Upewnij się, że .env jest wgrany i poprawny. Szczegóły: " . $e->getMessage());
 }
 ?>
