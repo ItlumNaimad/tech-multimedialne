@@ -24,8 +24,7 @@ if (!function_exists('loadEnv')) {
 loadEnv(__DIR__ . '/../.env');
 
 $host = getenv('DB_HOST') ?: 'localhost';
-// UWAGA: Specjalna baza dla tego zadania
-$db   = 'damskopb_z19'; 
+$db   = getenv('DB_NAME') ?: 'damskopb_z19'; 
 $user = getenv('DB_USER') ?: 'root';
 $pass = getenv('DB_PASS') ?: '';
 $charset = 'utf8mb4';
