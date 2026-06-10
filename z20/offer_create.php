@@ -25,10 +25,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($title) || empty($price) || empty($zipcode) || empty($city)) {
         $error = "Wypełnij wszystkie wymagane pola (Tytuł, Cena, Kod pocztowy, Miasto).";
     } else {
-        // Automatyczne pobieranie współrzędnych (Geocoding - OpenStreetMap Nominatim)
+        // Automatyczne pobieranie współrzędnych (Geocoding - Photon API z bazą OSM)
         $lat = null;
         $lng = null;
-        $searchQuery = urlencode($city . ' ' . $address . ' ' . $zipcode);
+        // Optymalizujemy zapytanie omijając kod pocztowy, jeśli to tylko miasto i ulica
+        $searchQuery = urlencode($city . ', ' . $address);
         
         $options = [
             "http" => [
@@ -36,15 +37,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]
         ];
         $context = stream_context_create($options);
-        $nominatimUrl = "https://nominatim.openstreetmap.org/search?format=json&q=" . $searchQuery . "&limit=1";
+        $photonUrl = "https://photon.komoot.io/api/?q=" . $searchQuery . "&limit=1";
         
         try {
-            $response = @file_get_contents($nominatimUrl, false, $context);
+            $response = @file_get_contents($photonUrl, false, $context);
             if ($response) {
                 $data = json_decode($response, true);
-                if (!empty($data) && isset($data[0]['lat']) && isset($data[0]['lon'])) {
-                    $lat = (float)$data[0]['lat'];
-                    $lng = (float)$data[0]['lon'];
+                if (!empty($data['features']) && isset($data['features'][0]['geometry']['coordinates'])) {
+                    $lng = (float)$data['features'][0]['geometry']['coordinates'][0];
+                    $lat = (float)$data['features'][0]['geometry']['coordinates'][1];
                 }
             }
         } catch (Exception $e) {
