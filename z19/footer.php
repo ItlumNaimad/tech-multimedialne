@@ -112,6 +112,11 @@ async function sendChatMessage() {
     input.focus();
     chatBox.scrollTop = chatBox.scrollHeight;
 }
+
+// Otwórz czat domyślnie po załadowaniu strony
+window.addEventListener('DOMContentLoaded', () => {
+    toggleChatbot(true);
+});
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

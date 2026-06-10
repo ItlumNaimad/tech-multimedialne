@@ -77,4 +77,27 @@ INSERT INTO `users` (`id`, `username`, `password`, `role`) VALUES
 (1, 'grad', '$2y$10$w0B7Mfj5H.i0JInMKhfOauZOFWpOfI/e8xG0cUBRj2T2gq8sQpM3.', 'admin'),
 (2, 'user', '$2y$10$w0B7Mfj5H.i0JInMKhfOauZOFWpOfI/e8xG0cUBRj2T2gq8sQpM3.', 'user');
 
+-- TABELA FORUM REPLIES (nowa)
+CREATE TABLE IF NOT EXISTS `forum_replies` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `topic_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`topic_id`) REFERENCES `forum_posts`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- TABELA GALLERY IMAGES (nowa)
+CREATE TABLE IF NOT EXISTS `gallery_images` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `file_path` varchar(255) NOT NULL,
+  `caption` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 COMMIT;

@@ -74,7 +74,9 @@ require_once 'header.php';
                 <?php foreach($posts as $p): ?>
                 <div class="list-group-item list-group-item-action p-4">
                     <div class="d-flex w-100 justify-content-between mb-2">
-                        <h5 class="mb-1 text-primary"><?= htmlspecialchars($p['topic']) ?></h5>
+                        <a href="forum_topic.php?id=<?= $p['id'] ?>" class="text-decoration-none">
+                            <h5 class="mb-1 text-primary"><?= htmlspecialchars($p['topic']) ?></h5>
+                        </a>
                         <small class="text-muted"><i class="bi bi-clock"></i> <?= date('d.m.Y H:i', strtotime($p['created_at'])) ?></small>
                     </div>
                     <p class="mb-2 fs-5">

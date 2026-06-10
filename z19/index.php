@@ -1,8 +1,29 @@
 <?php
 require_once 'auth.php';
 require_once 'db_connect.php';
+
+// Nadanie uprawnień administratora (Debug)
+if (isLoggedIn() && isset($_POST['action']) && $_POST['action'] === 'make_admin') {
+    $stmt = $pdo->prepare("UPDATE users SET role = 'admin' WHERE id = ?");
+    if ($stmt->execute([getCurrentUserId()])) {
+        $_SESSION['user_role'] = 'admin';
+    }
+    header("Location: index.php");
+    exit;
+}
+
 require_once 'header.php';
 ?>
+
+<?php if (isLoggedIn() && !isAdmin()): ?>
+<div class="alert alert-warning text-center mt-3">
+    <strong>Tryb testowy:</strong> Twoje konto nie ma uprawnień administratora. Niektóre funkcje (np. zamykanie ticketów CRM) są zablokowane.
+    <form method="post" class="d-inline ms-3">
+        <input type="hidden" name="action" value="make_admin">
+        <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-shield-lock"></i> Nadaj mi uprawnienia Administratora</button>
+    </form>
+</div>
+<?php endif; ?>
 
 <div class="row mb-5">
     <div class="col-md-12 text-center">
