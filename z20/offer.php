@@ -115,9 +115,9 @@ require_once 'header.php';
                 $linkGeoportal360 = "https://geoportal360.pl/map/#clk={$lng},{$lat},16";
                 
                 if ($hasParcel) {
-                    $linkGeoportalGov = "https://mapy.geoportal.gov.pl/imap/Imgp_2.html?gpmap=gp0&dzialka=" . urlencode($offer['parcel_id']);
+                    $linkGeoportalGov = "https://mapy.geoportal.gov.pl/imap/?identifyParcel=" . urlencode($offer['parcel_id']);
                 } else {
-                    $linkGeoportalGov = "https://mapy.geoportal.gov.pl/imap/Imgp_2.html?gpmap=gp0";
+                    $linkGeoportalGov = "https://mapy.geoportal.gov.pl/imap/";
                 }
                 $linkEmapa = "https://polska.e-mapa.net/"; // Nie wspiera lat/lng w URI w ten sam sposób
                 ?>
