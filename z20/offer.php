@@ -93,11 +93,41 @@ require_once 'header.php';
 
                 <?php if (!empty($offer['geoportal_url'])): ?>
                 <div class="alert alert-info">
-                    <i class="bi bi-info-circle-fill"></i> Sprzedawca udostępnił link do Geoportalu dla tej nieruchomości. Pozwala on na sprawdzenie granic działki, uzbrojenia terenu i obszarów chronionych.
+                    <i class="bi bi-info-circle-fill"></i> Sprzedawca udostępnił bezpośredni link GIS do tej nieruchomości:
                     <br><br>
-                    <a href="<?= htmlspecialchars($offer['geoportal_url']) ?>" target="_blank" class="btn btn-info text-white"><i class="bi bi-globe"></i> Zobacz na Geoportalu</a>
+                    <a href="<?= htmlspecialchars($offer['geoportal_url']) ?>" target="_blank" class="btn btn-info text-white"><i class="bi bi-globe"></i> Zobacz dedykowaną mapę</a>
                 </div>
                 <?php endif; ?>
+
+                <div class="mt-4">
+                    <h5>Narzędzia GIS do sprawdzenia nieruchomości</h5>
+                    <p class="text-muted small">Wykorzystaj poniższe państwowe i komercyjne geoportale, aby zweryfikować granice działek, obszary chronione, uzbrojenie terenu oraz inne parametry dla adresu: <strong><?= htmlspecialchars($offer['city']) ?>, <?= htmlspecialchars($offer['address']) ?></strong></p>
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><strong>Geoportal Krajowy</strong> (granice działek, uzbrojenie terenu)</span>
+                            <a href="https://geoportal-krajowy.pl/na-mapie" target="_blank" class="btn btn-sm btn-outline-secondary">Otwórz <i class="bi bi-box-arrow-up-right"></i></a>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><strong>Geoportal 360</strong> (ceny nieruchomości, księgi wieczyste)</span>
+                            <a href="https://geoportal360.pl/map/" target="_blank" class="btn btn-sm btn-outline-secondary">Otwórz <i class="bi bi-box-arrow-up-right"></i></a>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><strong>Geoportal.gov.pl</strong> (dane państwowe, usługi API)</span>
+                            <a href="https://www.geoportal.gov.pl/pl/dane/" target="_blank" class="btn btn-sm btn-outline-secondary">Otwórz <i class="bi bi-box-arrow-up-right"></i></a>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><strong>Polska e-mapa</strong> (zagospodarowanie przestrzenne)</span>
+                            <a href="https://polska.e-mapa.net/" target="_blank" class="btn btn-sm btn-outline-secondary">Otwórz <i class="bi bi-box-arrow-up-right"></i></a>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><strong>Jakość powietrza (GIOŚ)</strong> (pomiary środowiskowe)</span>
+                            <a href="https://powietrze.gios.gov.pl/pjp/current" target="_blank" class="btn btn-sm btn-outline-secondary">Otwórz <i class="bi bi-box-arrow-up-right"></i></a>
+                        </li>
+                    </ul>
+                    <div class="mt-2 text-end">
+                        <small class="text-muted">Źródła wiedzy GIS: <a href="https://gis-support.pl/dane-do-pobrania/" target="_blank">Dane do pobrania</a> | <a href="https://gis-support.pl/wtyczka-gis-support/" target="_blank">Wtyczki GIS</a></small>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

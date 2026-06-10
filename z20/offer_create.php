@@ -140,8 +140,11 @@ require_once 'header.php';
         </div>
 
         <h4 class="mt-4 mb-3 border-bottom pb-2">Zdjęcia</h4>
+        <div class="alert alert-info mb-3">
+            <i class="bi bi-info-circle-fill"></i> <strong>Wskazówka:</strong> Aby dodać kilka zdjęć do jednej nieruchomości, <strong>przytrzymaj klawisz CTRL</strong> na klawiaturze podczas wybierania plików w oknie.
+        </div>
         <div class="mb-4">
-            <label class="form-label fw-bold">Wybierz zdjęcia <small class="text-muted fw-normal">(Przytrzymaj klawisz CTRL, aby zaznaczyć wiele zdjęć naraz)</small></label>
+            <label class="form-label fw-bold">Wybierz zdjęcia</label>
             <input type="file" name="photos[]" class="form-control" multiple accept="image/*">
         </div>
 
